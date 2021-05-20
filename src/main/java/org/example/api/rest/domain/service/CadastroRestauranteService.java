@@ -3,7 +3,6 @@ package org.example.api.rest.domain.service;
 import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpecs.comFreteGratis;
 import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpecs.comNomeSemelhante;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +21,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ReflectionUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CadastroRestauranteService {
@@ -78,30 +74,6 @@ public class CadastroRestauranteService {
 		return restauranteRepository.save(restauranteAtual);
 	}
 
-	// Utilizando shared.mapper.GenericMapper
-	@SuppressWarnings("unused")
-	private void merge(Map<String, Object> propriedadesRestauranteNovo, Restaurante restauranteAtual) {
-		// remove a propriedade id se houver, para que o restauranteAtual nao tenha seu id sobrescrito
-		propriedadesRestauranteNovo.remove("id");
-
-		// converte os elementos do Map propriedadesRestauranteNovo em um objeto Restaurante
-		Restaurante restauranteNovo = new ObjectMapper().convertValue(propriedadesRestauranteNovo, Restaurante.class);
-
-		propriedadesRestauranteNovo.forEach((nomePropriedade, valor) -> {
-			// obtem dinamicamente uma propriedade da classe Restaurante pelo nome dela
-			Field propriedade = ReflectionUtils.findField(Restaurante.class, nomePropriedade);
-
-			// se a propriedade obtida for privada, eh preciso torna-la acessivel
-			propriedade.setAccessible(true);
-
-			// obtem o valor da propriedade obtida
-			Object valorPropriedade = ReflectionUtils.getField(propriedade, restauranteNovo);
-
-			// atribui dinamicamente o valor da propriedade obtida no objeto restauranteDestino
-			ReflectionUtils.setField(propriedade, restauranteAtual, valorPropriedade);
-		});
-	}
-
 	@Transactional
 	public void remover(Long restauranteId) {
 		Restaurante restaurante = restauranteRepository.findById(restauranteId)
@@ -146,8 +118,8 @@ public class CadastroRestauranteService {
 
 	public List<Restaurante> restauranteComNomeSemelhanteECozinhaId(String nome, Long cozinhaId) {
 		cozinhaRepository.findById(cozinhaId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
+		.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
 
 		return restauranteRepository.nomeContainingAndCozinhaId(nome, cozinhaId);
 	}
