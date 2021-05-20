@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -31,7 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class CadastroRestauranteService {
 
 	private static final String MSG_RESTAURANTE_EM_USO = "Restaurante de codigo %d em uso e nao pode ser removido";
-	private static final String MSG_COZINHA_NAO_ENCONTRADA = "Cozinha de codigo %d nao encontrada";
+	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id %d nao encontrada";
+	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome %d nao encontrada";
 	private static final String MSG_RESTAURANTE_NAO_ENCONTRADO = "Restaurante de codigo %d nao encontrado";
 
 	@Autowired
@@ -52,33 +52,30 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public Restaurante adicionar(Restaurante restaurante) {
-		Optional<Cozinha> cozinhaOpt = cozinhaRepository.findById(restaurante.getCozinha().getId());
-		if (cozinhaOpt.isPresent()) {
-			restaurante.setCozinha(cozinhaOpt.get());
-			return restauranteRepository.save(restaurante);
-		}
-		throw new EntidadeNaoEncontradaException(
-				String.format(MSG_COZINHA_NAO_ENCONTRADA, restaurante.getCozinha().getId()));
+		Cozinha cozinha = cozinhaRepository.findById(restaurante.getCozinha().getId())
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restaurante.getCozinha().getId())));
+
+		restaurante.setCozinha(cozinha);
+		return restauranteRepository.save(restaurante);
 	}
 
 	@Transactional
 	public Restaurante alterar(Map<String, Object> propriedadesRestauranteNovo, Long restauranteAtualId) {
 
-		Optional<Restaurante> restauranteAtualOpt = restauranteRepository.findById(restauranteAtualId);
-		if (restauranteAtualOpt.isPresent()) {
-			Restaurante restauranteAtual = restauranteAtualOpt.get();
-			GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class);
+		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId)));
 
-			Optional<Cozinha> cozinhaAtualOpt = cozinhaRepository.findById(restauranteAtual.getCozinha().getId());
-			if (cozinhaAtualOpt.isPresent()) {
-				restauranteAtual.setCozinha(cozinhaAtualOpt.get());
-			} else {
-				throw new EntidadeNaoEncontradaException(
-						String.format(MSG_COZINHA_NAO_ENCONTRADA, restauranteAtual.getCozinha().getId()));
-			}
-			return restauranteRepository.save(restauranteAtual);
-		}
-		throw new EntidadeNaoEncontradaException(String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId));
+		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class);
+		Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
+
+		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
+
+		restauranteAtual.setCozinha(cozinhaAtual);
+		return restauranteRepository.save(restauranteAtual);
 	}
 
 	// Utilizando shared.mapper.GenericMapper
@@ -107,13 +104,12 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public void remover(Long restauranteId) {
+		Restaurante restaurante = restauranteRepository.findById(restauranteId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteId)));
+
 		try {
-			Optional<Restaurante> restauranteOpt = restauranteRepository.findById(restauranteId);
-			if (restauranteOpt.isPresent()) {
-				restauranteRepository.delete(restauranteOpt.get());
-			} else {
-				throw new EntidadeNaoEncontradaException(String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteId));
-			}
+			restauranteRepository.delete(restaurante);
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
 					String.format(MSG_RESTAURANTE_EM_USO, restauranteId));
@@ -133,33 +129,27 @@ public class CadastroRestauranteService {
 	}
 
 	public int quantosRestaurantesPorCozinhaId(Long cozinhaId) {
-		Optional<Cozinha> cozinhaOpt = cozinhaRepository.findById(cozinhaId);
+		cozinhaRepository.findById(cozinhaId)
+		.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
 
-		if (cozinhaOpt.isPresent()) {
-			return restauranteRepository.countByCozinhaId(cozinhaId);
-		}
-		throw new EntidadeNaoEncontradaException(
-				String.format(MSG_COZINHA_NAO_ENCONTRADA, cozinhaId));
+		return restauranteRepository.countByCozinhaId(cozinhaId);
 	}
 
 	public int quantosRestaurantesPorCozinhaNome(String cozinhaNome) {
-		Optional<Cozinha> cozinhaOpt = cozinhaRepository.findByNome(cozinhaNome);
+		cozinhaRepository.findByNome(cozinhaNome)
+		.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				String.format(MSG_COZINHA_POR_NOME_NAO_ENCONTRADA, cozinhaNome)));
 
-		if (cozinhaOpt.isPresent()) {
-			return restauranteRepository.countByCozinhaNome(cozinhaNome);
-		}
-		throw new EntidadeNaoEncontradaException(
-				String.format(MSG_COZINHA_NAO_ENCONTRADA, cozinhaOpt.get().getId()));
+		return restauranteRepository.countByCozinhaNome(cozinhaNome);
 	}
 
 	public List<Restaurante> restauranteComNomeSemelhanteECozinhaId(String nome, Long cozinhaId) {
-		Optional<Cozinha> cozinhaOpt = cozinhaRepository.findById(cozinhaId);
+		cozinhaRepository.findById(cozinhaId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
 
-		if (cozinhaOpt.isPresent()) {
-			return restauranteRepository.nomeContainingAndCozinhaId(nome, cozinhaId);
-		}
-		throw new EntidadeNaoEncontradaException(
-				String.format(MSG_COZINHA_NAO_ENCONTRADA, cozinhaId));
+		return restauranteRepository.nomeContainingAndCozinhaId(nome, cozinhaId);
 	}
 
 	public List<Restaurante> restauranteComNomeSemelhante(String nome) {

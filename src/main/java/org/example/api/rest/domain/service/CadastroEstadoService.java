@@ -2,7 +2,6 @@ package org.example.api.rest.domain.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -41,26 +40,22 @@ public class CadastroEstadoService {
 	@Transactional
 	public Estado alterar(Map<String, Object> propriedadesEstadoNovo, Long estadoAtualId) {
 
-		Optional<Estado> estadoAtualOpt = estadoRepository.findById(estadoAtualId);
-		if (estadoAtualOpt.isPresent()) {
-			Estado estadoAtual = estadoAtualOpt.get();
-			GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class);
-			return estadoRepository.save(estadoAtual);
-		}
-		throw new EntidadeNaoEncontradaException(
-				String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoAtualId));
+		Estado estadoAtual = estadoRepository.findById(estadoAtualId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoAtualId)));
+
+		GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class);
+		return estadoRepository.save(estadoAtual);
 	}
 
 	@Transactional
 	public void remover(Long estadoId) {
+		Estado estado = estadoRepository.findById(estadoId) 
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoId)));
+
 		try {
-			Optional<Estado> estadoOpt = estadoRepository.findById(estadoId);
-			if (estadoOpt.isPresent()) {
-				estadoRepository.delete(estadoOpt.get());
-			} else {
-				throw new EntidadeNaoEncontradaException(
-						String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoId));
-			}
+			estadoRepository.delete(estado);
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
 					String.format(MSG_ESTADO_EM_USO, estadoId));

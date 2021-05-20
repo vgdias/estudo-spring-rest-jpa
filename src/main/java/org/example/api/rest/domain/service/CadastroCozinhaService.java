@@ -3,7 +3,6 @@ package org.example.api.rest.domain.service;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -22,8 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class CadastroCozinhaService {
 
 	private static final String MSG_COZINHA_EM_USO = "Cozinha de codigo %d em uso e nao pode ser removida";
-	private static final String MSG_COZINHA_NAO_ENCONTRADA = "Cozinha de codigo %d nao encontrada";
-
+	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id %d nao encontrada";
+	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome %d nao encontrada";
+	
 	@Autowired
 	private CozinhaRepository cozinhaRepository;
 
@@ -34,7 +34,7 @@ public class CadastroCozinhaService {
 	public Cozinha buscar(Long cozinhaId) {
 		return cozinhaRepository.findById(cozinhaId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_COZINHA_NAO_ENCONTRADA, cozinhaId)));
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
 	}
 
 	@Transactional
@@ -45,14 +45,12 @@ public class CadastroCozinhaService {
 	@Transactional
 	public Cozinha alterar(Map<String, Object> propriedadesCozinhaNova, Long cozinhaAtualId) {
 
-		Optional<Cozinha> cozinhaAtualOpt = cozinhaRepository.findById(cozinhaAtualId);
-		if (cozinhaAtualOpt.isPresent()) {
-			Cozinha cozinhaAtual = cozinhaAtualOpt.get();
-			GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class);
-			return cozinhaRepository.save(cozinhaAtual);
-		}
-		throw new EntidadeNaoEncontradaException(
-				String.format(MSG_COZINHA_NAO_ENCONTRADA, cozinhaAtualId));
+		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
+
+		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class);
+		return cozinhaRepository.save(cozinhaAtual);
 	}
 
 	// Utilizando shared.mapper.GenericMapper
@@ -81,14 +79,12 @@ public class CadastroCozinhaService {
 
 	@Transactional
 	public void remover(Long cozinhaId) {
+		Cozinha cozinha = cozinhaRepository.findById(cozinhaId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
+
 		try {
-			Optional<Cozinha> cozinhaOpt = cozinhaRepository.findById(cozinhaId);
-			if (cozinhaOpt.isPresent()) {
-				cozinhaRepository.delete(cozinhaOpt.get());
-			} else {
-				throw new EntidadeNaoEncontradaException(
-						String.format(MSG_COZINHA_NAO_ENCONTRADA, cozinhaId));
-			}
+			cozinhaRepository.delete(cozinha);
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
 					String.format(MSG_COZINHA_EM_USO, cozinhaId));
@@ -96,12 +92,9 @@ public class CadastroCozinhaService {
 	}
 
 	public Cozinha porNome(String nome) {
-		Optional<Cozinha> cozinhaOpt = cozinhaRepository.findByNome(nome);
-		if (cozinhaOpt.isPresent()) {
-			return cozinhaOpt.get();
-		} 
-		throw new EntidadeNaoEncontradaException(
-				String.format(MSG_COZINHA_NAO_ENCONTRADA, cozinhaOpt.get().getId()));
+		return cozinhaRepository.findByNome(nome)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_COZINHA_POR_NOME_NAO_ENCONTRADA, nome)));
 	}
 
 	public List<Cozinha> comNomeSemelhante(String nome) {
