@@ -18,6 +18,7 @@ import org.example.api.rest.infrastructure.repository.spec.RestauranteComNomeSem
 import org.example.api.rest.shared.mapper.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,12 +77,12 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public void remover(Long restauranteId) {
-		Restaurante restaurante = restauranteRepository.findById(restauranteId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteId)));
-
 		try {
-			restauranteRepository.delete(restaurante);
+			restauranteRepository.deleteById(restauranteId);
+
+		} catch (EmptyResultDataAccessException e) {
+			throw new EntidadeNaoEncontradaException(
+					String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteId));
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
 					String.format(MSG_RESTAURANTE_EM_USO, restauranteId));

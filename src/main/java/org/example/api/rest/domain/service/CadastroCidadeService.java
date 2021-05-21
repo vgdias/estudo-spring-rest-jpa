@@ -12,12 +12,14 @@ import org.example.api.rest.domain.repository.EstadoRepository;
 import org.example.api.rest.shared.mapper.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CadastroCidadeService {
 
+	private static final String ESTADO_NAO_ENCONTRADO = "Estado de codigo %d nao encontrado";
 	private static final String MSG_CIDADE_EM_USO = "Cidade de codigo %d em uso e nao pode ser removida";
 	private static final String MSG_CIDADE_NAO_ENCONTRADA = "Cidade de codigo %d nao encontrada";
 
@@ -41,7 +43,7 @@ public class CadastroCidadeService {
 	public Cidade adicionar(Cidade cidade) {
 		Estado estado = estadoRepository.findById(cidade.getEstado().getId()) 
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format("Estado de codigo %d nao encontrado", cidade.getEstado().getId())));
+						String.format(ESTADO_NAO_ENCONTRADO, cidade.getEstado().getId())));
 
 		cidade.setEstado(estado);
 		return cidadeRepository.save(cidade);
@@ -58,7 +60,7 @@ public class CadastroCidadeService {
 
 		Estado estadoAtual = estadoRepository.findById(estadoAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format("Estado de codigo %d nao encontrado", estadoAtualId)));
+						String.format(ESTADO_NAO_ENCONTRADO, estadoAtualId)));
 
 		cidadeAtual.setEstado(estadoAtual);
 		return cidadeRepository.save(cidadeAtual);
@@ -66,12 +68,12 @@ public class CadastroCidadeService {
 
 	@Transactional
 	public void remover(Long cidadeId) {
-		Cidade cidade = cidadeRepository.findById(cidadeId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId)));
-
 		try {
-			cidadeRepository.delete(cidade);
+			cidadeRepository.deleteById(cidadeId);
+			
+		} catch (EmptyResultDataAccessException e) {
+			throw new EntidadeNaoEncontradaException(
+					String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId));
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
 					String.format(MSG_CIDADE_EM_USO, cidadeId));

@@ -41,11 +41,6 @@ public class RestauranteController {
 		return GenericMapper.map(restaurante, RestauranteOutputDto.class);
 	}
 
-	/**
-	 * O uso de generics (?) possibilita que o método retorne um ResponseEntity do tipo
-	 * Restaurante se a operacao for OK e do tipo String (mensagem de erro) se a
-	 * operacao falhar
-	 */
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public RestauranteOutputDto adicionar(@RequestBody RestauranteInputDto restauranteNovo) {

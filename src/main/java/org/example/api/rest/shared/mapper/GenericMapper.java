@@ -28,10 +28,9 @@ public class GenericMapper {
 	}
 
 	/**
-	 * Operacao entre objetos (que podem ser de tipos diferentes) que substitui as propriedades em comum 
-	 * do objeto de origem no objeto de destino, criando um novo objeto do tipo generico T (classeDestino).
-	 * Para cada propriedade do objeto de origem em {@code objetoOrigem}, o seu valor eh copiado para o 
-	 * objeto de destino do tipo generico T.
+	 * Converte um objeto de qualquer tipo em um objeto do tipo generico T recebido por parametro.
+	 * A operacao substitui as propriedades em comum do objeto de origem no objeto de destino, 
+	 * criando um novo objeto do tipo generico T (classeDestino).
 	 * @param <T> Tipo generico da classe de destino
 	 * @param objetoOrigem Objeto de origem
 	 * @param classeDestino Classe de destino
@@ -55,8 +54,11 @@ public class GenericMapper {
 	}
 
 	/**
-	 * Operacao entre objetos (que podem ser de tipos diferentes) que substitui as propriedades em comum 
-	 * do objeto de origem no objeto de destino, criando um novo objeto do tipo T (classeDestino).
+	 * Converte um Map com as propriedades de um objeto de qualquer tipo em um objeto 
+	 * do tipo generico T recebido por parametro.
+	 * Apos criar um objeto de origem do tipo T com as propriedades do Map, a operacao 
+	 * substitui as propriedades em comum do objeto de origem no objeto de destino, 
+	 * criando um novo objeto do tipo generico T (classeDestino).
 	 * O objeto de origem eh criado atraves de um {@code Map<chave, valor>}, onde {@code chave} eh o nome da 
 	 * propriedade do objeto e {@code valor} eh o valor desta propriedade. Para cada propriedade do objeto de origem 
 	 * em {@code propriedadesObjetoOrigem}, o seu valor eh copiado para o objeto de destino.

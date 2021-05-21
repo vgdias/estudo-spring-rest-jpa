@@ -11,6 +11,7 @@ import org.example.api.rest.domain.repository.CozinhaRepository;
 import org.example.api.rest.shared.mapper.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
@@ -23,7 +24,7 @@ public class CadastroCozinhaService {
 	private static final String MSG_COZINHA_EM_USO = "Cozinha de codigo %d em uso e nao pode ser removida";
 	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id %d nao encontrada";
 	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome %d nao encontrada";
-	
+
 	@Autowired
 	private CozinhaRepository cozinhaRepository;
 
@@ -79,12 +80,12 @@ public class CadastroCozinhaService {
 
 	@Transactional
 	public void remover(Long cozinhaId) {
-		Cozinha cozinha = cozinhaRepository.findById(cozinhaId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
-
 		try {
-			cozinhaRepository.delete(cozinha);
+			cozinhaRepository.deleteById(cozinhaId);
+
+		} catch (EmptyResultDataAccessException e) {
+			throw new EntidadeNaoEncontradaException(
+					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId));
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
 					String.format(MSG_COZINHA_EM_USO, cozinhaId));

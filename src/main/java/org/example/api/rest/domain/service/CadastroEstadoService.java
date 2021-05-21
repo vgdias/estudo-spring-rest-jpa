@@ -10,6 +10,7 @@ import org.example.api.rest.domain.repository.EstadoRepository;
 import org.example.api.rest.shared.mapper.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,12 +51,12 @@ public class CadastroEstadoService {
 
 	@Transactional
 	public void remover(Long estadoId) {
-		Estado estado = estadoRepository.findById(estadoId) 
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoId)));
-
 		try {
-			estadoRepository.delete(estado);
+			estadoRepository.deleteById(estadoId);
+
+		} catch (EmptyResultDataAccessException e) {
+			throw new EntidadeNaoEncontradaException(
+					String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoId));
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
 					String.format(MSG_ESTADO_EM_USO, estadoId));
