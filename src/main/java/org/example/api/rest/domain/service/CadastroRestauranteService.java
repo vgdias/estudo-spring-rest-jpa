@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
 import org.example.api.rest.domain.model.Cozinha;
@@ -28,7 +29,7 @@ public class CadastroRestauranteService {
 
 	private static final String MSG_RESTAURANTE_EM_USO = "Restaurante de codigo %d em uso e nao pode ser removido";
 	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id %d nao encontrada";
-	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome %d nao encontrada";
+	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome %s nao encontrada";
 	private static final String MSG_RESTAURANTE_NAO_ENCONTRADO = "Restaurante de codigo %d nao encontrado";
 
 	@Autowired
@@ -50,7 +51,7 @@ public class CadastroRestauranteService {
 	@Transactional
 	public Restaurante adicionar(Restaurante restaurante) {
 		Cozinha cozinha = cozinhaRepository.findById(restaurante.getCozinha().getId())
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new DependenciaNaoEncontradaException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restaurante.getCozinha().getId())));
 
 		restaurante.setCozinha(cozinha);
@@ -68,7 +69,7 @@ public class CadastroRestauranteService {
 		Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
 
 		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new DependenciaNaoEncontradaException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
 		restauranteAtual.setCozinha(cozinhaAtual);
@@ -103,7 +104,7 @@ public class CadastroRestauranteService {
 
 	public int quantosRestaurantesPorCozinhaId(Long cozinhaId) {
 		cozinhaRepository.findById(cozinhaId)
-		.orElseThrow(() -> new EntidadeNaoEncontradaException(
+		.orElseThrow(() -> new DependenciaNaoEncontradaException(
 				String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
 
 		return restauranteRepository.countByCozinhaId(cozinhaId);
@@ -111,7 +112,7 @@ public class CadastroRestauranteService {
 
 	public int quantosRestaurantesPorCozinhaNome(String cozinhaNome) {
 		cozinhaRepository.findByNome(cozinhaNome)
-		.orElseThrow(() -> new EntidadeNaoEncontradaException(
+		.orElseThrow(() -> new DependenciaNaoEncontradaException(
 				String.format(MSG_COZINHA_POR_NOME_NAO_ENCONTRADA, cozinhaNome)));
 
 		return restauranteRepository.countByCozinhaNome(cozinhaNome);
@@ -119,7 +120,7 @@ public class CadastroRestauranteService {
 
 	public List<Restaurante> restauranteComNomeSemelhanteECozinhaId(String nome, Long cozinhaId) {
 		cozinhaRepository.findById(cozinhaId)
-		.orElseThrow(() -> new EntidadeNaoEncontradaException(
+		.orElseThrow(() -> new DependenciaNaoEncontradaException(
 				String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
 
 		return restauranteRepository.nomeContainingAndCozinhaId(nome, cozinhaId);

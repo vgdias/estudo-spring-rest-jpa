@@ -23,7 +23,7 @@ public class CadastroCozinhaService {
 
 	private static final String MSG_COZINHA_EM_USO = "Cozinha de codigo %d em uso e nao pode ser removida";
 	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id %d nao encontrada";
-	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome %d nao encontrada";
+	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome %s nao encontrada";
 
 	@Autowired
 	private CozinhaRepository cozinhaRepository;

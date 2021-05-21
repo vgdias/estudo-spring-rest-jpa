@@ -3,6 +3,7 @@ package org.example.api.rest.domain.service;
 import java.util.List;
 import java.util.Map;
 
+import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
 import org.example.api.rest.domain.model.Cidade;
@@ -42,7 +43,7 @@ public class CadastroCidadeService {
 	@Transactional
 	public Cidade adicionar(Cidade cidade) {
 		Estado estado = estadoRepository.findById(cidade.getEstado().getId()) 
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new DependenciaNaoEncontradaException(
 						String.format(ESTADO_NAO_ENCONTRADO, cidade.getEstado().getId())));
 
 		cidade.setEstado(estado);
@@ -59,7 +60,7 @@ public class CadastroCidadeService {
 		Long estadoAtualId = cidadeAtual.getEstado().getId();
 
 		Estado estadoAtual = estadoRepository.findById(estadoAtualId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new DependenciaNaoEncontradaException(
 						String.format(ESTADO_NAO_ENCONTRADO, estadoAtualId)));
 
 		cidadeAtual.setEstado(estadoAtual);
