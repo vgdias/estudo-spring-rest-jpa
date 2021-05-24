@@ -8,6 +8,7 @@ import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -61,6 +62,20 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	@Override
+	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Mensagem invalida")
+				.detail("O corpo da requisicao possui sintaxe invalida")
+				.build();
+				
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
+	
 	/**
 	 * Customiza a mensagem da excecao retornada no body de todas as excecoes.
 	 * As excecoes internas do Spring retornam null no body, por isso recebem a mensagem
