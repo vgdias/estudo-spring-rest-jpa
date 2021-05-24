@@ -67,7 +67,7 @@ public class CadastroCidadeService {
 		return cidadeRepository.save(cidadeAtual);
 	}
 
-	@Transactional
+//	@Transactional
 	public void remover(Long cidadeId) {
 		try {
 			cidadeRepository.deleteById(cidadeId);

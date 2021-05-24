@@ -49,7 +49,7 @@ public class CadastroEstadoService {
 		return estadoRepository.save(estadoAtual);
 	}
 
-	@Transactional
+//	@Transactional
 	public void remover(Long estadoId) {
 		try {
 			estadoRepository.deleteById(estadoId);

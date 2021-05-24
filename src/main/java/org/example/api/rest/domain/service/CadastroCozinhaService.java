@@ -78,7 +78,7 @@ public class CadastroCozinhaService {
 		});
 	}
 
-	@Transactional
+//	@Transactional
 	public void remover(Long cozinhaId) {
 		try {
 			cozinhaRepository.deleteById(cozinhaId);

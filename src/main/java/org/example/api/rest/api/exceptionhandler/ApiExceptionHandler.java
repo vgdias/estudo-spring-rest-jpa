@@ -1,6 +1,5 @@
 package org.example.api.rest.api.exceptionhandler;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
@@ -21,24 +20,45 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<?> tratarEntidadeNaoEncontradaException(EntidadeNaoEncontradaException ex, 
 			WebRequest request) {
 
-		return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), 
-				HttpStatus.NOT_FOUND, request);
+		HttpStatus status = HttpStatus.NOT_FOUND;
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Entidade nao encontrada")
+				.detail(ex.getMessage())
+				.build();
+		
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
 	}
 
 	@ExceptionHandler(EntidadeEmUsoException.class)
 	public ResponseEntity<?> tratarEntidadeEmUsoException(EntidadeEmUsoException ex,
 			WebRequest request) {
 
-		return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), 
-				HttpStatus.CONFLICT, request);
+		HttpStatus status = HttpStatus.CONFLICT;
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Entidade em uso")
+				.detail(ex.getMessage())
+				.build();
+		
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
 	}
 
 	@ExceptionHandler(DependenciaNaoEncontradaException.class)
 	public ResponseEntity<?> tratarDependenciaNaoEncontradaException(DependenciaNaoEncontradaException ex,
 			WebRequest request) {
 
-		return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), 
-				HttpStatus.BAD_REQUEST, request);
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Dependencia nao encontrada")
+				.detail(ex.getMessage())
+				.build();
+		
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
 	}
 
 	/**
@@ -53,12 +73,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 		if (Objects.isNull(body)) {
 			body = ExceptionMessage.builder()
-					.dataHora(LocalDateTime.now())
-					.mensagem(status.getReasonPhrase()).build();
+					.status(status.value())
+					.title(status.getReasonPhrase())
+					.build();
 		} else if (body instanceof String) {
 			body = ExceptionMessage.builder()
-					.dataHora(LocalDateTime.now())
-					.mensagem((String) body).build();
+					.status(status.value())
+					.title((String) body)
+					.build();
 		}
 
 		return super.handleExceptionInternal(ex, body, headers, status, request);
