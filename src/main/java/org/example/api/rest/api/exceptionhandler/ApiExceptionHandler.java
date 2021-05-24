@@ -23,8 +23,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(EntidadeNaoEncontradaException.class)
-	public ResponseEntity<?> handleEntidadeNaoEncontradaException(EntidadeNaoEncontradaException ex, 
-			WebRequest request) {
+	public ResponseEntity<Object> handleEntidadeNaoEncontrada(EntidadeNaoEncontradaException ex) {
 
 		HttpStatus status = HttpStatus.NOT_FOUND;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -33,13 +32,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(ex.getMessage())
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-				status, request);
+		return handleExceptionInternal(ex, exceptionMessage, null, 
+				status, null);
 	}
 
 	@ExceptionHandler(EntidadeEmUsoException.class)
-	public ResponseEntity<?> handleEntidadeEmUsoException(EntidadeEmUsoException ex,
-			WebRequest request) {
+	public ResponseEntity<Object> handleEntidadeEmUso(EntidadeEmUsoException ex) {
 
 		HttpStatus status = HttpStatus.CONFLICT;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -48,13 +46,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(ex.getMessage())
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-				status, request);
+		return handleExceptionInternal(ex, exceptionMessage, null, 
+				status, null);
 	}
 
 	@ExceptionHandler(DependenciaNaoEncontradaException.class)
-	public ResponseEntity<?> handleDependenciaNaoEncontradaException(DependenciaNaoEncontradaException ex,
-			WebRequest request) {
+	public ResponseEntity<Object> handleDependenciaNaoEncontrada(DependenciaNaoEncontradaException ex) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -63,8 +60,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(ex.getMessage())
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-				status, request);
+		return handleExceptionInternal(ex, exceptionMessage, null, 
+				status, null);
 	}
 
 	/**
@@ -73,7 +70,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-	
+
+		Throwable rootCause = ExceptionUtils.getRootCause(ex);
+
+		if (rootCause instanceof UnrecognizedPropertyException) {
+			return handleUnrecognizedPropertyException((UnrecognizedPropertyException) rootCause);
+		}
+
+		if (rootCause instanceof InvalidFormatException) {
+			return handleInvalidFormatException((InvalidFormatException) rootCause);
+		}
+
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title("Mensagem invalida")
@@ -84,12 +91,39 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	@ExceptionHandler(UnrecognizedPropertyException.class)
+	private ResponseEntity<Object> handleUnrecognizedPropertyException(UnrecognizedPropertyException ex) {
+
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+
+		String path = ex.getPath().stream()
+				.map(ref -> ref.getFieldName())
+				.collect(Collectors.joining("."));
+		String detail = String.format("A propriedade '%s' nao foi reconhecida.", path);
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Mensagem invalida")
+				.detail(detail)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, null, 
+				status, null);
+	}
+
 	/**
-	 * Customiza as excecoes genericas geradas por argumento invalido no corpo da requisicao
+	 * Customiza as excecoes genericas geradas por argumento invalido no corpo da requisicao.
+	 * Pode ser lancada pelas operacoes de repositorio chamadas pelas classes de servico ou
+	 * pelo metodo GenericMapper.map(Object objetoOrigem, Class<RestauranteOutputDto> classeDestino)
+	 * ao chamar new ObjectMapper().convertValue(). Por isso, esta sendo tratada separadamente e nao
+	 * somente como uma excecao raiz de HttpMessageNotReadableException.
+	 * @param ex tipo de excecao a ser tratada
+	 * @param headers cabecalhos Http
+	 * @param request requisicao Http
+	 * @return informacoes de resposta para o usuario
 	 */
 	@ExceptionHandler(InvalidFormatException.class)
-	public ResponseEntity<?> handleInvalidFormatException(InvalidFormatException ex, 
-			WebRequest request) {
+	public ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException ex) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		String path = ex.getPath().stream()
@@ -104,31 +138,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(detail)
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-				status, request);
-	}
-
-	/**
-	 * Customiza as excecoes geradas por argumento desconhecido no corpo da requisicao
-	 */
-	@ExceptionHandler(UnrecognizedPropertyException.class)
-	public ResponseEntity<?> handleUnrecognizedPropertyException(UnrecognizedPropertyException ex, 
-			WebRequest request) {
-
-		HttpStatus status = HttpStatus.BAD_REQUEST;
-		String path = ex.getPath().stream()
-				.map(ref -> ref.getFieldName())
-				.collect(Collectors.joining("."));
-		String detail = String.format("A propriedade '%s' nao foi reconhecida.", path);
-
-		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
-				.status(status.value())
-				.title("Mensagem invalida")
-				.detail(detail)
-				.build();
-
-		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-				status, request);
+		return handleExceptionInternal(ex, exceptionMessage, null, 
+				status, null);
 	}
 
 	/**
@@ -140,8 +151,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	@Override
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
-
-		Throwable rootCause = ExceptionUtils.getRootCause(ex); System.out.println("ROOT: " + rootCause);
 
 		if (Objects.isNull(body)) {
 			body = ExceptionMessage.builder()

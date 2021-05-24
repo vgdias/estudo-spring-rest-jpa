@@ -66,6 +66,7 @@ public class CadastroRestauranteService {
 						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId)));
 
 		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class);
+
 		Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
 
 		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
@@ -76,7 +77,7 @@ public class CadastroRestauranteService {
 		return restauranteRepository.save(restauranteAtual);
 	}
 
-//	@Transactional
+	//	@Transactional
 	public void remover(Long restauranteId) {
 		try {
 			restauranteRepository.deleteById(restauranteId);
