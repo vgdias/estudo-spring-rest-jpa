@@ -23,7 +23,8 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(EntidadeNaoEncontradaException.class)
-	public ResponseEntity<Object> handleEntidadeNaoEncontrada(EntidadeNaoEncontradaException ex) {
+	public ResponseEntity<Object> handleEntidadeNaoEncontrada(EntidadeNaoEncontradaException ex,
+			WebRequest request) {
 
 		HttpStatus status = HttpStatus.NOT_FOUND;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -32,12 +33,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(ex.getMessage())
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, null, 
-				status, null);
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
 	}
 
 	@ExceptionHandler(EntidadeEmUsoException.class)
-	public ResponseEntity<Object> handleEntidadeEmUso(EntidadeEmUsoException ex) {
+	public ResponseEntity<Object> handleEntidadeEmUso(EntidadeEmUsoException ex, 
+			WebRequest request) {
 
 		HttpStatus status = HttpStatus.CONFLICT;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -46,12 +48,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(ex.getMessage())
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, null, 
-				status, null);
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
 	}
 
 	@ExceptionHandler(DependenciaNaoEncontradaException.class)
-	public ResponseEntity<Object> handleDependenciaNaoEncontrada(DependenciaNaoEncontradaException ex) {
+	public ResponseEntity<Object> handleDependenciaNaoEncontrada(DependenciaNaoEncontradaException ex,
+			WebRequest request) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -60,8 +63,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(ex.getMessage())
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, null, 
-				status, null);
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
 	}
 
 	/**
@@ -74,11 +77,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		Throwable rootCause = ExceptionUtils.getRootCause(ex);
 
 		if (rootCause instanceof UnrecognizedPropertyException) {
-			return handleUnrecognizedPropertyException((UnrecognizedPropertyException) rootCause);
+			return handleUnrecognizedPropertyException((UnrecognizedPropertyException) rootCause,
+					headers, request);
 		}
 
 		if (rootCause instanceof InvalidFormatException) {
-			return handleInvalidFormatException((InvalidFormatException) rootCause);
+			return handleInvalidFormatException((InvalidFormatException) rootCause,
+					headers, request);
 		}
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -87,7 +92,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail("O corpo da requisicao possui sintaxe invalida")
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
 				status, request);
 	}
 
@@ -99,8 +104,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param ex tipo de excecao a ser tratada
 	 * @return informacoes de resposta para o usuario
 	 */
-//	@ExceptionHandler(UnrecognizedPropertyException.class)
-	private ResponseEntity<Object> handleUnrecognizedPropertyException(UnrecognizedPropertyException ex) {
+	//	@ExceptionHandler(UnrecognizedPropertyException.class)
+	private ResponseEntity<Object> handleUnrecognizedPropertyException(UnrecognizedPropertyException ex,
+			HttpHeaders headers,	WebRequest request) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 
@@ -115,8 +121,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(detail)
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, null, 
-				status, null);
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
 	}
 
 	/**
@@ -127,8 +133,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param ex tipo de excecao a ser tratada
 	 * @return informacoes de resposta para o usuario
 	 */
-//	@ExceptionHandler(InvalidFormatException.class)
-	private ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException ex) {
+	//	@ExceptionHandler(InvalidFormatException.class)
+	private ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException ex,
+			HttpHeaders headers,	WebRequest request) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		String path = ex.getPath().stream()
@@ -143,8 +150,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.detail(detail)
 				.build();
 
-		return handleExceptionInternal(ex, exceptionMessage, null, 
-				status, null);
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
 	}
 
 	/**
