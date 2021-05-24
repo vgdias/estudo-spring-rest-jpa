@@ -17,6 +17,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
@@ -72,7 +73,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-
+	
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title("Mensagem invalida")
@@ -96,6 +97,29 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.collect(Collectors.joining("."));
 		String detail = String.format("A propriedade '%s' recebeu o valor invalido '%s'. Informe um valor compativel com o tipo '%s'", 
 				path , ex.getValue(), ex.getTargetType().getSimpleName());
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Mensagem invalida")
+				.detail(detail)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
+
+	/**
+	 * Customiza as excecoes geradas por argumento desconhecido no corpo da requisicao
+	 */
+	@ExceptionHandler(UnrecognizedPropertyException.class)
+	public ResponseEntity<?> handleUnrecognizedPropertyException(UnrecognizedPropertyException ex, 
+			WebRequest request) {
+
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		String path = ex.getPath().stream()
+				.map(ref -> ref.getFieldName())
+				.collect(Collectors.joining("."));
+		String detail = String.format("A propriedade '%s' nao foi reconhecida.", path);
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
