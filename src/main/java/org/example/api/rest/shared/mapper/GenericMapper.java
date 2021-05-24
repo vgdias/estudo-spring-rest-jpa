@@ -6,9 +6,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
@@ -67,25 +71,32 @@ public class GenericMapper {
 	 * @param objetoDestino Objeto de destino
 	 * @param classeDestino Classe de destino
 	 */
-	public static <T> void map(Map<String, Object> propriedadesObjetoOrigem, Object objetoDestino, Class<T> classeDestino) {
-		// remove a propriedade id se houver, para que o objetoDestino nao tenha seu id sobrescrito
-		propriedadesObjetoOrigem.remove("id");
+	public static <T> void map(Map<String, Object> propriedadesObjetoOrigem, Object objetoDestino, 
+			Class<T> classeDestino, HttpServletRequest request) {
 
-		// converte os elementos do Map propriedadesObjetoOrigem em um objeto da classe classeDestino
-		T objetoOrigem = new ObjectMapper().convertValue(propriedadesObjetoOrigem, classeDestino);
+		try {
+			// remove a propriedade id se houver, para que o objetoDestino nao tenha seu id sobrescrito
+			propriedadesObjetoOrigem.remove("id");
 
-		propriedadesObjetoOrigem.forEach((nomePropriedade, valor) -> {
-			// obtem dinamicamente cada propriedade da classe classeDestino pelo nome
-			Field propriedade = ReflectionUtils.findField(classeDestino, nomePropriedade);
+			// converte os elementos do Map propriedadesObjetoOrigem em um objeto da classe classeDestino
+			T objetoOrigem = new ObjectMapper().convertValue(propriedadesObjetoOrigem, classeDestino);
 
-			// se a propriedade obtida for privada, eh preciso torna-la acessivel
-			propriedade.setAccessible(true);
+			propriedadesObjetoOrigem.forEach((nomePropriedade, valor) -> {
+				// obtem dinamicamente cada propriedade da classe classeDestino pelo nome
+				Field propriedade = ReflectionUtils.findField(classeDestino, nomePropriedade);
 
-			// obtem o valor da propriedade do objetoOrigem
-			Object valorPropriedade = ReflectionUtils.getField(propriedade, objetoOrigem);
+				// se a propriedade obtida for privada, eh preciso torna-la acessivel
+				propriedade.setAccessible(true);
 
-			// atribui dinamicamente o valor da propriedade do objetoOrigem no objetoDestino
-			ReflectionUtils.setField(propriedade, objetoDestino, valorPropriedade);
-		});
+				// obtem o valor da propriedade do objetoOrigem
+				Object valorPropriedade = ReflectionUtils.getField(propriedade, objetoOrigem);
+
+				// atribui dinamicamente o valor da propriedade do objetoOrigem no objetoDestino
+				ReflectionUtils.setField(propriedade, objetoDestino, valorPropriedade);
+			});
+		} catch (IllegalArgumentException ex) {
+			Throwable rootCause = ExceptionUtils.getRootCause(ex);
+			throw new HttpMessageNotReadableException(ex.getMessage(), rootCause, new ServletServerHttpRequest(request));
+		}
 	}
 }

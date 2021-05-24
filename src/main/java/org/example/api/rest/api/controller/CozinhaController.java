@@ -3,6 +3,8 @@ package org.example.api.rest.api.controller;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.example.api.rest.api.model.dto.cozinha.CozinhaInputDto;
 import org.example.api.rest.api.model.dto.cozinha.CozinhaOutputDto;
 import org.example.api.rest.domain.model.Cozinha;
@@ -49,9 +51,9 @@ public class CozinhaController {
 
 	@PutMapping("/{cozinhaId}")
 	public CozinhaOutputDto alterar(@PathVariable("cozinhaId") Long cozinhaAtualId, 
-			@RequestBody Map<String, Object> propriedadesCozinhaNova) {
+			@RequestBody Map<String, Object> propriedadesCozinhaNova, HttpServletRequest request) {
 
-		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(propriedadesCozinhaNova, cozinhaAtualId);
+		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(propriedadesCozinhaNova, cozinhaAtualId, request);
 		return GenericMapper.map(cozinhaAtualizada, CozinhaOutputDto.class);
 	}
 

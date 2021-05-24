@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -59,13 +61,13 @@ public class CadastroRestauranteService {
 	}
 
 	@Transactional
-	public Restaurante alterar(Map<String, Object> propriedadesRestauranteNovo, Long restauranteAtualId) {
+	public Restaurante alterar(Map<String, Object> propriedadesRestauranteNovo, Long restauranteAtualId, HttpServletRequest request) {
 
 		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
 						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId)));
 
-		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class);
+		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
 
 		Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
 

@@ -3,6 +3,8 @@ package org.example.api.rest.domain.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -51,12 +53,12 @@ public class CadastroCidadeService {
 	}
 
 	@Transactional
-	public Cidade alterar(Map<String, Object> propriedadesCidadeNova, Long cidadeAtualId) {
+	public Cidade alterar(Map<String, Object> propriedadesCidadeNova, Long cidadeAtualId, HttpServletRequest request) {
 		Cidade cidadeAtual = cidadeRepository.findById(cidadeAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
 						String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeAtualId)));
 
-		GenericMapper.map(propriedadesCidadeNova, cidadeAtual, Cidade.class);
+		GenericMapper.map(propriedadesCidadeNova, cidadeAtual, Cidade.class, request);
 		Long estadoAtualId = cidadeAtual.getEstado().getId();
 
 		Estado estadoAtual = estadoRepository.findById(estadoAtualId)

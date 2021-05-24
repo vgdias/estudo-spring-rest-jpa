@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
 import org.example.api.rest.domain.model.Restaurante;
@@ -50,9 +52,9 @@ public class RestauranteController {
 
 	@PutMapping("/{restauranteId}")
 	public RestauranteOutputDto alterar(@PathVariable("restauranteId")  Long restauranteAtualId, 
-			@RequestBody Map<String, Object> propriedadesRestauranteNovo) {
+			@RequestBody Map<String, Object> propriedadesRestauranteNovo, HttpServletRequest request) {
 
-		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(propriedadesRestauranteNovo, restauranteAtualId);
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(propriedadesRestauranteNovo, restauranteAtualId, request);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 

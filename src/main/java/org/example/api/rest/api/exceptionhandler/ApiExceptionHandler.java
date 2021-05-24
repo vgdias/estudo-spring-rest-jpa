@@ -91,7 +91,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
-	@ExceptionHandler(UnrecognizedPropertyException.class)
+	/**
+	 * Customiza as excecoes genericas geradas por argumento desconhecido no corpo da requisicao.
+	 * Pode ser lancada pelas operacoes de repositorio chamadas pelas classes de servico ou
+	 * pelo metodo GenericMapper.map(Object objetoOrigem, Class<RestauranteOutputDto> classeDestino)
+	 * ao chamar new ObjectMapper().convertValue(). 
+	 * @param ex tipo de excecao a ser tratada
+	 * @return informacoes de resposta para o usuario
+	 */
+//	@ExceptionHandler(UnrecognizedPropertyException.class)
 	private ResponseEntity<Object> handleUnrecognizedPropertyException(UnrecognizedPropertyException ex) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -115,15 +123,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * Customiza as excecoes genericas geradas por argumento invalido no corpo da requisicao.
 	 * Pode ser lancada pelas operacoes de repositorio chamadas pelas classes de servico ou
 	 * pelo metodo GenericMapper.map(Object objetoOrigem, Class<RestauranteOutputDto> classeDestino)
-	 * ao chamar new ObjectMapper().convertValue(). Por isso, esta sendo tratada separadamente e nao
-	 * somente como uma excecao raiz de HttpMessageNotReadableException.
+	 * ao chamar new ObjectMapper().convertValue(). 
 	 * @param ex tipo de excecao a ser tratada
-	 * @param headers cabecalhos Http
-	 * @param request requisicao Http
 	 * @return informacoes de resposta para o usuario
 	 */
-	@ExceptionHandler(InvalidFormatException.class)
-	public ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException ex) {
+//	@ExceptionHandler(InvalidFormatException.class)
+	private ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException ex) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		String path = ex.getPath().stream()

@@ -3,6 +3,8 @@ package org.example.api.rest.api.controller;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.example.api.rest.api.model.dto.cidade.CidadeInputDto;
 import org.example.api.rest.api.model.dto.cidade.CidadeOutputDto;
 import org.example.api.rest.domain.model.Cidade;
@@ -48,9 +50,9 @@ public class CidadeController {
 
 	@PutMapping("/{cidadeId}")
 	public CidadeOutputDto alterar(@PathVariable("cidadeId") Long cidadeAtualId, 
-			@RequestBody Map<String, Object> propriedadesCidadeNova) {
+			@RequestBody Map<String, Object> propriedadesCidadeNova, HttpServletRequest request) {
 
-		Cidade cidadeAtualizada = cadastroCidadeService.alterar(propriedadesCidadeNova, cidadeAtualId);
+		Cidade cidadeAtualizada = cadastroCidadeService.alterar(propriedadesCidadeNova, cidadeAtualId, request);
 		return GenericMapper.map(cidadeAtualizada, CidadeOutputDto.class);
 	}
 

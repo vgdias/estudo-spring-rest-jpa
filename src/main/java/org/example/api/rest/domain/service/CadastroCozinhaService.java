@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
 import org.example.api.rest.domain.model.Cozinha;
@@ -44,13 +46,13 @@ public class CadastroCozinhaService {
 	}
 
 	@Transactional
-	public Cozinha alterar(Map<String, Object> propriedadesCozinhaNova, Long cozinhaAtualId) {
+	public Cozinha alterar(Map<String, Object> propriedadesCozinhaNova, Long cozinhaAtualId, HttpServletRequest request) {
 
 		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
-		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class);
+		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
 		return cozinhaRepository.save(cozinhaAtual);
 	}
 
