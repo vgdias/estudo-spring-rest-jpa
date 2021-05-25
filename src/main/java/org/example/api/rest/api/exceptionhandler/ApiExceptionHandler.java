@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -31,7 +32,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		HttpStatus status = HttpStatus.NOT_FOUND;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Entidade nao encontrada")
+				.title("Recurso invalido")
 				.detail(ex.getMessage())
 				.build();
 
@@ -46,7 +47,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		HttpStatus status = HttpStatus.CONFLICT;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Entidade em uso")
+				.title("Recurso em uso")
 				.detail(ex.getMessage())
 				.build();
 
@@ -61,7 +62,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Dependencia nao encontrada")
+				.title("Dependencia invalida")
 				.detail(ex.getMessage())
 				.build();
 
@@ -69,6 +70,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	/**
+	 * Customiza as excecoes genericas geradas por requisicao a recurso invalido
+	 */
 	@Override
 	protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
 	        HttpStatus status, WebRequest request) {
@@ -81,6 +85,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	    return super.handleTypeMismatch(ex, headers, status, request);
 	}
 	
+	/**
+	 * Customiza as excecoes geradas por requisicao a recurso inexistente
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param headers cabecalhos do Http
+	 * @param status estado do Http
+	 * @param request requisicao Http
+	 * @return informacoes de resposta para o usuario
+	 */
 	private ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
@@ -89,7 +101,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Mensagem invalida")
+				.title("Caminho invalido")
 				.detail(detail)
 				.build();
 
@@ -184,6 +196,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	@Override
+	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+
+		String detail = String.format("O recurso '%s' nao foi encontrado", ex.getRequestURL());
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Recurso invalido")
+				.detail(detail)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
+	}
+	
 	/**
 	 * Customiza a mensagem da excecao retornada no body de todas as excecoes.
 	 * As excecoes internas do Spring retornam null no body, por isso recebem a mensagem
