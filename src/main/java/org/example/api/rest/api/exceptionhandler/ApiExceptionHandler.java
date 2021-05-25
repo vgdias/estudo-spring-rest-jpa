@@ -25,6 +25,28 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<Object> handleUncaught(Exception ex, WebRequest request) {
+
+		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;		
+		String detail = "Ocorreu um erro interno inesperado no sistema. "
+				+ "Tente novamente. Caso o problema persista, entre em contato "
+				+ "com o administrador do sistema";
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Erro inesperado")
+				.detail(detail)
+				.build();
+
+		// Importante colocar o printStackTrace (pelo menos  enquanto nao estou
+		// fazendo logging) para mostrar a stacktrace no console
+		ex.printStackTrace();
+		
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
+	
 	@ExceptionHandler(EntidadeNaoEncontradaException.class)
 	public ResponseEntity<Object> handleEntidadeNaoEncontrada(EntidadeNaoEncontradaException ex,
 			WebRequest request) {
