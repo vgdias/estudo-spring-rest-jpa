@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
@@ -53,7 +53,7 @@ public class CadastroRestauranteService {
 	}
 
 	@Transactional
-	public Restaurante adicionar(@Valid Restaurante restaurante) {
+	public Restaurante adicionar(Restaurante restaurante) {
 		if (Objects.nonNull(restaurante.getCozinha().getId())) {
 			Cozinha cozinha = cozinhaRepository.findById(restaurante.getCozinha().getId())
 					.orElseThrow(() -> new DependenciaNaoEncontradaException(
@@ -90,6 +90,23 @@ public class CadastroRestauranteService {
 			throw new DependenciaNaoEncontradaException(
 					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restauranteAtual.getCozinha().getId()));
 		}
+	}
+
+	@Transactional
+	public Restaurante alterarTotalmente(Restaurante restauranteNovo,
+			@Positive Long restauranteAtualId) {
+
+		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId)));
+		
+		cozinhaRepository.findById(restauranteNovo.getCozinha().getId())
+		.orElseThrow(() -> new DependenciaNaoEncontradaException(
+				String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restauranteNovo.getCozinha().getId())));
+
+		restauranteNovo.setId(restauranteAtualId);
+		restauranteNovo.setDataCadastro(restauranteAtual.getDataCadastro());
+		return restauranteRepository.save(restauranteNovo);
 	}
 
 	//	@Transactional
@@ -165,5 +182,6 @@ public class CadastroRestauranteService {
 	public List<Restaurante> restaurantesComFreteGratisENomeSemelhanteSpec2(String nome) {
 		return restauranteRepository.findAll(comFreteGratis().and(comNomeSemelhante(nome)));
 	}
+
 
 }

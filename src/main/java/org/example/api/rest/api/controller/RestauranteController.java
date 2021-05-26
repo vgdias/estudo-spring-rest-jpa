@@ -52,16 +52,28 @@ public class RestauranteController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public RestauranteOutputDto adicionar(@RequestBody @Valid RestauranteInputDto restauranteNovo) {
-		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(GenericMapper.map(restauranteNovo, Restaurante.class));
+		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(
+				GenericMapper.map(restauranteNovo, Restaurante.class));
+
 		return GenericMapper.map(restauranteAdicionado, RestauranteOutputDto.class);
 	}
 
-	@PutMapping("/{id}")
-	public RestauranteOutputDto alterar(@PathVariable("id")  @Positive Long restauranteId, 
+	@PutMapping("/alterar/{id}")
+	public RestauranteOutputDto alterar(@PathVariable("id")  @Positive Long restauranteAtualId, 
 			@RequestBody Map<String, Object> propriedadesRestauranteNovo, HttpServletRequest request) {
 
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(propriedadesRestauranteNovo, 
-				restauranteId, request);
+				restauranteAtualId, request);
+		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
+	}
+
+	@PutMapping("/alterar-totalmente/{id}")
+	public RestauranteOutputDto alterarTotalmente(@PathVariable("id")  @Positive Long restauranteAtualId, 
+			@RequestBody @Valid RestauranteInputDto restauranteNovo) {
+
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarTotalmente(
+				GenericMapper.map(restauranteNovo, Restaurante.class), restauranteAtualId);
+
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 
