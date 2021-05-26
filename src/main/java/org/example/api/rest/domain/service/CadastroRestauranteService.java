@@ -6,8 +6,10 @@ import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpe
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
@@ -51,13 +53,19 @@ public class CadastroRestauranteService {
 	}
 
 	@Transactional
-	public Restaurante adicionar(Restaurante restaurante) {
-		Cozinha cozinha = cozinhaRepository.findById(restaurante.getCozinha().getId())
-				.orElseThrow(() -> new DependenciaNaoEncontradaException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restaurante.getCozinha().getId())));
+	public Restaurante adicionar(@Valid Restaurante restaurante) {
+		if (Objects.nonNull(restaurante.getCozinha().getId())) {
+			Cozinha cozinha = cozinhaRepository.findById(restaurante.getCozinha().getId())
+					.orElseThrow(() -> new DependenciaNaoEncontradaException(
+							String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restaurante.getCozinha().getId())));
 
-		restaurante.setCozinha(cozinha);
-		return restauranteRepository.save(restaurante);
+			restaurante.setCozinha(cozinha);
+			return restauranteRepository.save(restaurante);
+
+		} else {
+			throw new DependenciaNaoEncontradaException(
+					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restaurante.getCozinha().getId()));
+		}
 	}
 
 	@Transactional
@@ -69,14 +77,19 @@ public class CadastroRestauranteService {
 
 		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
 
-		Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
+		if (Objects.nonNull(restauranteAtual.getCozinha())) {
+			Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
 
-		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
-				.orElseThrow(() -> new DependenciaNaoEncontradaException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
+			Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
+					.orElseThrow(() -> new DependenciaNaoEncontradaException(
+							String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
-		restauranteAtual.setCozinha(cozinhaAtual);
-		return restauranteRepository.save(restauranteAtual);
+			restauranteAtual.setCozinha(cozinhaAtual);
+			return restauranteRepository.save(restauranteAtual);
+		} else {
+			throw new DependenciaNaoEncontradaException(
+					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restauranteAtual.getCozinha().getId()));
+		}
 	}
 
 	//	@Transactional

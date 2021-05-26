@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -207,6 +208,26 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
+	 * Customiza as excecoes geradas por requisicao com parametro de URL nao fornecido
+	 */
+	@Override
+	protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+		String detail = String.format("O parametro de URL '%s' nao foi fornecido", 
+				ex.getParameterName());
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Caminho invalido")
+				.detail(detail)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
+	}
+
+	/**
 	 * Customiza as excecoes genericas geradas por erro de sintaxe no corpo da requisicao
 	 */
 	@Override
@@ -295,7 +316,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Customiza as excecoes geradas por requisicao com argumentos invalidos
+	 * Customiza as excecoes geradas por falha de validacao
 	 */
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,

@@ -1,4 +1,4 @@
-package org.example.api.rest.api.model.dto.cozinha;
+package org.example.api.rest.api.model.dto.restaurante;
 
 import javax.validation.constraints.NotNull;
 
@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CozinhaIdInputDto {
+public class RestauranteIdInputDto {
 	@NotNull
 	private Long id;
 }
