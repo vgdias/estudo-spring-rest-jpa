@@ -1,9 +1,14 @@
 package org.example.api.rest.api.exceptionhandler;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.example.api.rest.api.exceptionhandler.ExceptionMessage.Field;
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -12,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -29,6 +35,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleUncaught(Exception ex, WebRequest request) {
 
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;		
+
 		String detail = "Ocorreu um erro interno inesperado no sistema. "
 				+ "Tente novamente. Caso o problema persista, entre em contato "
 				+ "com o administrador do sistema";
@@ -42,16 +49,75 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		// Importante colocar o printStackTrace (pelo menos  enquanto nao estou
 		// fazendo logging) para mostrar a stacktrace no console
 		ex.printStackTrace();
-		
+
 		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
 				status, request);
 	}
-	
+
+	/**
+	 * Customiza as excecoes genericas geradas pelo sistema de validacao
+	 *
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param request requisicao Http
+	 * @return informacoes de resposta para o usuario
+	 */
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<Object> handleValidationException(ValidationException ex,
+			WebRequest request) {
+
+		HttpStatus status = HttpStatus.UNAUTHORIZED;	
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Erro de validacao")
+				.detail(ex.getMessage())
+				.build();
+
+		if (ex instanceof ConstraintViolationException) {
+			return handleConstraintViolation(
+					(ConstraintViolationException) ex, status, request);
+		}
+
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
+
+	/**
+	 * Customiza as excecoes geradas por violacao de regra de validacao 
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param status estado Http
+	 * @param request requisicao Htttp
+	 * @return informacoes de resposta para o usuario
+	 */
+	private ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, HttpStatus status,
+			WebRequest request) {
+
+		List<Field> fields = ex.getConstraintViolations().stream()
+				.map(constraintViolation -> ExceptionMessage.Field.builder()
+						.name(constraintViolation.getPropertyPath().toString())
+						.userMessage(constraintViolation.getMessage().toString())
+						.build())
+				.collect(Collectors.toList());
+
+		String detail = String.format("Falha na validacao de um ou mais argumentos");
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Operacao nao autorizada")
+				.detail(detail)
+				.fields(fields)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
+
 	@ExceptionHandler(EntidadeNaoEncontradaException.class)
 	public ResponseEntity<Object> handleEntidadeNaoEncontrada(EntidadeNaoEncontradaException ex,
 			WebRequest request) {
 
 		HttpStatus status = HttpStatus.NOT_FOUND;
+
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title("Recurso invalido")
@@ -67,6 +133,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			WebRequest request) {
 
 		HttpStatus status = HttpStatus.CONFLICT;
+
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title("Recurso em uso")
@@ -81,7 +148,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleDependenciaNaoEncontrada(DependenciaNaoEncontradaException ex,
 			WebRequest request) {
 
-		HttpStatus status = HttpStatus.BAD_REQUEST;
+		HttpStatus status = HttpStatus.FAILED_DEPENDENCY;
+
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title("Dependencia invalida")
@@ -97,18 +165,25 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@Override
 	protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
-	        HttpStatus status, WebRequest request) {
-	    
-	    if (ex instanceof MethodArgumentTypeMismatchException) {
-	        return handleMethodArgumentTypeMismatch(
-	                (MethodArgumentTypeMismatchException) ex, headers, status, request);
-	    }
+			HttpStatus status, WebRequest request) {
 
-	    return super.handleTypeMismatch(ex, headers, status, request);
+		if (ex instanceof MethodArgumentTypeMismatchException) {
+			return handleMethodArgumentTypeMismatch(
+					(MethodArgumentTypeMismatchException) ex, headers, status, request);
+		}
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Dados fornecidos invalidos")
+				.detail("O corpo da requisicao possui recurso invalido")
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
 	}
-	
+
 	/**
-	 * Customiza as excecoes geradas por requisicao a recurso inexistente
+	 * Customiza as excecoes geradas por requisicao com tipo de parametro de URL invalido
 	 * @param ex tipo de excecao a ser tratada 
 	 * @param headers cabecalhos do Http
 	 * @param status estado do Http
@@ -130,7 +205,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
 				status, request);
 	}
-	
+
 	/**
 	 * Customiza as excecoes genericas geradas por erro de sintaxe no corpo da requisicao
 	 */
@@ -141,18 +216,18 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		Throwable rootCause = ExceptionUtils.getRootCause(ex);
 
 		if (rootCause instanceof UnrecognizedPropertyException) {
-			return handleUnrecognizedPropertyException((UnrecognizedPropertyException) rootCause,
+			return handleUnrecognizedProperty((UnrecognizedPropertyException) rootCause,
 					headers, request);
 		}
 
 		if (rootCause instanceof InvalidFormatException) {
-			return handleInvalidFormatException((InvalidFormatException) rootCause,
+			return handleInvalidFormat((InvalidFormatException) rootCause,
 					headers, request);
 		}
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Mensagem invalida")
+				.title("Dados fornecidos invalidos")
 				.detail("O corpo da requisicao possui sintaxe invalida")
 				.build();
 
@@ -169,19 +244,19 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return informacoes de resposta para o usuario
 	 */
 	//	@ExceptionHandler(UnrecognizedPropertyException.class)
-	private ResponseEntity<Object> handleUnrecognizedPropertyException(UnrecognizedPropertyException ex,
+	private ResponseEntity<Object> handleUnrecognizedProperty(UnrecognizedPropertyException ex,
 			HttpHeaders headers,	WebRequest request) {
-
-		HttpStatus status = HttpStatus.BAD_REQUEST;
 
 		String path = ex.getPath().stream()
 				.map(ref -> ref.getFieldName())
 				.collect(Collectors.joining("."));
+
+		HttpStatus status = HttpStatus.BAD_REQUEST;
 		String detail = String.format("A propriedade '%s' nao foi reconhecida.", path);
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Mensagem invalida")
+				.title("Dados fornecidos invalidos")
 				.detail(detail)
 				.build();
 
@@ -198,19 +273,20 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return informacoes de resposta para o usuario
 	 */
 	//	@ExceptionHandler(InvalidFormatException.class)
-	private ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException ex,
+	private ResponseEntity<Object> handleInvalidFormat(InvalidFormatException ex,
 			HttpHeaders headers,	WebRequest request) {
 
-		HttpStatus status = HttpStatus.BAD_REQUEST;
 		String path = ex.getPath().stream()
 				.map(ref -> ref.getFieldName())
 				.collect(Collectors.joining("."));
+
+		HttpStatus status = HttpStatus.BAD_REQUEST;
 		String detail = String.format("A propriedade '%s' recebeu o valor invalido '%s'", 
 				path , ex.getValue(), ex.getTargetType().getSimpleName());
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Mensagem invalida")
+				.title("Dados fornecidos invalidos")
 				.detail(detail)
 				.build();
 
@@ -218,11 +294,44 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	/**
+	 * Customiza as excecoes geradas por requisicao com argumentos invalidos
+	 */
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+
+		List<Field> fields = ex.getBindingResult().getFieldErrors().stream()
+				.map(fieldError -> ExceptionMessage.Field.builder()
+						.name(fieldError.getField())
+						.userMessage(fieldError.getDefaultMessage())
+						.build())
+				.collect(Collectors.toList());
+
+		status = HttpStatus.UNAUTHORIZED;	
+		String detail = String.format("Falha na validacao de um ou mais argumentos");
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Operacao nao autorizada")
+				.detail(detail)
+				.fields(fields)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
+	}
+
+	/**
+	 * Customiza as excecoes geradas por requisicao a recurso inexistente
+	 */
 	@Override
 	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
+		status = HttpStatus.NOT_FOUND;	
 		String detail = String.format("O recurso '%s' nao foi encontrado", ex.getRequestURL());
+
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title("Recurso invalido")
@@ -232,7 +341,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		return handleExceptionInternal(ex, exceptionMessage, headers, 
 				status, request);
 	}
-	
+
+
 	/**
 	 * Customiza a mensagem da excecao retornada no body de todas as excecoes.
 	 * As excecoes internas do Spring retornam null no body, por isso recebem a mensagem

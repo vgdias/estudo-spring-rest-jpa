@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
@@ -45,7 +46,7 @@ public class RestauranteController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public RestauranteOutputDto adicionar(@RequestBody RestauranteInputDto restauranteNovo) {
+	public RestauranteOutputDto adicionar(@RequestBody @Valid RestauranteInputDto restauranteNovo) {
 		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(GenericMapper.map(restauranteNovo, Restaurante.class));
 		return GenericMapper.map(restauranteAdicionado, RestauranteOutputDto.class);
 	}
