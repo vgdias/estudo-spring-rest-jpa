@@ -13,6 +13,9 @@ import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,9 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+
+	@Autowired
+	private MessageSource messageSource;
 
 	/**
 	 * Customiza as excecoes genericas que nao foram capturadas por outros handlers 
@@ -355,10 +361,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		status = HttpStatus.UNAUTHORIZED;	
 
 		List<Field> fields = ex.getBindingResult().getFieldErrors().stream()
-				.map(fieldError -> ExceptionMessage.Field.builder()
-						.name(fieldError.getField())
-						.userMessage(fieldError.getDefaultMessage())
-						.build())
+				.map(fieldError -> {
+					String message = messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
+					return ExceptionMessage.Field.builder()
+							.name(fieldError.getField())
+							.userMessage(message)
+							.build();
+				})
 				.collect(Collectors.toList());
 
 		String detail = String.format("Falha na validacao de um ou mais argumentos");
