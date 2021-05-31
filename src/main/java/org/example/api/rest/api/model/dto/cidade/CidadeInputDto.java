@@ -4,7 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import org.example.api.rest.api.model.dto.estado.EstadoInputIdDto;
+import org.example.api.rest.api.model.dto.estado.IdEstadoInputDto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,5 +18,5 @@ public class CidadeInputDto {
 	
 	@Valid
 	@NotNull
-	private EstadoInputIdDto estado;
+	private IdEstadoInputDto estado;
 }

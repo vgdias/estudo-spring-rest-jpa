@@ -10,6 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import org.example.api.rest.api.model.dto.restaurante.NomeEFreteRestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
 import org.example.api.rest.domain.model.Restaurante;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,9 +31,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Validated
 @RestController
 @RequestMapping("/restaurantes")
+@Validated
 public class RestauranteController {
 
 	@Autowired
@@ -51,7 +53,7 @@ public class RestauranteController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public RestauranteOutputDto adicionar(@RequestBody @Valid RestauranteInputDto restauranteNovo) {
+	public RestauranteOutputDto adicionar(@Valid @RequestBody RestauranteInputDto restauranteNovo) {
 		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(
 				GenericMapper.map(restauranteNovo, Restaurante.class));
 
@@ -59,7 +61,7 @@ public class RestauranteController {
 	}
 
 	@PutMapping("/alterar/{id}")
-	public RestauranteOutputDto alterar(@PathVariable("id")  @Positive Long restauranteAtualId, 
+	public RestauranteOutputDto alterar(@PathVariable("id") @Positive Long restauranteAtualId,
 			@RequestBody Map<String, Object> propriedadesRestauranteNovo, HttpServletRequest request) {
 
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(propriedadesRestauranteNovo, 
@@ -67,13 +69,12 @@ public class RestauranteController {
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 
-	@PutMapping("/alterar-totalmente/{id}")
-	public RestauranteOutputDto alterarTotalmente(@PathVariable("id")  @Positive Long restauranteAtualId, 
-			@RequestBody @Valid RestauranteInputDto restauranteNovo) {
+	@PatchMapping("/alterar-nome-e-frete/{id}")
+	public RestauranteOutputDto alterarNomeEFrete(@PathVariable("id") @Positive Long restauranteAtualId, 
+			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovo, HttpServletRequest request) {
 
-		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarTotalmente(
-				GenericMapper.map(restauranteNovo, Restaurante.class), restauranteAtualId);
-
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(
+				GenericMapper.map(nomeEFreteRestauranteNovo, Restaurante.class), 	restauranteAtualId);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 
@@ -90,7 +91,7 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/por-intervalo-de-taxa-frete")
-	public List<RestauranteOutputDto> porIntervaloDeTaxaFrete(@RequestParam @PositiveOrZero BigDecimal taxaInicial, 
+	public List<RestauranteOutputDto> porIntervaloDeTaxaFrete(@RequestParam @PositiveOrZero BigDecimal taxaInicial,
 			@RequestParam @PositiveOrZero BigDecimal taxaFinal) {
 		List<Restaurante> restaurantes = cadastroRestauranteService.restaurantePorIntervaloDeTaxaFrete(taxaInicial, taxaFinal);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class); 
@@ -126,7 +127,8 @@ public class RestauranteController {
 			@RequestParam @PositiveOrZero BigDecimal taxaFreteInicial, 
 			@RequestParam("taxaFreteFinal") @PositiveOrZero  BigDecimal taxaFinal) {// renomeando parametro recebido
 
-		List<Restaurante> restaurantes = cadastroRestauranteService.buscaCustomizadaPorNomeEFrete(nome, taxaFreteInicial, taxaFinal);
+		List<Restaurante> restaurantes = cadastroRestauranteService.buscaCustomizadaPorNomeEFrete(
+				nome, taxaFreteInicial, taxaFinal);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
@@ -136,7 +138,8 @@ public class RestauranteController {
 			@RequestParam @PositiveOrZero BigDecimal taxaFreteFinal, 
 			@RequestParam @NotBlank String nomeCozinha) {
 
-		List<Restaurante> restaurantes = cadastroRestauranteService.buscaDinamica(nomeRestaurante, taxaFreteInicial, taxaFreteFinal, nomeCozinha);
+		List<Restaurante> restaurantes = cadastroRestauranteService.buscaDinamica(
+				nomeRestaurante, taxaFreteInicial, taxaFreteFinal, nomeCozinha);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 

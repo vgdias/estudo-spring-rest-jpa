@@ -14,20 +14,20 @@ public interface RestauranteRepository extends
 JpaRepository<Restaurante, Long>,
 RestauranteCustomRepository,
 JpaSpecificationExecutor<Restaurante>{
-	
+
 	int countByCozinhaId(Long cozinhaId);
 	int countByCozinhaNome(String cozinhaNome);
 	List<Restaurante> findByTaxaFreteBetween(BigDecimal taxaInicial, BigDecimal taxaFinal);
 	List<Restaurante> nomeContainingAndCozinhaId(String nome, Long cozinhaId);
-	
+
 	@Query("from Restaurante where nome like %:nome%")
 	List<Restaurante> comNomeSemelhante(String nome);
-	
+
 	// Resolvendo o problema do N + 1
-	@Query("from Restaurante r join r.cozinha left join fetch r.formasPagamento")
-	List<Restaurante> findAll();
-	
+//		@Query("from Restaurante r join r.cozinha left join fetch r.formasPagamento")
+//		List<Restaurante> findAll();
+
 	// Movida para RestauranteCustomRepository
-//	List<Restaurante> buscaCustomizadaPorNomeEFrete(String nome, BigDecimal taxaFreteInicial, 
-//			BigDecimal taxaFreteFinal);
+	//	List<Restaurante> buscaCustomizadaPorNomeEFrete(String nome, BigDecimal taxaFreteInicial, 
+	//			BigDecimal taxaFreteFinal);
 }

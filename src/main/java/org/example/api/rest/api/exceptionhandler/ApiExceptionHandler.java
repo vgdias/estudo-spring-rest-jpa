@@ -32,6 +32,12 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
+	/**
+	 * Customiza as excecoes genericas que nao foram capturadas por outros handlers 
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param request requisicao Http
+	 * @return informacoes de resposta para o usuario
+	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleUncaught(Exception ex, WebRequest request) {
 
@@ -63,7 +69,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return informacoes de resposta para o usuario
 	 */
 	@ExceptionHandler(ValidationException.class)
-	public ResponseEntity<Object> handleValidationException(ValidationException ex,
+	public ResponseEntity<Object> handleValidation(ValidationException ex,
 			WebRequest request) {
 
 		HttpStatus status = HttpStatus.UNAUTHORIZED;	
@@ -93,6 +99,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	private ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, HttpStatus status,
 			WebRequest request) {
 
+		status = HttpStatus.UNAUTHORIZED;	
+
 		List<Field> fields = ex.getConstraintViolations().stream()
 				.map(constraintViolation -> ExceptionMessage.Field.builder()
 						.name(constraintViolation.getPropertyPath().toString())
@@ -113,6 +121,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	/**
+	 * Customiza as excecoes geradas por entidade nao encontrada no banco de dados 
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param request requisicao Htttp
+	 * @return informacoes de resposta para o usuario
+	 */
 	@ExceptionHandler(EntidadeNaoEncontradaException.class)
 	public ResponseEntity<Object> handleEntidadeNaoEncontrada(EntidadeNaoEncontradaException ex,
 			WebRequest request) {
@@ -129,6 +143,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	/**
+	 * Customiza as excecoes geradas pela restricao de entidade em uso 
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param request requisicao Htttp
+	 * @return informacoes de resposta para o usuario
+	 */
 	@ExceptionHandler(EntidadeEmUsoException.class)
 	public ResponseEntity<Object> handleEntidadeEmUso(EntidadeEmUsoException ex, 
 			WebRequest request) {
@@ -145,6 +165,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				status, request);
 	}
 
+	/**
+	 * Customiza as excecoes geradas por dependencia nao encontrada no banco de dados 
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param request requisicao Htttp
+	 * @return informacoes de resposta para o usuario
+	 */
 	@ExceptionHandler(DependenciaNaoEncontradaException.class)
 	public ResponseEntity<Object> handleDependenciaNaoEncontrada(DependenciaNaoEncontradaException ex,
 			WebRequest request) {
@@ -186,8 +212,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	/**
 	 * Customiza as excecoes geradas por requisicao com tipo de parametro de URL invalido
 	 * @param ex tipo de excecao a ser tratada 
-	 * @param headers cabecalhos do Http
-	 * @param status estado do Http
+	 * @param headers cabecalho Http a ser inserido na resposta
+	 * @param status estado Http
 	 * @param request requisicao Http
 	 * @return informacoes de resposta para o usuario
 	 */
@@ -211,7 +237,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * Customiza as excecoes geradas por requisicao com parametro de URL nao fornecido
 	 */
 	@Override
-	protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+	protected ResponseEntity<Object> handleMissingServletRequestParameter(
+			MissingServletRequestParameterException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		String detail = String.format("O parametro de URL '%s' nao foi fornecido", 
@@ -228,7 +255,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Customiza as excecoes genericas geradas por erro de sintaxe no corpo da requisicao
+	 * Customiza as excecoes genericas geradas por sintaxe invalida no corpo da requisicao
 	 */
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
@@ -257,14 +284,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Customiza as excecoes genericas geradas por argumento desconhecido no corpo da requisicao.
+	 * Customiza as excecoes genericas geradas por argumento desconhecido no corpo da requisicao
 	 * Pode ser lancada pelas operacoes de repositorio chamadas pelas classes de servico ou
-	 * pelo metodo GenericMapper.map(Object objetoOrigem, Class<RestauranteOutputDto> classeDestino)
-	 * ao chamar new ObjectMapper().convertValue(). 
+	 * pelo metodo {@code GenericMapper.map(Object objetoOrigem, Class<RestauranteOutputDto> classeDestino)}
+	 * ao chamar {@code new ObjectMapper().convertValue()} 
 	 * @param ex tipo de excecao a ser tratada
+	 * @param headers cabecalho Http a ser inserido na resposta
+	 * @param request requisicao Http
 	 * @return informacoes de resposta para o usuario
 	 */
-	//	@ExceptionHandler(UnrecognizedPropertyException.class)
 	private ResponseEntity<Object> handleUnrecognizedProperty(UnrecognizedPropertyException ex,
 			HttpHeaders headers,	WebRequest request) {
 
@@ -286,14 +314,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Customiza as excecoes genericas geradas por argumento invalido no corpo da requisicao.
+	 * Customiza as excecoes genericas geradas por argumento invalido no corpo da requisicao
 	 * Pode ser lancada pelas operacoes de repositorio chamadas pelas classes de servico ou
 	 * pelo metodo GenericMapper.map(Object objetoOrigem, Class<RestauranteOutputDto> classeDestino)
 	 * ao chamar new ObjectMapper().convertValue(). 
 	 * @param ex tipo de excecao a ser tratada
+	 * @param headers cabecalho Http a ser inserido na resposta
+	 * @param request requisicao Http
 	 * @return informacoes de resposta para o usuario
 	 */
-	//	@ExceptionHandler(InvalidFormatException.class)
 	private ResponseEntity<Object> handleInvalidFormat(InvalidFormatException ex,
 			HttpHeaders headers,	WebRequest request) {
 
@@ -319,8 +348,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * Customiza as excecoes geradas por falha de validacao
 	 */
 	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, 
+			HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
+
+		status = HttpStatus.UNAUTHORIZED;	
 
 		List<Field> fields = ex.getBindingResult().getFieldErrors().stream()
 				.map(fieldError -> ExceptionMessage.Field.builder()
@@ -329,7 +361,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 						.build())
 				.collect(Collectors.toList());
 
-		status = HttpStatus.UNAUTHORIZED;	
 		String detail = String.format("Falha na validacao de um ou mais argumentos");
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
@@ -347,7 +378,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * Customiza as excecoes geradas por requisicao a recurso inexistente
 	 */
 	@Override
-	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
+	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, 
+			HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
 		status = HttpStatus.NOT_FOUND;	
@@ -365,10 +397,10 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 
 	/**
-	 * Customiza a mensagem da excecao retornada no body de todas as excecoes.
+	 * Customiza a mensagem da erro retornada no body de todas as excecoes
 	 * As excecoes internas do Spring retornam null no body, por isso recebem a mensagem
 	 * com a causa da excecao. As excecoes da aplicacao retornam uma String com a mensagem
-	 * de erro, que eh inserida no body.
+	 * de erro, que eh inserida no body
 	 */
 	@Override
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CidadeOutputDto {
-	private Long id;
+//	private Long id;
 	private String nomeCidade;
 	private EstadoOutputDto estado;
 }
