@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
@@ -71,6 +72,10 @@ public class CadastroRestauranteService {
 	public Restaurante alterar(Map<String, Object> propriedadesRestauranteNovo, Long restauranteAtualId, 
 			HttpServletRequest request) {
 
+		if (propriedadesRestauranteNovo.isEmpty()) {
+			throw new ValidationException("Nenhuma propriedade foi fornecida");
+		}
+		
 		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
 						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId)));
@@ -84,6 +89,14 @@ public class CadastroRestauranteService {
 			Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
 					.orElseThrow(() -> new DependenciaNaoEncontradaException(
 							String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
+
+			if (restauranteAtual.getNome().trim().isEmpty()) {
+				System.out.println("AQUI");
+				throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
+			}
+			if (Objects.isNull(restauranteAtual.getTaxaFrete())) {
+				throw new ValidationException("A propriedade 'taxaFrete' nao pode ser vazia");
+			}
 
 			restauranteAtual.setCozinha(cozinhaAtual);
 			return restauranteRepository.save(restauranteAtual);
