@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -43,11 +44,22 @@ public class CadastroEstadoService {
 	@Transactional
 	public Estado alterar(Map<String, Object> propriedadesEstadoNovo, Long estadoAtualId, HttpServletRequest request) {
 
+		if (propriedadesEstadoNovo.isEmpty()) {
+			throw new ValidationException("Nenhuma propriedade foi fornecida");
+		}
+		if (propriedadesEstadoNovo.containsKey("id")) {
+			throw new ValidationException("A propriedade 'estado.id' nao pode ser alterada");
+		}
+		
 		Estado estadoAtual = estadoRepository.findById(estadoAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
 						String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoAtualId)));
 
 		GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class, request);
+		
+		if (estadoAtual.getNome().trim().isEmpty()) {
+			throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
+		}
 		return estadoRepository.save(estadoAtual);
 	}
 

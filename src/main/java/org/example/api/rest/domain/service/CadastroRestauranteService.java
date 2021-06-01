@@ -75,6 +75,9 @@ public class CadastroRestauranteService {
 		if (propriedadesRestauranteNovo.isEmpty()) {
 			throw new ValidationException("Nenhuma propriedade foi fornecida");
 		}
+		if (propriedadesRestauranteNovo.containsKey("id")) {
+			throw new ValidationException("A propriedade 'restaurante.id' nao pode ser alterada");
+		}
 		
 		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
@@ -84,6 +87,7 @@ public class CadastroRestauranteService {
 
 		if ( (Objects.nonNull(restauranteAtual.getCozinha()) ) 
 				&& (Objects.nonNull(restauranteAtual.getCozinha().getId()))) {
+			
 			Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
 
 			Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
@@ -91,7 +95,6 @@ public class CadastroRestauranteService {
 							String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
 			if (restauranteAtual.getNome().trim().isEmpty()) {
-				System.out.println("AQUI");
 				throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
 			}
 			if (Objects.isNull(restauranteAtual.getTaxaFrete())) {

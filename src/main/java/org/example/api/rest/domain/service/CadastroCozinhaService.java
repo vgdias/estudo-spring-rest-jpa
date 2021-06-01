@@ -1,10 +1,10 @@
 package org.example.api.rest.domain.service;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
@@ -16,9 +16,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ReflectionUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CadastroCozinhaService {
@@ -48,36 +45,23 @@ public class CadastroCozinhaService {
 	@Transactional
 	public Cozinha alterar(Map<String, Object> propriedadesCozinhaNova, Long cozinhaAtualId, HttpServletRequest request) {
 
+		if (propriedadesCozinhaNova.isEmpty()) {
+			throw new ValidationException("Nenhuma propriedade foi fornecida");
+		}
+		if (propriedadesCozinhaNova.containsKey("id")) {
+			throw new ValidationException("A propriedade 'cozinha.id' nao pode ser alterada");
+		}
+		
 		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
 		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
+		
+		if (cozinhaAtual.getNome().trim().isEmpty()) {
+			throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
+		}
 		return cozinhaRepository.save(cozinhaAtual);
-	}
-
-	// Utilizando shared.mapper.GenericMapper
-	@SuppressWarnings("unused")
-	private void merge(Map<String, Object> propriedadesCozinhaNova, Cozinha cozinhaAtual) {
-		// remove a propriedade id se houver, para que o cozinhaAtual nao tenha seu id sobrescrito
-		propriedadesCozinhaNova.remove("id");
-
-		// converte os elementos do Map propriedadesCozinhaNova em um objeto Cozinha
-		Cozinha cozinhaNova = new ObjectMapper().convertValue(propriedadesCozinhaNova, Cozinha.class);
-
-		propriedadesCozinhaNova.forEach((nomePropriedade, valor) -> {
-			// obtem dinamicamente uma propriedade da classe Cozinha pelo nome dela
-			Field propriedade = ReflectionUtils.findField(Cozinha.class, nomePropriedade);
-
-			// se a propriedade obtida for privada, eh preciso torna-la acessivel
-			propriedade.setAccessible(true);
-
-			// obtem o valor da propriedade obtida
-			Object valorPropriedade = ReflectionUtils.getField(propriedade, cozinhaNova);
-
-			// atribui dinamicamente o valor da propriedade obtida no objeto cozinhaDestino
-			ReflectionUtils.setField(propriedade, cozinhaAtual, valorPropriedade);
-		});
 	}
 
 //	@Transactional

@@ -15,6 +15,7 @@ import org.example.api.rest.domain.service.CadastroCozinhaService;
 import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequestMapping("/cozinhas")
 public class CozinhaController {
@@ -47,7 +49,7 @@ public class CozinhaController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public CozinhaOutputDto adicionar(@RequestBody @Valid CozinhaInputDto cozinhaNova) {
+	public CozinhaOutputDto adicionar(@Valid @RequestBody CozinhaInputDto cozinhaNova) {
 		Cozinha cozinhaAdicionada = cadastroCozinhaService.adicionar(GenericMapper.map(cozinhaNova, Cozinha.class));
 		return GenericMapper.map(cozinhaAdicionada, CozinhaOutputDto.class);
 	}
