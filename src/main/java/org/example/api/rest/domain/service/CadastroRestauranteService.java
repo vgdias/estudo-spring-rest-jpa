@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.EntidadeEmUsoException;
@@ -20,7 +19,7 @@ import org.example.api.rest.domain.repository.CozinhaRepository;
 import org.example.api.rest.domain.repository.RestauranteRepository;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComFreteGratisSpec;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComNomeSemelhanteSpec;
-import org.example.api.rest.shared.mapper.GenericMapper;
+import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -71,9 +70,6 @@ public class CadastroRestauranteService {
 	@Transactional
 	public Restaurante alterar(Map<String, Object> propriedadesRestauranteNovo, Long restauranteAtualId, 
 			HttpServletRequest request) {
-		if (propriedadesRestauranteNovo.isEmpty()) { 
-			throw new ValidationException("Nenhuma propriedade de Restaurante foi fornecida");
-		}
 
 		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
@@ -90,7 +86,7 @@ public class CadastroRestauranteService {
 							String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
 			restauranteAtual.setCozinha(cozinhaAtual);
-				return restauranteRepository.save(restauranteAtual);
+			return restauranteRepository.save(restauranteAtual);
 		} else {
 			throw new DependenciaNaoEncontradaException(
 					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restauranteAtual.getCozinha().getId()));

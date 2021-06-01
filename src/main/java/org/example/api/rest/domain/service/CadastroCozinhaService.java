@@ -10,7 +10,7 @@ import org.example.api.rest.domain.exception.EntidadeEmUsoException;
 import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.repository.CozinhaRepository;
-import org.example.api.rest.shared.mapper.GenericMapper;
+import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;

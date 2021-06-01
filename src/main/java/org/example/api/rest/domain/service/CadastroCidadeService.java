@@ -12,7 +12,7 @@ import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.repository.CidadeRepository;
 import org.example.api.rest.domain.repository.EstadoRepository;
-import org.example.api.rest.shared.mapper.GenericMapper;
+import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;

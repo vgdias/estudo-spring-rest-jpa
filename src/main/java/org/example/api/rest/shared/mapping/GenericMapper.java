@@ -1,4 +1,4 @@
-package org.example.api.rest.shared.mapper;
+package org.example.api.rest.shared.mapping;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.modelmapper.ModelMapper;
@@ -76,13 +75,6 @@ public class GenericMapper {
 			Class<T> classeDestino, HttpServletRequest request) {
 
 		try {
-			// remove silenciosamente a propriedade id se houver, para que o objetoDestino nao tenha seu id sobrescrito
-			//	propriedadesObjetoOrigem.remove("id");
-			
-			if (propriedadesObjetoOrigem.containsKey("id")) {
-				throw new ValidationException("A propriedade 'id' nao pode ser alterada");
-			}
-			
 			// converte os elementos do Map propriedadesObjetoOrigem em um objeto da classe classeDestino
 			T objetoOrigem = new ObjectMapper().convertValue(propriedadesObjetoOrigem, classeDestino);
 
@@ -95,7 +87,7 @@ public class GenericMapper {
 
 				// obtem o valor da propriedade do objetoOrigem
 				Object valorPropriedade = ReflectionUtils.getField(propriedade, objetoOrigem);
-				
+
 				// atribui dinamicamente o valor da propriedade do objetoOrigem no objetoDestino
 				ReflectionUtils.setField(propriedade, objetoDestino, valorPropriedade);
 			});

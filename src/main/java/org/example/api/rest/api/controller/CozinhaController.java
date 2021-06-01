@@ -12,7 +12,7 @@ import org.example.api.rest.api.model.dto.cozinha.CozinhaInputDto;
 import org.example.api.rest.api.model.dto.cozinha.CozinhaOutputDto;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.service.CadastroCozinhaService;
-import org.example.api.rest.shared.mapper.GenericMapper;
+import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;

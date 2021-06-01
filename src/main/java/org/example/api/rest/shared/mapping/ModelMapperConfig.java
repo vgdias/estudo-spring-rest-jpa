@@ -1,4 +1,4 @@
-package org.example.api.rest.shared.mapper;
+package org.example.api.rest.shared.mapping;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

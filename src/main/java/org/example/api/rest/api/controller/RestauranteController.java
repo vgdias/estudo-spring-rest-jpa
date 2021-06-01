@@ -15,7 +15,7 @@ import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
 import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.domain.service.CadastroRestauranteService;
-import org.example.api.rest.shared.mapper.GenericMapper;
+import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -62,7 +62,8 @@ public class RestauranteController {
 
 	@PutMapping("/alterar/{id}")
 	public RestauranteOutputDto alterar(@PathVariable("id") @Positive Long restauranteAtualId,
-			@RequestBody Map<String, Object> propriedadesRestauranteNovo, HttpServletRequest request) {
+			@RequestBody Map<String, Object> propriedadesRestauranteNovo, 
+			HttpServletRequest request) {
 
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(propriedadesRestauranteNovo, 
 				restauranteAtualId, request);

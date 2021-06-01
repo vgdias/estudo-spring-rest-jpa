@@ -11,7 +11,7 @@ import org.example.api.rest.api.model.dto.estado.EstadoInputDto;
 import org.example.api.rest.api.model.dto.estado.EstadoOutputDto;
 import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.service.CadastroEstadoService;
-import org.example.api.rest.shared.mapper.GenericMapper;
+import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
