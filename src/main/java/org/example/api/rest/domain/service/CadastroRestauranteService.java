@@ -5,22 +5,17 @@ import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpe
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ValidationException;
-
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
-import org.example.api.rest.domain.exception.EntidadeEmUsoException;
-import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
+import org.example.api.rest.domain.exception.RecursoEmUsoException;
+import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.domain.repository.CozinhaRepository;
 import org.example.api.rest.domain.repository.RestauranteRepository;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComFreteGratisSpec;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComNomeSemelhanteSpec;
-import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -47,75 +42,64 @@ public class CadastroRestauranteService {
 	}
 
 	public Restaurante buscar(Long restauranteId) {
-		return restauranteRepository.findById(restauranteId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteId)));
+		return obtemRestaurante(restauranteId);
 	}
 
 	@Transactional
 	public Restaurante adicionar(Restaurante restaurante) {
 		if (Objects.nonNull(restaurante.getCozinha().getId())) {
-			Cozinha cozinha = cozinhaRepository.findById(restaurante.getCozinha().getId())
-					.orElseThrow(() -> new DependenciaNaoEncontradaException(
-							String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restaurante.getCozinha().getId())));
+			Cozinha cozinha = obtemCozinhaDeRestaurante(restaurante.getCozinha().getId());
 
 			restaurante.setCozinha(cozinha);
 			return restauranteRepository.save(restaurante);
 
 		} else {
 			throw new DependenciaNaoEncontradaException(
-					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restaurante.getCozinha().getId()));
+					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, 
+							restaurante.getCozinha().getId()));
 		}
 	}
 
 	@Transactional
-	public Restaurante alterar(Map<String, Object> propriedadesRestauranteNovo, Long restauranteAtualId, 
-			HttpServletRequest request) {
+	public Restaurante alterar(Restaurante restauranteNovo) {
 
-		if (propriedadesRestauranteNovo.isEmpty()) {
-			throw new ValidationException("Nenhuma propriedade foi fornecida");
-		}
-		if (propriedadesRestauranteNovo.containsKey("id")) {
-			throw new ValidationException("A propriedade 'restaurante.id' nao pode ser alterada");
-		}
-		
-		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId)));
+		//		if (propriedadesRestauranteNovo.isEmpty()) {
+		//			throw new ValidationException("Nenhuma propriedade foi fornecida");
+		//		}
+		//		if (propriedadesRestauranteNovo.containsKey("id")) {
+		//			throw new ValidationException("A propriedade 'restaurante.id' nao pode ser alterada");
+		//		}
 
-		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
+//		Restaurante restauranteAtual = obtemRestaurante(restauranteAtualId, 
+//				MSG_RESTAURANTE_NAO_ENCONTRADO);
+//
+//		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
 
-		if ( (Objects.nonNull(restauranteAtual.getCozinha()) ) 
-				&& (Objects.nonNull(restauranteAtual.getCozinha().getId()))) {
-			
-			Long cozinhaAtualId = restauranteAtual.getCozinha().getId();
+		//		if ( (Objects.nonNull(restauranteAtual.getCozinha()) ) 
+		//				&& (Objects.nonNull(restauranteAtual.getCozinha().getId()))) {
 
-			Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
-					.orElseThrow(() -> new DependenciaNaoEncontradaException(
-							String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
+		Long cozinhaAtualId = restauranteNovo.getCozinha().getId();
+		Cozinha cozinhaAtual = obtemCozinhaDeRestaurante(cozinhaAtualId);
 
-			if (restauranteAtual.getNome().trim().isEmpty()) {
-				throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
-			}
-			if (Objects.isNull(restauranteAtual.getTaxaFrete())) {
-				throw new ValidationException("A propriedade 'taxaFrete' nao pode ser vazia");
-			}
+		//			if (restauranteAtual.getNome().trim().isEmpty()) {
+		//				throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
+		//			}
+		//			if (Objects.isNull(restauranteAtual.getTaxaFrete())) {
+		//				throw new ValidationException("A propriedade 'taxaFrete' nao pode ser vazia");
+		//			}
 
-			restauranteAtual.setCozinha(cozinhaAtual);
-			return restauranteRepository.save(restauranteAtual);
-		} else {
-			throw new DependenciaNaoEncontradaException(
-					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restauranteAtual.getCozinha().getId()));
-		}
+		restauranteNovo.setCozinha(cozinhaAtual);
+		return restauranteRepository.save(restauranteNovo);
+		//		} else {
+		//			throw new DependenciaNaoEncontradaException(
+		//					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restauranteAtual.getCozinha().getId()));
+		//		}
 	}
 
 	@Transactional
 	public Restaurante alterarNomeEFrete(Restaurante nomeEFreteRestauranteNovo, Long restauranteAtualId) {
 
-		Restaurante restauranteAtual = restauranteRepository.findById(restauranteAtualId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteAtualId)));
-
+		Restaurante restauranteAtual = obtemRestaurante(restauranteAtualId);
 		restauranteAtual.setNome(nomeEFreteRestauranteNovo.getNome());
 		restauranteAtual.setTaxaFrete(nomeEFreteRestauranteNovo.getTaxaFrete());
 		return restauranteRepository.save(restauranteAtual);
@@ -124,12 +108,14 @@ public class CadastroRestauranteService {
 	//	@Transactional
 	public void remover(Long restauranteId) {
 		try {
+
 			restauranteRepository.deleteById(restauranteId);
+
 		} catch (EmptyResultDataAccessException e) {
-			throw new EntidadeNaoEncontradaException(
+			throw new RecursoNaoEncontradoException(
 					String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteId));
 		} catch (DataIntegrityViolationException e) {
-			throw new EntidadeEmUsoException(
+			throw new RecursoEmUsoException(
 					String.format(MSG_RESTAURANTE_EM_USO, restauranteId));
 		}
 	}
@@ -147,10 +133,7 @@ public class CadastroRestauranteService {
 	}
 
 	public int quantosRestaurantesPorCozinhaId(Long cozinhaId) {
-		cozinhaRepository.findById(cozinhaId)
-		.orElseThrow(() -> new DependenciaNaoEncontradaException(
-				String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
-
+		obtemCozinhaDeRestaurante(cozinhaId);
 		return restauranteRepository.countByCozinhaId(cozinhaId);
 	}
 
@@ -163,10 +146,7 @@ public class CadastroRestauranteService {
 	}
 
 	public List<Restaurante> restauranteComNomeSemelhanteECozinhaId(String nome, Long cozinhaId) {
-		cozinhaRepository.findById(cozinhaId)
-		.orElseThrow(() -> new DependenciaNaoEncontradaException(
-				String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
-
+		obtemCozinhaDeRestaurante(cozinhaId);
 		return restauranteRepository.nomeContainingAndCozinhaId(nome, cozinhaId);
 	}
 
@@ -193,5 +173,17 @@ public class CadastroRestauranteService {
 
 	public List<Restaurante> restaurantesComFreteGratisENomeSemelhanteSpec2(String nome) {
 		return restauranteRepository.findAll(comFreteGratis().and(comNomeSemelhante(nome)));
+	}
+
+	public Restaurante obtemRestaurante(Long id) {
+		return restauranteRepository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
+						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));
+	}
+
+	public Cozinha obtemCozinhaDeRestaurante(Long id) {
+		return cozinhaRepository.findById(id)
+				.orElseThrow(() -> new DependenciaNaoEncontradaException(
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, id)));
 	}
 }

@@ -17,7 +17,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 
+import org.example.api.rest.shared.validation.Groups;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -30,19 +35,26 @@ import lombok.EqualsAndHashCode;
 @Table(name="restaurante")
 public class Restaurante {
 
+	@NotNull(groups = Groups.AlterarRestaurante.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotBlank(groups = Groups.AlterarRestaurante.class)
 	@Column(nullable = false)
 	private String nome;
 
+	@NotNull(groups = Groups.AlterarRestaurante.class)
+	@PositiveOrZero
 	@Column(name = "taxa_frete", nullable = false)
 	private BigDecimal taxaFrete;
 
 	// https://stackoverflow.com/questions/24994440/no-serializer-found-for-class-org-hibernate-proxy-pojo-javassist-javassist
 	// @JsonIgnoreProperties("hibernateLazyInitializer")
+	@Valid
+//	@ConvertGroup(to = Groups.CozinhaId.class)
+	@NotNull(groups = Groups.AlterarRestaurante.class)
 	@ManyToOne
 	@JoinColumn(name = "cozinha_id", nullable = false)
 	private Cozinha cozinha;

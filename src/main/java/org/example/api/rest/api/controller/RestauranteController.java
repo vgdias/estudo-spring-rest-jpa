@@ -13,11 +13,15 @@ import javax.validation.constraints.PositiveOrZero;
 import org.example.api.rest.api.model.dto.restaurante.NomeEFreteRestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
+import org.example.api.rest.domain.exception.ValidacaoException;
 import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.domain.service.CadastroRestauranteService;
 import org.example.api.rest.shared.mapping.GenericMapper;
+import org.example.api.rest.shared.validation.Groups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +42,9 @@ public class RestauranteController {
 
 	@Autowired
 	private CadastroRestauranteService cadastroRestauranteService;
+
+	@Autowired
+	private SmartValidator validator;
 
 	@GetMapping
 	public List<RestauranteOutputDto> listar() {
@@ -65,14 +72,24 @@ public class RestauranteController {
 			@RequestBody Map<String, Object> propriedadesRestauranteNovo, 
 			HttpServletRequest request) {
 
-		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(propriedadesRestauranteNovo, 
-				restauranteAtualId, request);
+		Restaurante restauranteAtual = cadastroRestauranteService.obtemRestaurante(restauranteAtualId);
+		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
+		validate(restauranteAtual, "restaurante");
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(restauranteAtual);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
+	}
+
+	private void validate(Restaurante restauranteAtual, String objectName) {
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(restauranteAtual, objectName);
+		validator.validate(restauranteAtual, bindingResult, Groups.AlterarRestaurante.class);
+		if (bindingResult.hasErrors()) {
+			throw new ValidacaoException(bindingResult);
+		}
 	}
 
 	@PatchMapping("/alterar-nome-e-frete/{id}")
 	public RestauranteOutputDto alterarNomeEFrete(@PathVariable("id") @Positive Long restauranteAtualId, 
-			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovo, HttpServletRequest request) {
+			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovo) {
 
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(
 				GenericMapper.map(nomeEFreteRestauranteNovo, Restaurante.class), 	restauranteAtualId);

@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
-import org.example.api.rest.domain.exception.EntidadeEmUsoException;
-import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
+import org.example.api.rest.domain.exception.RecursoEmUsoException;
+import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.repository.CidadeRepository;
@@ -40,7 +40,7 @@ public class CadastroCidadeService {
 
 	public Cidade buscar(Long cidadeId) {
 		return cidadeRepository.findById(cidadeId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId)));
 	} 
 
@@ -66,7 +66,7 @@ public class CadastroCidadeService {
 		}
 
 		Cidade cidadeAtual = cidadeRepository.findById(cidadeAtualId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeAtualId)));
 
 		GenericMapper.map(propriedadesCidadeNova, cidadeAtual, Cidade.class, request);
@@ -98,10 +98,10 @@ public class CadastroCidadeService {
 			cidadeRepository.deleteById(cidadeId);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new EntidadeNaoEncontradaException(
+			throw new RecursoNaoEncontradoException(
 					String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId));
 		} catch (DataIntegrityViolationException e) {
-			throw new EntidadeEmUsoException(
+			throw new RecursoEmUsoException(
 					String.format(MSG_CIDADE_EM_USO, cidadeId));
 		}
 	}

@@ -10,6 +10,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.example.api.rest.shared.validation.Groups;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,11 +24,13 @@ import lombok.EqualsAndHashCode;
 @Table(name="cozinha")
 public class Cozinha {
 
+	@NotNull(groups = Groups.AlterarRestaurante.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotBlank
 	@Column(nullable = false)
 	private String nome;
 	

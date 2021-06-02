@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
-import org.example.api.rest.domain.exception.EntidadeEmUsoException;
-import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
+import org.example.api.rest.domain.exception.RecursoEmUsoException;
+import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.repository.CozinhaRepository;
 import org.example.api.rest.shared.mapping.GenericMapper;
@@ -33,7 +33,7 @@ public class CadastroCozinhaService {
 
 	public Cozinha buscar(Long cozinhaId) {
 		return cozinhaRepository.findById(cozinhaId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
 	}
 
@@ -53,7 +53,7 @@ public class CadastroCozinhaService {
 		}
 		
 		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
 		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
@@ -70,17 +70,17 @@ public class CadastroCozinhaService {
 			cozinhaRepository.deleteById(cozinhaId);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new EntidadeNaoEncontradaException(
+			throw new RecursoNaoEncontradoException(
 					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId));
 		} catch (DataIntegrityViolationException e) {
-			throw new EntidadeEmUsoException(
+			throw new RecursoEmUsoException(
 					String.format(MSG_COZINHA_EM_USO, cozinhaId));
 		}
 	}
 
 	public Cozinha porNome(String nome) {
 		return cozinhaRepository.findByNome(nome)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_COZINHA_POR_NOME_NAO_ENCONTRADA, nome)));
 	}
 

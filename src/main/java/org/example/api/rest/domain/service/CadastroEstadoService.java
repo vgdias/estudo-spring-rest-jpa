@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
-import org.example.api.rest.domain.exception.EntidadeEmUsoException;
-import org.example.api.rest.domain.exception.EntidadeNaoEncontradaException;
+import org.example.api.rest.domain.exception.RecursoEmUsoException;
+import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.repository.EstadoRepository;
 import org.example.api.rest.shared.mapping.GenericMapper;
@@ -32,7 +32,7 @@ public class CadastroEstadoService {
 
 	public Estado buscar(Long estadoId) {
 		return estadoRepository.findById(estadoId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoId)));
 	}
 
@@ -52,7 +52,7 @@ public class CadastroEstadoService {
 		}
 		
 		Estado estadoAtual = estadoRepository.findById(estadoAtualId)
-				.orElseThrow(() -> new EntidadeNaoEncontradaException(
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoAtualId)));
 
 		GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class, request);
@@ -69,10 +69,10 @@ public class CadastroEstadoService {
 			estadoRepository.deleteById(estadoId);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new EntidadeNaoEncontradaException(
+			throw new RecursoNaoEncontradoException(
 					String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoId));
 		} catch (DataIntegrityViolationException e) {
-			throw new EntidadeEmUsoException(
+			throw new RecursoEmUsoException(
 					String.format(MSG_ESTADO_EM_USO, estadoId));
 		}
 	}

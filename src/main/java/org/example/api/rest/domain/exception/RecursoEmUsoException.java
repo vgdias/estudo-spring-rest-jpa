@@ -1,9 +1,9 @@
 package org.example.api.rest.domain.exception;
 
-public class EntidadeEmUsoException extends RuntimeException {
+public class RecursoEmUsoException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	public EntidadeEmUsoException(String mensagem) {
+	public RecursoEmUsoException(String mensagem) {
 		super(mensagem);
 	}
 }
