@@ -51,20 +51,20 @@ public class CadastroCozinhaService {
 		if (propriedadesCozinhaNova.containsKey("id")) {
 			throw new ValidationException("A propriedade 'cozinha.id' nao pode ser alterada");
 		}
-		
+
 		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
 
 		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
-		
+
 		if (cozinhaAtual.getNome().trim().isEmpty()) {
 			throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
 		}
 		return cozinhaRepository.save(cozinhaAtual);
 	}
 
-//	@Transactional
+	//	@Transactional
 	public void remover(Long cozinhaId) {
 		try {
 			cozinhaRepository.deleteById(cozinhaId);
@@ -86,6 +86,10 @@ public class CadastroCozinhaService {
 
 	public List<Cozinha> comNomeSemelhante(String nome) {
 		return cozinhaRepository.nomeContaining(nome);
+	}
+
+	public long count() {
+		return cozinhaRepository.count();
 	}
 
 }

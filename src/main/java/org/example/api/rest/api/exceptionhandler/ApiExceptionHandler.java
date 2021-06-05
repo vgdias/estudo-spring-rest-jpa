@@ -326,7 +326,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		String detail = String.format("Falha na validacao de um ou mais argumentos");
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Operacao nao autorizada")
+				.title("Operacao nao permitida")
 				.detail(detail)
 				.objects(objects)
 				.build();
