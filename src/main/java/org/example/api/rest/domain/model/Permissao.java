@@ -6,6 +6,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,14 +19,18 @@ import lombok.EqualsAndHashCode;
 @Table(name="permissao")
 public class Permissao {
 
+	@NotNull
+	@Positive
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotBlank
 	@Column(nullable = false)
 	private String nome;
 	
+	@NotBlank
 	@Column(nullable = false)
 	private String descricao;
 	

@@ -1,16 +1,11 @@
 package org.example.api.rest.domain.service;
 
 import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.repository.CozinhaRepository;
-import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -32,9 +27,7 @@ public class CadastroCozinhaService {
 	}
 
 	public Cozinha buscar(Long cozinhaId) {
-		return cozinhaRepository.findById(cozinhaId)
-				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId)));
+		return obtemCozinha(cozinhaId);
 	}
 
 	@Transactional
@@ -43,25 +36,8 @@ public class CadastroCozinhaService {
 	}
 
 	@Transactional
-	public Cozinha alterar(Map<String, Object> propriedadesCozinhaNova, Long cozinhaAtualId, HttpServletRequest request) {
-
-		if (propriedadesCozinhaNova.isEmpty()) {
-			throw new ValidationException("Nenhuma propriedade foi fornecida");
-		}
-		if (propriedadesCozinhaNova.containsKey("id")) {
-			throw new ValidationException("A propriedade 'cozinha.id' nao pode ser alterada");
-		}
-
-		Cozinha cozinhaAtual = cozinhaRepository.findById(cozinhaAtualId)
-				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaAtualId)));
-
-		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
-
-		if (cozinhaAtual.getNome().trim().isEmpty()) {
-			throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
-		}
-		return cozinhaRepository.save(cozinhaAtual);
+	public Cozinha alterar(Cozinha cozinhaNova) {
+		return cozinhaRepository.save(cozinhaNova);
 	}
 
 	//	@Transactional
@@ -90,6 +66,12 @@ public class CadastroCozinhaService {
 
 	public long count() {
 		return cozinhaRepository.count();
+	}
+
+	public Cozinha obtemCozinha(Long id) {
+		return cozinhaRepository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
+						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, id)));
 	}
 
 }

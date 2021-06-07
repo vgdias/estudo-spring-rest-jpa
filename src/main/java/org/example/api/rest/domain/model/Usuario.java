@@ -13,6 +13,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -25,17 +29,22 @@ import lombok.EqualsAndHashCode;
 @Table(name="usuario")
 public class Usuario {
 
+	@NotNull
+	@Positive
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotBlank
 	@Column(nullable = false)
 	private String nome;
 	
+	@Email
 	@Column(nullable = false)
 	private String email;
 	
+	@NotBlank
 	@Column(nullable = false)
 	private String senha;
 	

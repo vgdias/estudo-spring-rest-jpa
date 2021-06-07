@@ -12,15 +12,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest
-class CadastroCozinhaServiceTestIT {
+@SpringBootTest(webEnvironment = 
+SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource("/application-test.properties")
+public class CadastroCozinhaIT {
+
+	private static final long COZINHA_EM_USO = 1L;
+	private static final long COZINHA_INEXISTENTE = 100L;
 
 	@Autowired
-	CadastroCozinhaService service;
+	private CadastroCozinhaService service;
 
 	@Test
-	void deveAtribuirId_quandoCadastrarCozinha() {
+	void deveAtribuirId_quandoCadastrarCozinhaChinesaComNome() {
 		Cozinha novaCozinha = new Cozinha();
 		novaCozinha.setNome("Chinesa");
 		service.adicionar(novaCozinha);
@@ -42,13 +48,13 @@ class CadastroCozinhaServiceTestIT {
 	public void deveFalhar_quandoExcluirCozinhaEmUso() {
 		Assertions.assertThrows(
 				RecursoEmUsoException.class, 
-				() -> service.remover(1L));
+				() -> service.remover(COZINHA_EM_USO));
 	}
 
 	@Test
 	public void deveFalhar_quandoExcluirCozinhaInexistente() {
 		Assertions.assertThrows(
 				RecursoNaoEncontradoException.class , 
-				() -> service.remover(10L));
+				() -> service.remover(COZINHA_INEXISTENTE));
 	}
 }

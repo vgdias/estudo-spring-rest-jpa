@@ -26,7 +26,10 @@ SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("/application-test.properties")
 public class CadastroCozinhaApiIT {
 
-	private static final int COZINHA_ID_INEXISTENTE = 100;
+	private static final long ID_COZINHA_INEXISTENTE = 100L;
+	private static final String CAMINHO_RAIZ = "/cozinhas";
+	private static final String PARAMETRO_ID_COZINHA = "cozinhaId";
+
 	private Cozinha cozinhaFrancesa;
 	private String jsonCozinhaChinesaComNome;
 	private int quantidadeCozinhasCadastradas;
@@ -43,7 +46,7 @@ public class CadastroCozinhaApiIT {
 	@BeforeEach
 	public void setup() {
 		enableLoggingOfRequestAndResponseIfValidationFails();
-		basePath = "/cozinhas";
+		basePath = CAMINHO_RAIZ;
 		port = localServerPort;
 		jsonCozinhaChinesaComNome = ResourceUtils.getContentFromResource (
 				"/json/cozinha/valido/cozinha-chinesa-com-nome.json");
@@ -89,7 +92,7 @@ public class CadastroCozinhaApiIT {
 	}
 
 	@Test
-	public void deveRetornarEstado201_quandoCadastrarCozinha() {
+	public void deveRetornarEstado201_quandoCadastrarCozinhaChinesaComNome() {
 		given()
 		.body(jsonCozinhaChinesaComNome)
 		.contentType(ContentType.JSON)
@@ -103,10 +106,10 @@ public class CadastroCozinhaApiIT {
 	@Test
 	public void deveRetornarRespostaEEstadoCorretos_quandoConsultarCozinhaExistente() {
 		given()
-		.pathParam("cozinhaId", cozinhaFrancesa.getId())
+		.pathParam(PARAMETRO_ID_COZINHA, cozinhaFrancesa.getId())
 		.accept(ContentType.JSON)
 		.when()
-		.get("/{cozinhaId}")
+		.get("/{" + PARAMETRO_ID_COZINHA + "}")
 		.then()
 		.statusCode(HttpStatus.OK.value())
 		.body("nomeCozinha", equalTo(cozinhaFrancesa.getNome()));
@@ -115,10 +118,10 @@ public class CadastroCozinhaApiIT {
 	@Test
 	public void deveRetornarEstado404_quandoConsultarCozinhaInexistente() {
 		given()
-		.pathParam("cozinhaId", COZINHA_ID_INEXISTENTE)
+		.pathParam(PARAMETRO_ID_COZINHA, ID_COZINHA_INEXISTENTE)
 		.accept(ContentType.JSON)
 		.when()
-		.get("/{cozinhaId}")
+		.get("/{" + PARAMETRO_ID_COZINHA + "}")
 		.then()
 		.statusCode(HttpStatus.NOT_FOUND.value());
 	}

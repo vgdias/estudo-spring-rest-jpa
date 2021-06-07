@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EstadoOutputDto {
-//	private Long id;
+	private Long id;
 	private String nomeEstado;
 }

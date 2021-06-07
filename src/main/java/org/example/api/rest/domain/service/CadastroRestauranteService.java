@@ -62,38 +62,11 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public Restaurante alterar(Restaurante restauranteNovo) {
-
-		//		if (propriedadesRestauranteNovo.isEmpty()) {
-		//			throw new ValidationException("Nenhuma propriedade foi fornecida");
-		//		}
-		//		if (propriedadesRestauranteNovo.containsKey("id")) {
-		//			throw new ValidationException("A propriedade 'restaurante.id' nao pode ser alterada");
-		//		}
-
-//		Restaurante restauranteAtual = obtemRestaurante(restauranteAtualId, 
-//				MSG_RESTAURANTE_NAO_ENCONTRADO);
-//
-//		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
-
-		//		if ( (Objects.nonNull(restauranteAtual.getCozinha()) ) 
-		//				&& (Objects.nonNull(restauranteAtual.getCozinha().getId()))) {
-
 		Long cozinhaAtualId = restauranteNovo.getCozinha().getId();
 		Cozinha cozinhaAtual = obtemCozinhaDeRestaurante(cozinhaAtualId);
 
-		//			if (restauranteAtual.getNome().trim().isEmpty()) {
-		//				throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
-		//			}
-		//			if (Objects.isNull(restauranteAtual.getTaxaFrete())) {
-		//				throw new ValidationException("A propriedade 'taxaFrete' nao pode ser vazia");
-		//			}
-
 		restauranteNovo.setCozinha(cozinhaAtual);
 		return restauranteRepository.save(restauranteNovo);
-		//		} else {
-		//			throw new DependenciaNaoEncontradaException(
-		//					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, restauranteAtual.getCozinha().getId()));
-		//		}
 	}
 
 	@Transactional
@@ -108,7 +81,6 @@ public class CadastroRestauranteService {
 	//	@Transactional
 	public void remover(Long restauranteId) {
 		try {
-
 			restauranteRepository.deleteById(restauranteId);
 
 		} catch (EmptyResultDataAccessException e) {

@@ -11,6 +11,10 @@ import javax.persistence.Table;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.groups.Default;
+
+import org.example.api.rest.shared.validation.Groups.AlterarCidade;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,18 +25,19 @@ import lombok.EqualsAndHashCode;
 @Table(name="cidade")
 public class Cidade {
 
-	@NotNull
+	@NotNull(groups = AlterarCidade.class)
+	@Positive(groups = AlterarCidade.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotBlank
+	@NotBlank(groups = {Default.class, AlterarCidade.class})
 	@Column(nullable = false)
 	private String nome;
 	
 	@Valid
-	@NotNull
+	@NotNull(groups = {Default.class, AlterarCidade.class})
 	@ManyToOne
 	@JoinColumn(nullable = false)
 	private Estado estado;

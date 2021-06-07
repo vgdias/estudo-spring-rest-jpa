@@ -10,11 +10,15 @@ import javax.validation.constraints.Positive;
 
 import org.example.api.rest.api.model.dto.cozinha.CozinhaInputDto;
 import org.example.api.rest.api.model.dto.cozinha.CozinhaOutputDto;
+import org.example.api.rest.domain.exception.ValidacaoException;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.service.CadastroCozinhaService;
 import org.example.api.rest.shared.mapping.GenericMapper;
+import org.example.api.rest.shared.validation.Groups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +39,9 @@ public class CozinhaController {
 	@Autowired
 	private CadastroCozinhaService cadastroCozinhaService;
 
+	@Autowired
+	private SmartValidator validator;
+
 	@GetMapping()
 	public List<CozinhaOutputDto> listar() {
 		List<Cozinha> cozinhas = cadastroCozinhaService.listar();
@@ -50,21 +57,34 @@ public class CozinhaController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public CozinhaOutputDto adicionar(@Valid @RequestBody CozinhaInputDto cozinhaNova) {
-		Cozinha cozinhaAdicionada = cadastroCozinhaService.adicionar(GenericMapper.map(cozinhaNova, Cozinha.class));
+		Cozinha cozinhaAdicionada = cadastroCozinhaService.adicionar(
+				GenericMapper.map(cozinhaNova, Cozinha.class));
+
 		return GenericMapper.map(cozinhaAdicionada, CozinhaOutputDto.class);
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping("/alterar/{id}")
 	public CozinhaOutputDto alterar(@PathVariable("id") @Positive Long cozinhaAtualId, 
-			@RequestBody Map<String, Object> propriedadesCozinhaNova, HttpServletRequest request) {
+			@RequestBody Map<String, Object> propriedadesCozinhaNova, 
+			HttpServletRequest request) {
 
-		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(propriedadesCozinhaNova, cozinhaAtualId, request);
+		Cozinha cozinhaAtual = cadastroCozinhaService.obtemCozinha(cozinhaAtualId);
+		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
+		validate(cozinhaAtual, "cozinha");
+		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(cozinhaAtual);
 		return GenericMapper.map(cozinhaAtualizada, CozinhaOutputDto.class);
+	}
+	private void validate(Cozinha cozinhaAtual, String objectName) {
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(cozinhaAtual, objectName);
+		validator.validate(cozinhaAtual, bindingResult, Groups.AlterarCozinha.class);
+		if (bindingResult.hasErrors()) {
+			throw new ValidacaoException(bindingResult);
+		}
 	}
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") Long cozinhaId) {
+	public void remover(@PathVariable("id") @Positive Long cozinhaId) {
 		cadastroCozinhaService.remover(cozinhaId);
 	}
 

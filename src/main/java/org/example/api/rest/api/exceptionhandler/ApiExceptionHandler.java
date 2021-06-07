@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
@@ -129,6 +132,27 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
+	 * Customiza as excecoes geradas por requisicao a recurso inexistente
+	 */
+	@Override
+	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, 
+			HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+
+		status = HttpStatus.NOT_FOUND;	
+		String detail = String.format("O recurso '%s' nao foi encontrado", ex.getRequestURL());
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Recurso nao encontrado")
+				.detail(detail)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
+	}
+
+	/**
 	 * Excecao lancada por requisicao contendo tipo de parametro de URL invalido
 	 * 
 	 * @param ex tipo de excecao a ser tratada 
@@ -206,7 +230,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Excecao lancada por falha no mapeamento de propriedade JSON em propriedade de objeto
+	 * Excecao lancada por falha no mapeamento de propriedade JSON em 
+	 * propriedade de objeto
 	 * 
 	 * @param ex tipo de excecao a ser tratada
 	 * @param headers cabecalho Http a ser inserido na resposta
@@ -222,7 +247,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.map(ref -> ref.getFieldName())
 				.collect(Collectors.joining("."));
 
-		String detail = String.format("A propriedade '%s' nao foi reconhecida.", path);
+		String detail = String.format("A propriedade '%s' nao foi reconhecida", path);
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title(title)
@@ -234,7 +259,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Excecao lancada por argumento com formato invalido no corpo da requisicao
+	 * Excecao lancada por argumento com formato invalido no corpo da 
+	 * requisicao
 	 * 
 	 * @param ex tipo de excecao a ser tratada
 	 * @param headers cabecalho Http a ser inserido na resposta
@@ -264,7 +290,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Excecao lancada por validacao atraves de validacao programatica
+	 * Excecao lancada por falha em validacao programatica
 	 * 
 	 * @param ex tipo de excecao a ser tratada 
 	 * @param request requisicao Htttp
@@ -277,7 +303,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}   
 
 	/**
-	 * Excecao lancada por validacao atraves de anotacao
+	 * Excecao lancada por falha em validacao de argumento 
+	 * anotado com {@code @Valid}
 	 * 
 	 * @param ex tipo de excecao a ser tratada
 	 * @param headers cabecalho Http a ser inserido na resposta
@@ -292,8 +319,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Concentra o tratamento das excecoes lancadas atraves de validacao programatica
-	 * e atraves de anotacao
+	 * Concentra o tratamento das excecoes lancadas por falhas em validacao 
+	 * programatica e validacao de argumento anotado com {@code @Valid}
 	 * 
 	 * @param ex tipo de excecao a ser tratada
 	 * @param bindingResult informacoes dos erros de validacao
@@ -336,53 +363,32 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Customiza as excecoes geradas por requisicao a recurso inexistente
-	 */
-	@Override
-	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, 
-			HttpHeaders headers,
-			HttpStatus status, WebRequest request) {
-
-		status = HttpStatus.NOT_FOUND;	
-		String detail = String.format("O recurso '%s' nao foi encontrado", ex.getRequestURL());
-
-		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
-				.status(status.value())
-				.title("Recurso nao encontrado")
-				.detail(detail)
-				.build();
-
-		return handleExceptionInternal(ex, exceptionMessage, headers, 
-				status, request);
-	}
-
-	/**
-	 * Excecao lancada atraves de validacao na camada de persistencia
+	 * Excecao lancada atraves de validacao por anotacoes de Bean Validation
 	 *
 	 * @param ex tipo de excecao a ser tratada 
 	 * @param request requisicao Http
 	 * @return informacoes de resposta ao usuario
 	 */
-	//	@ExceptionHandler(ValidationException.class)
-	//	public ResponseEntity<Object> handleValidation(ValidationException ex,
-	//			WebRequest request) {
-	//
-	//		HttpStatus status = HttpStatus.UNAUTHORIZED;	
-	//
-	//		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
-	//				.status(status.value())
-	//				.title("Erro de validacao")
-	//				.detail(ex.getMessage())
-	//				.build();
-	//
-	//		if (ex instanceof ConstraintViolationException) {
-	//			return handleConstraintViolation(
-	//					(ConstraintViolationException) ex, status, request);
-	//		}
-	//
-	//		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-	//				status, request);
-	//	}
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<Object> handleValidation(ValidationException ex,
+			WebRequest request) {
+
+		HttpStatus status = HttpStatus.BAD_REQUEST;	
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Erro de validacao")
+				.detail(ex.getMessage())
+				.build();
+
+		if (ex instanceof ConstraintViolationException) {
+			return handleConstraintViolation(
+					(ConstraintViolationException) ex, status, request);
+		}
+
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
 
 	/**
 	 * Excecao lancada por validacao na camada de persistencia gerada 
@@ -393,30 +399,28 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param request requisicao Htttp
 	 * @return informacoes de resposta ao usuario
 	 */
-	//	private ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, HttpStatus status,
-	//			WebRequest request) {
-	//
-	//		status = HttpStatus.UNAUTHORIZED;	
-	//
-	//		List<Field> fields = ex.getConstraintViolations().stream()
-	//				.map(constraintViolation -> ExceptionMessage.Field.builder()
-	//						.name(constraintViolation.getPropertyPath().toString())
-	//						.userMessage(constraintViolation.getMessage().toString())
-	//						.build())
-	//				.collect(Collectors.toList());
-	//
-	//		String detail = String.format("Falha na validacao de um ou mais argumentos");
-	//
-	//		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
-	//				.status(status.value())
-	//				.title("Operacao nao autorizada")
-	//				.detail(detail)
-	//				.fields(fields)
-	//				.build();
-	//
-	//		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-	//				status, request);
-	//	}
+	private ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, HttpStatus status,
+			WebRequest request) {
+
+		List<ExceptionMessage.Object> objects = ex.getConstraintViolations().stream()
+				.map(constraintViolation -> ExceptionMessage.Object.builder()
+						.name(constraintViolation.getPropertyPath().toString())
+						.userMessage(constraintViolation.getMessage().toString())
+						.build())
+				.collect(Collectors.toList());
+
+		String detail = String.format("Falha na validacao de um ou mais argumentos");
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Operacao nao autorizada")
+				.detail(detail)
+				.objects(objects)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
 
 	/**
 	 * Excecoes genericas que nao foram capturadas por outros handlers 

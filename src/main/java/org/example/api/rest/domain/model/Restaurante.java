@@ -20,9 +20,11 @@ import javax.persistence.Table;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import javax.validation.groups.Default;
 
-import org.example.api.rest.shared.validation.Groups;
+import org.example.api.rest.shared.validation.Groups.AlterarRestaurante;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -35,26 +37,26 @@ import lombok.EqualsAndHashCode;
 @Table(name="restaurante")
 public class Restaurante {
 
-	@NotNull(groups = Groups.AlterarRestaurante.class)
+	@NotNull(groups = AlterarRestaurante.class)
+	@Positive(groups = AlterarRestaurante.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(groups = Groups.AlterarRestaurante.class)
+	@NotBlank(groups = {Default.class, AlterarRestaurante.class})
 	@Column(nullable = false)
 	private String nome;
 
-	@NotNull(groups = Groups.AlterarRestaurante.class)
-	@PositiveOrZero
+	@NotNull(groups = {Default.class, AlterarRestaurante.class})
+	@PositiveOrZero(groups = {Default.class, AlterarRestaurante.class})
 	@Column(name = "taxa_frete", nullable = false)
 	private BigDecimal taxaFrete;
 
 	// https://stackoverflow.com/questions/24994440/no-serializer-found-for-class-org-hibernate-proxy-pojo-javassist-javassist
 	// @JsonIgnoreProperties("hibernateLazyInitializer")
 	@Valid
-//	@ConvertGroup(to = Groups.CozinhaId.class)
-	@NotNull(groups = Groups.AlterarRestaurante.class)
+	@NotNull(groups = {Default.class, AlterarRestaurante.class})
 	@ManyToOne
 	@JoinColumn(name = "cozinha_id", nullable = false)
 	private Cozinha cozinha;
