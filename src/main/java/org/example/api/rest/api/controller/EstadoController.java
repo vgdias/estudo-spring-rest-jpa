@@ -5,15 +5,20 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 
 import org.example.api.rest.api.model.dto.estado.EstadoInputDto;
 import org.example.api.rest.api.model.dto.estado.EstadoOutputDto;
+import org.example.api.rest.domain.exception.ValidacaoException;
 import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.service.CadastroEstadoService;
 import org.example.api.rest.shared.mapping.GenericMapper;
+import org.example.api.rest.shared.validation.Groups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +38,9 @@ public class EstadoController {
 	@Autowired
 	private CadastroEstadoService cadastroEstadoService;
 
+	@Autowired
+	private SmartValidator validator;
+	
 	@GetMapping
 	public List<EstadoOutputDto> listar() {
 		List<Estado> estados = cadastroEstadoService.listar();
@@ -56,9 +64,29 @@ public class EstadoController {
 	public EstadoOutputDto alterar(@PathVariable("id") @Positive Long estadoAtualId, 
 			@RequestBody Map<String, Object> propriedadesEstadoNovo, HttpServletRequest request) {
 
-		Estado estadoAtualizado = cadastroEstadoService.alterar(propriedadesEstadoNovo, estadoAtualId, request);
+		this.validate(propriedadesEstadoNovo);
+		Estado estadoAtual = cadastroEstadoService.obtemEstado(estadoAtualId);
+		GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class, request);
+		this.validate(estadoAtual, "estado");
+
+		Estado estadoAtualizado = cadastroEstadoService.alterar(estadoAtual);
 		return GenericMapper.map(estadoAtualizado, EstadoOutputDto.class);
 	}
+	private void validate(Map<String, Object> propriedadesEstadoNovo) {
+		if (propriedadesEstadoNovo.isEmpty()) {
+			throw new ValidationException("Nenhum argumento fornecido");
+		}
+		if (propriedadesEstadoNovo.containsKey("id")) {
+			throw new ValidationException("A propriedade 'id' nao pode ser alterada");
+		}
+	}
+	private void validate(Object object, String objectName) {
+		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(object, objectName);
+		validator.validate(object, bindingResult, Groups.AlterarEstado.class);
+		if (bindingResult.hasErrors()) {
+			throw new ValidacaoException(bindingResult);
+		}
+	} 
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)

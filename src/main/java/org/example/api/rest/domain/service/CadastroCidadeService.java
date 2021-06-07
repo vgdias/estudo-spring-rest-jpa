@@ -1,11 +1,7 @@
 package org.example.api.rest.domain.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
@@ -14,7 +10,6 @@ import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.repository.CidadeRepository;
 import org.example.api.rest.domain.repository.EstadoRepository;
-import org.example.api.rest.shared.mapping.GenericMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -39,57 +34,31 @@ public class CadastroCidadeService {
 	}
 
 	public Cidade buscar(Long cidadeId) {
-		return cidadeRepository.findById(cidadeId)
-				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId)));
+		return obtemCidade(cidadeId);
 	} 
 
 	@Transactional
 	public Cidade adicionar(Cidade cidade) {
-		Estado estado = estadoRepository.findById(cidade.getEstado().getId()) 
-				.orElseThrow(() -> new DependenciaNaoEncontradaException(
-						String.format(MSG_ESTADO_NAO_ENCONTRADO, cidade.getEstado().getId())));
+		if (Objects.nonNull(cidade.getEstado().getId())) {
+			Estado estado = obtemEstadoDeCidade(cidade.getEstado().getId());
 
-		cidade.setEstado(estado);
-		return cidadeRepository.save(cidade);
+			cidade.setEstado(estado);
+			return cidadeRepository.save(cidade);
+
+		} else {
+			throw new DependenciaNaoEncontradaException(
+					String.format(MSG_ESTADO_NAO_ENCONTRADO, 
+							cidade.getEstado().getId()));
+		}
 	}
 
 	@Transactional
-	public Cidade alterar(Map<String, Object> propriedadesCidadeNova, Long cidadeAtualId, 
-			HttpServletRequest request) {
+	public Cidade alterar(Cidade cidadeNova) {
+		Long estadoAtualId = cidadeNova.getEstado().getId();
+		Estado estadoAtual = obtemEstadoDeCidade(estadoAtualId);
 
-		if (propriedadesCidadeNova.isEmpty()) {
-			throw new ValidationException("Nenhuma propriedade foi fornecida");
-		}
-		if (propriedadesCidadeNova.containsKey("id")) {
-			throw new ValidationException("A propriedade 'cidade.id' nao pode ser alterada");
-		}
-
-		Cidade cidadeAtual = cidadeRepository.findById(cidadeAtualId)
-				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeAtualId)));
-
-		GenericMapper.map(propriedadesCidadeNova, cidadeAtual, Cidade.class, request);
-
-		if ( (Objects.nonNull(cidadeAtual.getEstado()) ) 
-				&& (Objects.nonNull(cidadeAtual.getEstado().getId()))) {
-
-			Long estadoAtualId = cidadeAtual.getEstado().getId();
-
-			Estado estadoAtual = estadoRepository.findById(estadoAtualId)
-					.orElseThrow(() -> new DependenciaNaoEncontradaException(
-							String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoAtualId)));
-
-			cidadeAtual.setEstado(estadoAtual);
-			
-			if (cidadeAtual.getNome().trim().isEmpty()) {
-				throw new ValidationException("A propriedade 'nome' nao pode ser vazia");
-			}
-			return cidadeRepository.save(cidadeAtual);
-		} else {
-			throw new DependenciaNaoEncontradaException(
-					String.format(MSG_ESTADO_NAO_ENCONTRADO, cidadeAtual.getEstado().getId()));
-		}
+		cidadeNova.setEstado(estadoAtual);
+		return cidadeRepository.save(cidadeNova);
 	}
 
 	//	@Transactional
@@ -104,5 +73,17 @@ public class CadastroCidadeService {
 			throw new RecursoEmUsoException(
 					String.format(MSG_CIDADE_EM_USO, cidadeId));
 		}
+	}
+
+	public Cidade obtemCidade(Long id) {
+		return cidadeRepository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
+						String.format(MSG_CIDADE_NAO_ENCONTRADA, id)));
+	}
+
+	public Estado obtemEstadoDeCidade(Long id) {
+		return estadoRepository.findById(id)
+				.orElseThrow(() -> new DependenciaNaoEncontradaException(
+						String.format(MSG_ESTADO_NAO_ENCONTRADO, id)));
 	}
 }

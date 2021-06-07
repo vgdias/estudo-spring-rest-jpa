@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 
@@ -68,11 +69,20 @@ public class CozinhaController {
 			@RequestBody Map<String, Object> propriedadesCozinhaNova, 
 			HttpServletRequest request) {
 
+		this.validate(propriedadesCozinhaNova);
 		Cozinha cozinhaAtual = cadastroCozinhaService.obtemCozinha(cozinhaAtualId);
 		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
 		validate(cozinhaAtual, "cozinha");
 		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(cozinhaAtual);
 		return GenericMapper.map(cozinhaAtualizada, CozinhaOutputDto.class);
+	}
+	private void validate(Map<String, Object> propriedadesCozinhaNova) {
+		if (propriedadesCozinhaNova.isEmpty()) {
+			throw new ValidationException("Nenhum argumento fornecido");
+		}
+		if (propriedadesCozinhaNova.containsKey("id")) {
+			throw new ValidationException("A propriedade 'id' nao pode ser alterada");
+		}
 	}
 	private void validate(Cozinha cozinhaAtual, String objectName) {
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(cozinhaAtual, objectName);
