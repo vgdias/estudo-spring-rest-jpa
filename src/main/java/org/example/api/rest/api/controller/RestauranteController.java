@@ -1,6 +1,7 @@
 package org.example.api.rest.api.controller;
 
 import java.math.BigDecimal;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Validated
 @RestController
@@ -121,9 +124,29 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam @NotBlank String nome) {
-		List<Restaurante> restaurantes = cadastroRestauranteService.restauranteComFreteGratisComNomeSemelhante(nome);
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam Map<String, String> allRequestParams) throws MissingServletRequestParameterException {
+		validateParams(allRequestParams); 
+		List<Restaurante> restaurantes = cadastroRestauranteService
+				.restauranteComFreteGratisComNomeSemelhante(allRequestParams.get("nome"));
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
+	}
+	private void validateParams(Map<String, String> allRequestParams) throws MissingServletRequestParameterException {
+		if (allRequestParams.isEmpty()) {
+			throw new ValidationException("Nenhum parâmetro fornecido");
+		}
+
+		Iterator<Map.Entry<String, String>> iterator = 
+				allRequestParams.entrySet().iterator();
+	    while (iterator.hasNext()) {
+	        Map.Entry<String, String> entry = iterator.next();
+	        if (entry.getKey().equals("nome")) {
+	        	if (entry.getValue().trim().isEmpty()) {
+	        		throw new MethodArgumentTypeMismatchException("", getClass(), "nome", null, null);
+	        	}
+	        } else {
+	        	throw new ValidationException("Um ou mais parâmetros não reconhecidos");
+	        }
+	    }
 	}
 
 	@GetMapping("/por-intervalo-de-taxa-frete")
