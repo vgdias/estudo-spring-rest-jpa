@@ -46,6 +46,7 @@ public class GenericMapper {
 
 	/**
 	 * Operacao {@link #map } com uma lista de objetos de origem
+	 * 
 	 * @param <T> Tipo generico da classe de destino
 	 * @param listaObjetoOrigem Lista de objetos de origem
 	 * @param classeDestino Classe de destino
@@ -66,6 +67,7 @@ public class GenericMapper {
 	 * O objeto de origem eh criado atraves de um {@code Map<chave, valor>}, onde {@code chave} eh o nome da 
 	 * propriedade do objeto e {@code valor} eh o valor desta propriedade. Para cada propriedade do objeto de origem 
 	 * em {@code propriedadesObjetoOrigem}, o seu valor eh copiado para o objeto de destino.
+	 *
 	 * @param <T> Tipo generico da classe de destino
 	 * @param propriedadesObjetoOrigem Map com as propriedades do objeto de origem
 	 * @param objetoDestino Objeto de destino

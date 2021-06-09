@@ -71,7 +71,7 @@ public class RestauranteController {
 		return GenericMapper.map(restauranteAdicionado, RestauranteOutputDto.class);
 	}
 
-	@PutMapping("/alterar/{id}")
+	@PutMapping("/{id}")
 	public RestauranteOutputDto alterar(@PathVariable("id") @Positive Long restauranteAtualId,
 			@RequestBody Map<String, Object> propriedadesRestauranteNovo, 
 			HttpServletRequest request) {

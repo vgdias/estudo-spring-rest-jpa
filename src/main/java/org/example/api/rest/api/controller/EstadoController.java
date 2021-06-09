@@ -65,7 +65,7 @@ public class EstadoController {
 			@RequestBody Map<String, Object> propriedadesEstadoNovo, HttpServletRequest request) {
 
 		this.validate(propriedadesEstadoNovo);
-		Estado estadoAtual = cadastroEstadoService.obtemEstado(estadoAtualId);
+		Estado estadoAtual = cadastroEstadoService.obterEstado(estadoAtualId);
 		GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class, request);
 		this.validate(estadoAtual, "estado");
 

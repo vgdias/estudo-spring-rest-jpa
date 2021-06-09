@@ -26,7 +26,7 @@ public class CadastroEstadoService {
 	}
 
 	public Estado buscar(Long estadoId) {
-		return obtemEstado(estadoId);
+		return obterEstado(estadoId);
 	}
 
 	@Transactional
@@ -53,7 +53,7 @@ public class CadastroEstadoService {
 		}
 	}
 
-	public Estado obtemEstado(Long id) {
+	public Estado obterEstado(Long id) {
 		return estadoRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_ESTADO_NAO_ENCONTRADO, id)));

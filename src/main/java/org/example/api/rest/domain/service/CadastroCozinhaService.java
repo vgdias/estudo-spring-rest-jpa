@@ -27,7 +27,7 @@ public class CadastroCozinhaService {
 	}
 
 	public Cozinha buscar(Long cozinhaId) {
-		return obtemCozinha(cozinhaId);
+		return obterCozinha(cozinhaId);
 	}
 
 	@Transactional
@@ -68,7 +68,7 @@ public class CadastroCozinhaService {
 		return cozinhaRepository.count();
 	}
 
-	public Cozinha obtemCozinha(Long id) {
+	public Cozinha obterCozinha(Long id) {
 		return cozinhaRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, id)));

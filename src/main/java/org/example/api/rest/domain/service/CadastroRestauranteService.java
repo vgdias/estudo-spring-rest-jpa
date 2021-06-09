@@ -48,7 +48,7 @@ public class CadastroRestauranteService {
 	@Transactional
 	public Restaurante adicionar(Restaurante restaurante) {
 		if (Objects.nonNull(restaurante.getCozinha().getId())) {
-			Cozinha cozinha = obtemCozinhaDeRestaurante(restaurante.getCozinha().getId());
+			Cozinha cozinha = obterCozinhaDeRestaurante(restaurante.getCozinha().getId());
 
 			restaurante.setCozinha(cozinha);
 			return restauranteRepository.save(restaurante);
@@ -63,7 +63,7 @@ public class CadastroRestauranteService {
 	@Transactional
 	public Restaurante alterar(Restaurante restauranteNovo) {
 		Long cozinhaAtualId = restauranteNovo.getCozinha().getId();
-		Cozinha cozinhaAtual = obtemCozinhaDeRestaurante(cozinhaAtualId);
+		Cozinha cozinhaAtual = obterCozinhaDeRestaurante(cozinhaAtualId);
 
 		restauranteNovo.setCozinha(cozinhaAtual);
 		return restauranteRepository.save(restauranteNovo);
@@ -105,7 +105,7 @@ public class CadastroRestauranteService {
 	}
 
 	public int quantosRestaurantesPorCozinhaId(Long cozinhaId) {
-		obtemCozinhaDeRestaurante(cozinhaId);
+		obterCozinhaDeRestaurante(cozinhaId);
 		return restauranteRepository.countByCozinhaId(cozinhaId);
 	}
 
@@ -118,7 +118,7 @@ public class CadastroRestauranteService {
 	}
 
 	public List<Restaurante> restauranteComNomeSemelhanteECozinhaId(String nome, Long cozinhaId) {
-		obtemCozinhaDeRestaurante(cozinhaId);
+		obterCozinhaDeRestaurante(cozinhaId);
 		return restauranteRepository.nomeContainingAndCozinhaId(nome, cozinhaId);
 	}
 
@@ -153,7 +153,7 @@ public class CadastroRestauranteService {
 						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));
 	}
 
-	public Cozinha obtemCozinhaDeRestaurante(Long id) {
+	public Cozinha obterCozinhaDeRestaurante(Long id) {
 		return cozinhaRepository.findById(id)
 				.orElseThrow(() -> new DependenciaNaoEncontradaException(
 						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, id)));

@@ -64,13 +64,13 @@ public class CozinhaController {
 		return GenericMapper.map(cozinhaAdicionada, CozinhaOutputDto.class);
 	}
 
-	@PutMapping("/alterar/{id}")
+	@PutMapping("/{id}")
 	public CozinhaOutputDto alterar(@PathVariable("id") @Positive Long cozinhaAtualId, 
 			@RequestBody Map<String, Object> propriedadesCozinhaNova, 
 			HttpServletRequest request) {
 
 		this.validate(propriedadesCozinhaNova);
-		Cozinha cozinhaAtual = cadastroCozinhaService.obtemCozinha(cozinhaAtualId);
+		Cozinha cozinhaAtual = cadastroCozinhaService.obterCozinha(cozinhaAtualId);
 		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
 		validate(cozinhaAtual, "cozinha");
 		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(cozinhaAtual);

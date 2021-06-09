@@ -40,7 +40,7 @@ public class CadastroCidadeService {
 	@Transactional
 	public Cidade adicionar(Cidade cidade) {
 		if (Objects.nonNull(cidade.getEstado().getId())) {
-			Estado estado = obtemEstadoDeCidade(cidade.getEstado().getId());
+			Estado estado = obterEstadoDeCidade(cidade.getEstado().getId());
 
 			cidade.setEstado(estado);
 			return cidadeRepository.save(cidade);
@@ -55,7 +55,7 @@ public class CadastroCidadeService {
 	@Transactional
 	public Cidade alterar(Cidade cidadeNova) {
 		Long estadoAtualId = cidadeNova.getEstado().getId();
-		Estado estadoAtual = obtemEstadoDeCidade(estadoAtualId);
+		Estado estadoAtual = obterEstadoDeCidade(estadoAtualId);
 
 		cidadeNova.setEstado(estadoAtual);
 		return cidadeRepository.save(cidadeNova);
@@ -81,7 +81,7 @@ public class CadastroCidadeService {
 						String.format(MSG_CIDADE_NAO_ENCONTRADA, id)));
 	}
 
-	public Estado obtemEstadoDeCidade(Long id) {
+	public Estado obterEstadoDeCidade(Long id) {
 		return estadoRepository.findById(id)
 				.orElseThrow(() -> new DependenciaNaoEncontradaException(
 						String.format(MSG_ESTADO_NAO_ENCONTRADO, id)));
