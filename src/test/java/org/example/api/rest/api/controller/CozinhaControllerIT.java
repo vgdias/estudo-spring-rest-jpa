@@ -6,8 +6,12 @@ import static io.restassured.RestAssured.port;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
+import java.math.BigDecimal;
+
 import org.example.api.rest.domain.model.Cozinha;
+import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.domain.service.CadastroCozinhaService;
+import org.example.api.rest.domain.service.CadastroRestauranteService;
 import org.example.api.rest.util.DatabaseCleaner;
 import org.example.api.rest.util.ResourceUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,12 +30,20 @@ SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CozinhaControllerIT {
 
 	private static final long ID_COZINHA_EXISTENTE = 1L;
+	private static final long ID_COZINHA_EM_USO = 4L;
 	private static final long ID_COZINHA_INEXISTENTE = 100L;
 	private static final long ID_COZINHA_INVALIDO = 0L;
 	private static final String CAMINHO_RAIZ = "/cozinhas";
 	private static final String CAMINHO_INVALIDO = "/caminhoInvalido";
 	private static final String PARAMETRO_ID_COZINHA = "cozinhaId";
-
+	private static final String PARAMETRO_NOME_COZINHA_REQUEST = "nome";
+	private static final String PARAMETRO_NOME_COZINHA_RESPONSE = "nomeCozinha";
+	private static final String PARAMETRO_INVALIDO = "invalido";
+	private static final String NOME_COZINHA_INEXISTENTE = "inexistente";
+	private static final String NOME_SEMELHANTE_COZINHA = "l";
+	private static final Integer NUMERO_COZINHAS_COM_NOME_SEMELHANTE = 2;
+	
+	
 	private Cozinha cozinhaFrancesa;
 	private int quantidadeCozinhasCadastradas;
 
@@ -42,7 +54,10 @@ public class CozinhaControllerIT {
 	private DatabaseCleaner databaseCleaner;
 
 	@Autowired
-	CadastroCozinhaService service;
+	CadastroCozinhaService cadastroCozinhaService;
+
+	@Autowired
+	CadastroRestauranteService cadastroRestauranteService;
 
 	@BeforeEach
 	public void setup() {
@@ -53,9 +68,9 @@ public class CozinhaControllerIT {
 		loadData();
 	}
 
-	/*=============================
+	/*===================================
 	 * Testes do metodo de servico listar()
-	 *=============================*/
+	 *===================================*/
 	@Test
 	public void deveRetornarEstado200_quandoConsultarCozinhas() {
 		given()
@@ -89,9 +104,9 @@ public class CozinhaControllerIT {
 		.body("", hasSize(quantidadeCozinhasCadastradas));
 	}
 
-	/*=============================
+	/*===================================
 	 * Testes do metodo de servico buscar()
-	 *=============================*/
+	 *===================================*/
 	@Test
 	public void deveRetornarRespostaEEstadoCorretos_quandoConsultarCozinhaExistente() {
 		given()
@@ -118,7 +133,7 @@ public class CozinhaControllerIT {
 	}
 
 	@Test
-	public void deveRetornarEstado400_quandoConsultarIdInvalido() {
+	public void deveRetornarEstado400_quandoConsultarCozinhaCom_idInvalido() {
 		given()
 		.pathParam(PARAMETRO_ID_COZINHA, ID_COZINHA_INVALIDO)
 		.accept(ContentType.JSON)
@@ -129,9 +144,9 @@ public class CozinhaControllerIT {
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
 
-	/*=============================
+	/*===================================
 	 * Testes do metodo de servico adicionar()
-	 *=============================*/
+	 *===================================*/
 	@Test
 	public void deveRetornarEstado201_quandoCadastrarCozinhaCom_nome() {
 		String jsonCozinhaCom_nome = 
@@ -165,7 +180,7 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
+
 	@Test
 	public void deveRetornarEstado400_quandoCadastrarCozinhaCom_id_nome() {
 		String jsonCozinhaCom_id_nome = 
@@ -199,7 +214,7 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
+
 	@Test
 	public void deveRetornarEstado400_quandoCadastrarCozinhaComParametroInexistente() {
 		String jsonCozinhaComParametroInexistente = 
@@ -216,7 +231,7 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
+
 	@Test
 	public void deveRetornarEstado400_quandoCadastrarCozinhaComSintaxeInvalida() {
 		String jsonCozinhaComSintaxeInvalida = 
@@ -233,10 +248,10 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
-	/*=============================
+
+	/*===================================
 	 * Testes do metodo de servico alterar()
-	 *=============================*/
+	 *===================================*/
 	@Test
 	public void deveRetornarEstado200_quandoAlterarCozinhaCom_nome() {
 		String jsonCozinhaCom_nome = 
@@ -290,7 +305,7 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
+
 	@Test
 	public void deveRetornarEstado400_quandoAlterarCozinhaCom_nomeVazio() {
 		String jsonCozinhaCom_nomeVazio = 
@@ -308,7 +323,7 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
+
 	@Test
 	public void deveRetornarEstado400_quandoAlterarCozinhaComParametroInexistente() {
 		String jsonCozinhaComParametroInexistente = 
@@ -326,7 +341,7 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
+
 	@Test
 	public void deveRetornarEstado400_quandoAlterarCozinhaComSintaxeInvalida() {
 		String jsonCozinhaComSintaxeInvalida = 
@@ -344,24 +359,128 @@ public class CozinhaControllerIT {
 		.contentType(ContentType.JSON)
 		.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
-	
+
+	/*===================================
+	 * Testes do metodo de servico remover()
+	 *===================================*/
+	@Test
+	public void deveRetornarEstado204_quandoRemoverCozinhaExistente() {
+		given()
+		.pathParam(PARAMETRO_ID_COZINHA, ID_COZINHA_EXISTENTE)
+		.when()
+		.delete(CAMINHO_RAIZ + "/{" + PARAMETRO_ID_COZINHA + "}")
+		.then()
+		.statusCode(HttpStatus.NO_CONTENT.value());
+	}
+
+	@Test
+	public void deveRetornarEstado404_quandoRemoverCozinhaInexistente() {
+		given()
+		.pathParam(PARAMETRO_ID_COZINHA, ID_COZINHA_INEXISTENTE)
+		.when()
+		.delete(CAMINHO_RAIZ + "/{" + PARAMETRO_ID_COZINHA + "}")
+		.then()
+		.statusCode(HttpStatus.NOT_FOUND.value());
+	}
+
+	@Test
+	public void deveRetornarEstado400_quandoRemoverCozinhaCom_id() {
+		given()
+		.pathParam(PARAMETRO_ID_COZINHA, ID_COZINHA_EM_USO)
+		.when()
+		.delete(CAMINHO_RAIZ + "/{" + PARAMETRO_ID_COZINHA + "}")
+		.then()
+		.statusCode(HttpStatus.CONFLICT.value());
+	}
+
+	@Test
+	public void deveRetornarEstado400_quandoRemoverCozinhaCom_idInvalido() {
+		given()
+		.pathParam(PARAMETRO_ID_COZINHA, ID_COZINHA_INVALIDO)
+		.when()
+		.delete(CAMINHO_RAIZ + "/{" + PARAMETRO_ID_COZINHA + "}")
+		.then()
+		.statusCode(HttpStatus.BAD_REQUEST.value());
+	}
+
+	/*===================================
+	 * Testes do metodo de servico porNome()
+	 *===================================*/
+	@Test
+	public void deveRetornarRespostaEEstadoCorretos_quandoConsultarCozinhaCom_nome() {
+		given()
+		.queryParam(PARAMETRO_NOME_COZINHA_REQUEST, cozinhaFrancesa.getNome())
+		.accept(ContentType.JSON)
+		.when()
+		.get(CAMINHO_RAIZ  + "/por-nome")
+		.then()
+		.contentType(ContentType.JSON)
+		.statusCode(HttpStatus.OK.value())
+		.body(PARAMETRO_NOME_COZINHA_RESPONSE, equalTo(cozinhaFrancesa.getNome()));
+	}
+
+	@Test
+	public void deveRetornar404_quandoConsultarCozinhaCom_nomeInexistente() {
+		given()
+		.queryParam(PARAMETRO_NOME_COZINHA_REQUEST, NOME_COZINHA_INEXISTENTE)
+		.accept(ContentType.JSON)
+		.when()
+		.get(CAMINHO_RAIZ  + "/por-nome")
+		.then()
+		.contentType(ContentType.JSON)
+		.statusCode(HttpStatus.NOT_FOUND.value());
+	}
+
+	@Test
+	public void deveRetornarEstado400_quandoConsultarCozinhaComParametroInvalido() {
+		given()
+		.queryParam(PARAMETRO_INVALIDO, cozinhaFrancesa.getNome())
+		.accept(ContentType.JSON)
+		.when()
+		.get(CAMINHO_RAIZ  + "/por-nome")
+		.then()
+		.contentType(ContentType.JSON)
+		.statusCode(HttpStatus.BAD_REQUEST.value());
+	}
+
+	/*===================================
+	 * Testes do metodo de servico porNomeSemelhante()
+	 *===================================*/
+	@Test
+	public void deveRetornarTotalDeCozinhas_quandoConsultarCozinhaCom_nomeSemelhante() {
+		given()
+		.queryParam(PARAMETRO_NOME_COZINHA_REQUEST, NOME_SEMELHANTE_COZINHA)
+		.accept(ContentType.JSON)
+		.when()
+		.get(CAMINHO_RAIZ  + "/com-nome-semelhante")
+		.then()
+		.contentType(ContentType.JSON)
+		.statusCode(HttpStatus.OK.value())
+		.body("", hasSize(NUMERO_COZINHAS_COM_NOME_SEMELHANTE));
+	}
+
 	/**
 	 * Carrega dados para os testes
 	 */
 	private void loadData() {
 		Cozinha cozinhaIndiana = new Cozinha();
 		cozinhaIndiana.setNome("Indiana");
-		service.adicionar(cozinhaIndiana);
+		cadastroCozinhaService.adicionar(cozinhaIndiana);
 		Cozinha cozinhaTailandesa = new Cozinha();
 		cozinhaTailandesa.setNome("Tailandesa");
-		service.adicionar(cozinhaTailandesa);
+		cadastroCozinhaService.adicionar(cozinhaTailandesa);
 		Cozinha cozinhaAlema = new Cozinha();
 		cozinhaAlema.setNome("Alemã");
-		service.adicionar(cozinhaAlema);
+		cadastroCozinhaService.adicionar(cozinhaAlema);
 		cozinhaFrancesa = new Cozinha();
 		cozinhaFrancesa.setNome("Francesa");
-		service.adicionar(cozinhaFrancesa);
+		cadastroCozinhaService.adicionar(cozinhaFrancesa);
+		Restaurante restaurante = new Restaurante();
+		restaurante.setNome("Pane e Vino");
+		restaurante.setTaxaFrete(new BigDecimal(0.0));
+		restaurante.setCozinha(cozinhaFrancesa);
+		cadastroRestauranteService.adicionar(restaurante);
 
-		quantidadeCozinhasCadastradas = (int) service.count();
+		quantidadeCozinhasCadastradas = (int) cadastroCozinhaService.count();
 	}
 }

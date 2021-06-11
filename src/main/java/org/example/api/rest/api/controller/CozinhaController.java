@@ -73,6 +73,7 @@ public class CozinhaController {
 		Cozinha cozinhaAtual = cadastroCozinhaService.obterCozinha(cozinhaAtualId);
 		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
 		validate(cozinhaAtual, "cozinha");
+	
 		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(cozinhaAtual);
 		return GenericMapper.map(cozinhaAtualizada, CozinhaOutputDto.class);
 	}
