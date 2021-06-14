@@ -39,10 +39,11 @@ public class CadastroEstadoService {
 		return estadoRepository.save(estadoNovo);
 	}
 
-	//	@Transactional
+		@Transactional
 	public void remover(Long estadoId) {
 		try {
 			estadoRepository.deleteById(estadoId);
+			estadoRepository.flush();
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(

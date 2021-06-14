@@ -61,11 +61,12 @@ public class CadastroCidadeService {
 		return cidadeRepository.save(cidadeNova);
 	}
 
-	//	@Transactional
+		@Transactional
 	public void remover(Long cidadeId) {
 		try {
 			cidadeRepository.deleteById(cidadeId);
-
+			cidadeRepository.flush();
+			
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
 					String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId));

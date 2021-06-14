@@ -40,10 +40,11 @@ public class CadastroCozinhaService {
 		return cozinhaRepository.save(cozinhaNova);
 	}
 
-	//	@Transactional
+		@Transactional
 	public void remover(Long cozinhaId) {
 		try {
 			cozinhaRepository.deleteById(cozinhaId);
+			cozinhaRepository.flush();
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
