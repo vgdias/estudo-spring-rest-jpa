@@ -43,7 +43,6 @@ public class CadastroCozinhaServiceIT {
 	@Autowired
 	private CadastroRestauranteService cadastroRestauranteService;
 	
-	
 	@BeforeEach
 	public void setup() {
 		enableLoggingOfRequestAndResponseIfValidationFails();
