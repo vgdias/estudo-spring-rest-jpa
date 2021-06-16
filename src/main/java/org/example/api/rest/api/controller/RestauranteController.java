@@ -123,6 +123,18 @@ public class RestauranteController {
 		cadastroRestauranteService.remover(restauranteId);
 	}
 
+	@PutMapping("/{id}/ativo")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void ativar(@PathVariable("id") Long restauranteId) {
+		cadastroRestauranteService.ativar(restauranteId);
+	}
+
+	@DeleteMapping("/{id}/ativo")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void inativar(@PathVariable("id") Long restauranteId) {
+		cadastroRestauranteService.inativar(restauranteId);
+	}
+
 	@GetMapping("/com-frete-gratis-e-nome-semelhante")
 	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam Map<String, String> allRequestParams) throws MissingServletRequestParameterException {
 		validateParams(allRequestParams); 
@@ -137,16 +149,16 @@ public class RestauranteController {
 
 		Iterator<Map.Entry<String, String>> iterator = 
 				allRequestParams.entrySet().iterator();
-	    while (iterator.hasNext()) {
-	        Map.Entry<String, String> entry = iterator.next();
-	        if (entry.getKey().equals("nome")) {
-	        	if (entry.getValue().trim().isEmpty()) {
-	        		throw new MethodArgumentTypeMismatchException("", getClass(), "nome", null, null);
-	        	}
-	        } else {
-	        	throw new ValidationException("Um ou mais parâmetros não reconhecidos");
-	        }
-	    }
+		while (iterator.hasNext()) {
+			Map.Entry<String, String> entry = iterator.next();
+			if (entry.getKey().equals("nome")) {
+				if (entry.getValue().trim().isEmpty()) {
+					throw new MethodArgumentTypeMismatchException("", getClass(), "nome", null, null);
+				}
+			} else {
+				throw new ValidationException("Um ou mais parâmetros não reconhecidos");
+			}
+		}
 	}
 
 	@GetMapping("/por-intervalo-de-taxa-frete")

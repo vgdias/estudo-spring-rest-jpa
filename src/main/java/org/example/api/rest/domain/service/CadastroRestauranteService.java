@@ -37,6 +37,18 @@ public class CadastroRestauranteService {
 	@Autowired
 	private CozinhaRepository cozinhaRepository;
 
+	@Transactional
+	public void ativar(Long restauranteId) {
+		Restaurante restauranteAtual = obtemRestaurante(restauranteId);
+		restauranteAtual.ativar();
+	}
+
+	@Transactional
+	public void inativar(Long restauranteId) {
+		Restaurante restauranteAtual = obtemRestaurante(restauranteId);
+		restauranteAtual.desativar();
+	}
+
 	public List<Restaurante> listar() {
 		return restauranteRepository.findAll();
 	}
@@ -83,7 +95,7 @@ public class CadastroRestauranteService {
 		try {
 			restauranteRepository.deleteById(restauranteId);
 			restauranteRepository.flush();
-			
+
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
 					String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, restauranteId));
