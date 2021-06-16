@@ -9,6 +9,9 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.groups.Default;
+
+import org.example.api.rest.shared.validation.Groups.AlterarFormaPagamento;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,15 +22,15 @@ import lombok.EqualsAndHashCode;
 @Table(name="forma_pagamento")
 public class FormaPagamento {
 
-	@NotNull
-	@Positive
+	@NotNull(groups = {AlterarFormaPagamento.class})
+	@Positive(groups = {AlterarFormaPagamento.class})
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	@NotBlank
+
+	@NotBlank(groups = {Default.class, AlterarFormaPagamento.class})
 	@Column(nullable = false)
 	private String descricao;
-	
+
 }

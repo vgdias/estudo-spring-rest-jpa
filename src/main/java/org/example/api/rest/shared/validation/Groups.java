@@ -5,4 +5,5 @@ public interface Groups {
 	public interface AlterarRestaurante {}
 	public interface AlterarCidade {}
 	public interface AlterarEstado {}
+	public interface AlterarFormaPagamento{}
 }
