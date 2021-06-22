@@ -10,9 +10,10 @@ import java.util.Objects;
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
+import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Cozinha;
+import org.example.api.rest.domain.model.Endereco;
 import org.example.api.rest.domain.model.Restaurante;
-import org.example.api.rest.domain.repository.CozinhaRepository;
 import org.example.api.rest.domain.repository.RestauranteRepository;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComFreteGratisSpec;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComNomeSemelhanteSpec;
@@ -35,17 +36,21 @@ public class CadastroRestauranteService {
 	private RestauranteRepository restauranteRepository;
 
 	@Autowired
-	private CozinhaRepository cozinhaRepository;
+	private CadastroCozinhaService cozinhaService;
+
+	@Autowired
+	private CadastroCidadeService cidadeService;
+
 
 	@Transactional
 	public void ativar(Long restauranteId) {
-		Restaurante restauranteAtual = obtemRestaurante(restauranteId);
+		Restaurante restauranteAtual = obterRestaurante(restauranteId);
 		restauranteAtual.ativar();
 	}
 
 	@Transactional
 	public void inativar(Long restauranteId) {
-		Restaurante restauranteAtual = obtemRestaurante(restauranteId);
+		Restaurante restauranteAtual = obterRestaurante(restauranteId);
 		restauranteAtual.desativar();
 	}
 
@@ -54,15 +59,22 @@ public class CadastroRestauranteService {
 	}
 
 	public Restaurante buscar(Long restauranteId) {
-		return obtemRestaurante(restauranteId);
+		return obterRestaurante(restauranteId);
 	}
 
 	@Transactional
 	public Restaurante adicionar(Restaurante restaurante) {
-		if (Objects.nonNull(restaurante.getCozinha().getId())) {
-			Cozinha cozinha = obterCozinhaDeRestaurante(restaurante.getCozinha().getId());
+		Long cozinhaId = restaurante.getCozinha().getId();
+		if (Objects.nonNull(cozinhaId)) {
+			Cozinha cozinha = cozinhaService.obterCozinha(cozinhaId);
 
 			restaurante.setCozinha(cozinha);
+
+			Long cidadeId = restaurante.getEndereco().getCidade().getId();
+			if (Objects.nonNull(cidadeId)) {
+				Cidade cidade  = cidadeService.obterCidade(cidadeId); 
+				restaurante.getEndereco().setCidade(cidade);
+			}
 			return restauranteRepository.save(restaurante);
 
 		} else {
@@ -74,17 +86,23 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public Restaurante alterar(Restaurante restauranteNovo) {
-		Long cozinhaAtualId = restauranteNovo.getCozinha().getId();
-		Cozinha cozinhaAtual = obterCozinhaDeRestaurante(cozinhaAtualId);
+		if (Objects.nonNull(restauranteNovo.getCozinha().getId())) {
+			Cozinha cozinhaAtual = cozinhaService.obterCozinha(restauranteNovo.getCozinha().getId());
 
-		restauranteNovo.setCozinha(cozinhaAtual);
-		return restauranteRepository.save(restauranteNovo);
+			restauranteNovo.setCozinha(cozinhaAtual);
+			return restauranteRepository.save(restauranteNovo);
+
+		} else {
+			throw new DependenciaNaoEncontradaException(
+					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, 
+							restauranteNovo.getCozinha().getId()));
+		}
 	}
 
 	@Transactional
 	public Restaurante alterarNomeEFrete(Restaurante nomeEFreteRestauranteNovo, Long restauranteAtualId) {
 
-		Restaurante restauranteAtual = obtemRestaurante(restauranteAtualId);
+		Restaurante restauranteAtual = obterRestaurante(restauranteAtualId);
 		restauranteAtual.setNome(nomeEFreteRestauranteNovo.getNome());
 		restauranteAtual.setTaxaFrete(nomeEFreteRestauranteNovo.getTaxaFrete());
 		return restauranteRepository.save(restauranteAtual);
@@ -118,20 +136,17 @@ public class CadastroRestauranteService {
 	}
 
 	public int quantosRestaurantesPorCozinhaId(Long cozinhaId) {
-		obterCozinhaDeRestaurante(cozinhaId);
+		cozinhaService.obterCozinha(cozinhaId);
 		return restauranteRepository.countByCozinhaId(cozinhaId);
 	}
 
 	public int quantosRestaurantesPorCozinhaNome(String cozinhaNome) {
-		cozinhaRepository.findByNome(cozinhaNome)
-		.orElseThrow(() -> new DependenciaNaoEncontradaException(
-				String.format(MSG_COZINHA_POR_NOME_NAO_ENCONTRADA, cozinhaNome)));
-
+		cozinhaService.porNome(cozinhaNome);
 		return restauranteRepository.countByCozinhaNome(cozinhaNome);
 	}
 
 	public List<Restaurante> restauranteComNomeSemelhanteECozinhaId(String nome, Long cozinhaId) {
-		obterCozinhaDeRestaurante(cozinhaId);
+		cozinhaService.obterCozinha(cozinhaId);
 		return restauranteRepository.nomeContainingAndCozinhaId(nome, cozinhaId);
 	}
 
@@ -160,15 +175,23 @@ public class CadastroRestauranteService {
 		return restauranteRepository.findAll(comFreteGratis().and(comNomeSemelhante(nome)));
 	}
 
-	public Restaurante obtemRestaurante(Long id) {
+	public Restaurante obterRestaurante(Long id) {
 		return restauranteRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));
 	}
 
-	public Cozinha obterCozinhaDeRestaurante(Long id) {
-		return cozinhaRepository.findById(id)
-				.orElseThrow(() -> new DependenciaNaoEncontradaException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, id)));
+	public Restaurante alterarEnderecoDeRestaurante(Endereco enderecoNovo, Long restauranteAtualId) {
+		Restaurante restauranteAtual = obterRestaurante(restauranteAtualId);
+		if (Objects.nonNull(enderecoNovo.getCidade().getId())) {
+			Cidade cidadeAtual = cidadeService.obterCidade(enderecoNovo.getCidade().getId());
+			enderecoNovo.setCidade(cidadeAtual);
+			restauranteAtual.setEndereco(enderecoNovo);
+			return restauranteRepository.save(restauranteAtual);
+		} else {
+			throw new DependenciaNaoEncontradaException(
+					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, 
+							enderecoNovo.getCidade().getId()));
+		}
 	}
 }

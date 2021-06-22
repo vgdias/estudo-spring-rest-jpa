@@ -63,6 +63,8 @@ public class Restaurante {
 
 	private Boolean ativo = Boolean.TRUE;
 
+	@Valid
+	@NotNull(groups = {Default.class, AlterarRestaurante.class})
 	@Embedded
 	private Endereco endereco;
 

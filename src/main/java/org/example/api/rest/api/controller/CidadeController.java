@@ -65,7 +65,7 @@ public class CidadeController {
 			@RequestBody Map<String, Object> propriedadesCidadeNova, HttpServletRequest request) {
 
 		this.validate(propriedadesCidadeNova);
-		Cidade cidadeAtual = cadastroCidadeService.obtemCidade(cidadeAtualId);
+		Cidade cidadeAtual = cadastroCidadeService.obterCidade(cidadeAtualId);
 		GenericMapper.map(propriedadesCidadeNova, cidadeAtual, Cidade.class, request);
 		this.validate(cidadeAtual, "cidade");
 

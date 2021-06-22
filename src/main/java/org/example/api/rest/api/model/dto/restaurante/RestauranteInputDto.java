@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.example.api.rest.api.model.dto.cozinha.IdCozinhaInputDto;
+import org.example.api.rest.api.model.dto.endereco.EnderecoInputDto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -26,4 +27,9 @@ public class RestauranteInputDto {
 	@Valid
 	@NotNull
 	private IdCozinhaInputDto cozinha;
+
+	@Valid
+	@NotNull
+	private EnderecoInputDto endereco;
+
 }

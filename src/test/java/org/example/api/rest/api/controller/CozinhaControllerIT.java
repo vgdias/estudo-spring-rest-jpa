@@ -8,9 +8,14 @@ import static org.hamcrest.Matchers.hasSize;
 
 import java.math.BigDecimal;
 
+import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Cozinha;
+import org.example.api.rest.domain.model.Endereco;
+import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.model.Restaurante;
+import org.example.api.rest.domain.service.CadastroCidadeService;
 import org.example.api.rest.domain.service.CadastroCozinhaService;
+import org.example.api.rest.domain.service.CadastroEstadoService;
 import org.example.api.rest.domain.service.CadastroRestauranteService;
 import org.example.api.rest.util.DatabaseCleaner;
 import org.example.api.rest.util.ResourceUtils;
@@ -42,8 +47,8 @@ public class CozinhaControllerIT {
 	private static final String NOME_COZINHA_INEXISTENTE = "inexistente";
 	private static final String NOME_SEMELHANTE_COZINHA = "l";
 	private static final Integer NUMERO_COZINHAS_COM_NOME_SEMELHANTE = 2;
-	
-	
+
+
 	private Cozinha cozinhaFrancesa;
 	private int quantidadeCozinhasCadastradas;
 
@@ -54,10 +59,16 @@ public class CozinhaControllerIT {
 	private DatabaseCleaner databaseCleaner;
 
 	@Autowired
-	CadastroCozinhaService cadastroCozinhaService;
+	private CadastroCozinhaService cadastroCozinhaService;
 
 	@Autowired
-	CadastroRestauranteService cadastroRestauranteService;
+	private CadastroRestauranteService cadastroRestauranteService;
+
+	@Autowired
+	private CadastroEstadoService cadastroEstadoService;
+
+	@Autowired
+	private CadastroCidadeService cadastroCidadeService;
 
 	@BeforeEach
 	public void setup() {
@@ -475,10 +486,29 @@ public class CozinhaControllerIT {
 		cozinhaFrancesa = new Cozinha();
 		cozinhaFrancesa.setNome("Francesa");
 		cadastroCozinhaService.adicionar(cozinhaFrancesa);
+
+		Estado estado = new Estado();
+		estado.setNome("Rio de Janeiro");
+		cadastroEstadoService.adicionar(estado);
+
+		Cidade cidade = new Cidade();
+		cidade.setNome("Rio de Janeiro");
+		cidade.setEstado(estado);
+		cadastroCidadeService.adicionar(cidade);
+
+		Endereco endereco = new Endereco();
+		endereco.setBairro("Tijuca");
+		endereco.setCep("20500-400");
+		endereco.setLogradouro("Rua Santo Afonso");
+		endereco.setNumero("20");
+		endereco.setCidade(cidade);
+
 		Restaurante restaurante = new Restaurante();
 		restaurante.setNome("Pane e Vino");
 		restaurante.setTaxaFrete(new BigDecimal(0.0));
 		restaurante.setCozinha(cozinhaFrancesa);
+		restaurante.setEndereco(endereco);
+
 		cadastroRestauranteService.adicionar(restaurante);
 
 		quantidadeCozinhasCadastradas = (int) cadastroCozinhaService.count();

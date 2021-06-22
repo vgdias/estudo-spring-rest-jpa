@@ -1,7 +1,5 @@
 package org.example.api.rest.api.model.dto.endereco;
 
-import org.example.api.rest.api.model.dto.cidade.ResumoCidadeOutputDto;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,5 +11,6 @@ public class EnderecoOutputDto {
 	private String numero;
 	private String complemento;
 	private String bairro;
-	private ResumoCidadeOutputDto cidade;
+	private String cidade;
+	private String estado;
 }

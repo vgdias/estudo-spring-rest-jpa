@@ -10,7 +10,10 @@ import javax.validation.ConstraintViolationException;
 
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
+import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Cozinha;
+import org.example.api.rest.domain.model.Endereco;
+import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.util.DatabaseCleaner;
 import org.junit.jupiter.api.Assertions;
@@ -42,7 +45,13 @@ public class CadastroCozinhaServiceIT {
 
 	@Autowired
 	private CadastroRestauranteService cadastroRestauranteService;
-	
+
+	@Autowired
+	private CadastroEstadoService cadastroEstadoService;
+
+	@Autowired
+	private CadastroCidadeService cadastroCidadeService;
+
 	@BeforeEach
 	public void setup() {
 		enableLoggingOfRequestAndResponseIfValidationFails();
@@ -84,7 +93,7 @@ public class CadastroCozinhaServiceIT {
 				RecursoNaoEncontradoException.class , 
 				() -> cadastroCozinhaService.remover(ID_COZINHA_INEXISTENTE));
 	}
-	
+
 	@Test
 	public void deveFalhar_quandoBuscarPorNomeDeCozinhaInexistente() {
 		Assertions.assertThrows(
@@ -92,7 +101,7 @@ public class CadastroCozinhaServiceIT {
 				() -> cadastroCozinhaService.porNome(
 						NOME_COZINHA_INEXISTENTE));
 	}
-	
+
 	@Test
 	public void deveFalhar_quandoBuscarPorIdDeCozinhaInexistente() {
 		Assertions.assertThrows(
@@ -111,11 +120,29 @@ public class CadastroCozinhaServiceIT {
 		Cozinha cozinhaAlema = new Cozinha();
 		cozinhaAlema.setNome("Alemã");
 		cadastroCozinhaService.adicionar(cozinhaAlema);
+
+		Estado estado = new Estado();
+		estado.setNome("Rio de Janeiro");
+		cadastroEstadoService.adicionar(estado);
+
+		Cidade cidade = new Cidade();
+		cidade.setNome("Rio de Janeiro");
+		cidade.setEstado(estado);
+		cadastroCidadeService.adicionar(cidade);
+
+		Endereco endereco = new Endereco();
+		endereco.setBairro("Tijuca");
+		endereco.setCep("20500-400");
+		endereco.setLogradouro("Rua Santo Afonso");
+		endereco.setNumero("20");
+		endereco.setCidade(cidade);
+
 		Restaurante restaurante = new Restaurante();
 		restaurante.setNome("Restaurante de teste 1");
 		restaurante.setTaxaFrete(new BigDecimal(0.0));
 		restaurante.setCozinha(cozinhaIndiana);
-		
+		restaurante.setEndereco(endereco);
+
 		cadastroRestauranteService.adicionar(restaurante);
 	}
 

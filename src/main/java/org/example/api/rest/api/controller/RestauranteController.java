@@ -12,10 +12,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import org.example.api.rest.api.model.dto.endereco.EnderecoInputDto;
 import org.example.api.rest.api.model.dto.restaurante.NomeEFreteRestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
 import org.example.api.rest.domain.exception.ValidacaoException;
+import org.example.api.rest.domain.model.Endereco;
 import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.domain.service.CadastroRestauranteService;
 import org.example.api.rest.shared.mapping.GenericMapper;
@@ -77,7 +79,7 @@ public class RestauranteController {
 			HttpServletRequest request) {
 
 		this.validate(propriedadesRestauranteNovo);
-		Restaurante restauranteAtual = cadastroRestauranteService.obtemRestaurante(restauranteAtualId);
+		Restaurante restauranteAtual = cadastroRestauranteService.obterRestaurante(restauranteAtualId);
 		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
 		this.validate(restauranteAtual, "restaurante");
 
@@ -92,12 +94,22 @@ public class RestauranteController {
 			throw new ValidationException("A propriedade 'id' nao pode ser alterada");
 		}
 		if (propriedadesRestauranteNovo.containsKey("cozinha")) {
-			if (((Map<?, ?>)propriedadesRestauranteNovo.get("cozinha")).containsKey("nome")) {
-				throw new ValidationException("A propriedade 'cozinha.nome' nao pode ser alterada");
-			}
-			if (((Map<?, ?>)propriedadesRestauranteNovo.get("cozinha")).containsKey("restaurantes")) {
-				throw new ValidationException("A propriedade 'cozinha.restaurantes' nao pode ser alterada");
-			}
+			throw new ValidationException("A propriedade 'cozinha' nao pode ser alterada");
+		}
+		if (propriedadesRestauranteNovo.containsKey("endereco")) {
+			throw new ValidationException("A propriedade 'endereco' nao pode ser alterada");
+		}
+		if (propriedadesRestauranteNovo.containsKey("dataCadastro")) {
+			throw new ValidationException("A propriedade 'dataCadastro' nao pode ser alterada");
+		}
+		if (propriedadesRestauranteNovo.containsKey("dataAtualizacao")) {
+			throw new ValidationException("A propriedade 'dataAtualizacao' nao pode ser alterada");
+		}
+		if (propriedadesRestauranteNovo.containsKey("formasPagamento")) {
+			throw new ValidationException("A propriedade 'formasPagamento' nao pode ser alterada");
+		}
+		if (propriedadesRestauranteNovo.containsKey("produtos")) {
+			throw new ValidationException("A propriedade 'produtos' nao pode ser alterada");
 		}
 	}
 	private void validate(Object object, String objectName) {
@@ -108,12 +120,21 @@ public class RestauranteController {
 		}
 	} 
 
-	@PatchMapping("/alterar-nome-e-frete/{id}")
+	@PatchMapping("/{id}/alterar-nome-e-frete")
 	public RestauranteOutputDto alterarNomeEFrete(@PathVariable("id") @Positive Long restauranteAtualId, 
 			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovo) {
 
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(
 				GenericMapper.map(nomeEFreteRestauranteNovo, Restaurante.class), 	restauranteAtualId);
+		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
+	}
+
+	@PatchMapping("/{id}/alterar-endereco")
+	public RestauranteOutputDto alterarEnderecoDeRestaurante(@PathVariable("id") @Positive Long restauranteAtualId, 
+			@Valid @RequestBody EnderecoInputDto enderecoInputDto) {
+
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarEnderecoDeRestaurante(
+				GenericMapper.map(enderecoInputDto, Endereco.class), 	restauranteAtualId);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 

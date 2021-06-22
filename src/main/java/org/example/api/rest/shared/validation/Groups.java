@@ -6,4 +6,5 @@ public interface Groups {
 	public interface AlterarCidade {}
 	public interface AlterarEstado {}
 	public interface AlterarFormaPagamento{}
+	public interface AlterarEndereco{}
 }

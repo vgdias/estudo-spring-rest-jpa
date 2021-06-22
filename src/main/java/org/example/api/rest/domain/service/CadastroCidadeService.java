@@ -34,7 +34,7 @@ public class CadastroCidadeService {
 	}
 
 	public Cidade buscar(Long cidadeId) {
-		return obtemCidade(cidadeId);
+		return obterCidade(cidadeId);
 	} 
 
 	@Transactional
@@ -76,7 +76,7 @@ public class CadastroCidadeService {
 		}
 	}
 
-	public Cidade obtemCidade(Long id) {
+	public Cidade obterCidade(Long id) {
 		return cidadeRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_CIDADE_NAO_ENCONTRADA, id)));
