@@ -1,6 +1,7 @@
 package org.example.api.rest.api.controller;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,16 +17,14 @@ import org.example.api.rest.api.model.dto.endereco.EnderecoInputDto;
 import org.example.api.rest.api.model.dto.restaurante.NomeEFreteRestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
-import org.example.api.rest.domain.exception.ValidacaoException;
 import org.example.api.rest.domain.model.Endereco;
 import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.domain.service.CadastroRestauranteService;
 import org.example.api.rest.shared.mapping.GenericMapper;
+import org.example.api.rest.shared.validation.GenericValidator;
 import org.example.api.rest.shared.validation.Groups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,9 +48,6 @@ public class RestauranteController {
 	@Autowired
 	private CadastroRestauranteService cadastroRestauranteService;
 
-	@Autowired
-	private SmartValidator validator;
-
 	@GetMapping
 	public List<RestauranteOutputDto> listar() {
 		List<Restaurante> restaurantes = cadastroRestauranteService.listar();
@@ -73,52 +69,23 @@ public class RestauranteController {
 		return GenericMapper.map(restauranteAdicionado, RestauranteOutputDto.class);
 	}
 
-	@PutMapping("/{id}")
+	@PatchMapping("/{id}")
 	public RestauranteOutputDto alterar(@PathVariable("id") @Positive Long restauranteAtualId,
 			@RequestBody Map<String, Object> propriedadesRestauranteNovo, 
 			HttpServletRequest request) {
 
-		this.validate(propriedadesRestauranteNovo);
+		List<String> propriedadesNaoPermitidas = Arrays.asList(
+				"id", "cozinha", "endereco", "dataCadastro", 
+				"dataAtualizacao", "formasPagamento", "produtos");
+
+		GenericValidator.validate(propriedadesRestauranteNovo, propriedadesNaoPermitidas);
 		Restaurante restauranteAtual = cadastroRestauranteService.obterRestaurante(restauranteAtualId);
 		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
-		this.validate(restauranteAtual, "restaurante");
+		GenericValidator.validate(restauranteAtual, "restaurante", Groups.AlterarRestaurante.class);
 
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(restauranteAtual);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
-	private void validate(Map<String, Object> propriedadesRestauranteNovo) {
-		if (propriedadesRestauranteNovo.isEmpty()) {
-			throw new ValidationException("Nenhum argumento fornecido");
-		}
-		if (propriedadesRestauranteNovo.containsKey("id")) {
-			throw new ValidationException("A propriedade 'id' nao pode ser alterada");
-		}
-		if (propriedadesRestauranteNovo.containsKey("cozinha")) {
-			throw new ValidationException("A propriedade 'cozinha' nao pode ser alterada");
-		}
-		if (propriedadesRestauranteNovo.containsKey("endereco")) {
-			throw new ValidationException("A propriedade 'endereco' nao pode ser alterada");
-		}
-		if (propriedadesRestauranteNovo.containsKey("dataCadastro")) {
-			throw new ValidationException("A propriedade 'dataCadastro' nao pode ser alterada");
-		}
-		if (propriedadesRestauranteNovo.containsKey("dataAtualizacao")) {
-			throw new ValidationException("A propriedade 'dataAtualizacao' nao pode ser alterada");
-		}
-		if (propriedadesRestauranteNovo.containsKey("formasPagamento")) {
-			throw new ValidationException("A propriedade 'formasPagamento' nao pode ser alterada");
-		}
-		if (propriedadesRestauranteNovo.containsKey("produtos")) {
-			throw new ValidationException("A propriedade 'produtos' nao pode ser alterada");
-		}
-	}
-	private void validate(Object object, String objectName) {
-		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(object, objectName);
-		validator.validate(object, bindingResult, Groups.AlterarRestaurante.class);
-		if (bindingResult.hasErrors()) {
-			throw new ValidacaoException(bindingResult);
-		}
-	} 
 
 	@PatchMapping("/{id}/alterar-nome-e-frete")
 	public RestauranteOutputDto alterarNomeEFrete(@PathVariable("id") @Positive Long restauranteAtualId, 

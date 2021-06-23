@@ -9,7 +9,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.example.api.rest.shared.validation.Groups.AlterarEndereco;
-import org.example.api.rest.shared.validation.Groups.AlterarRestaurante;
 
 import lombok.Data;
 

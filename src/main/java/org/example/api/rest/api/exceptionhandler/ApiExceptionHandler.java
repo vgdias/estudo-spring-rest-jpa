@@ -98,10 +98,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			WebRequest request) {
 
 		HttpStatus status = HttpStatus.FAILED_DEPENDENCY;
+		String title = "Dependencia nao encontrada";
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Dependencia nao encontrada")
+				.title(title)
 				.detail(ex.getMessage())
 				.build();
 
@@ -116,6 +117,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
+		String title = "Dados fornecidos invalidos";
+		String detail = "O corpo da requisicao possui recurso invalido";
+
 		if (ex instanceof MethodArgumentTypeMismatchException) {
 			return handleMethodArgumentTypeMismatch(
 					(MethodArgumentTypeMismatchException) ex, headers, status, request);
@@ -123,8 +127,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Dados fornecidos invalidos")
-				.detail("O corpo da requisicao possui recurso invalido")
+				.title(title)
+				.detail(detail)
 				.build();
 
 		return handleExceptionInternal(ex, exceptionMessage, headers, 
@@ -139,12 +143,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
-		status = HttpStatus.NOT_FOUND;	
+		status = HttpStatus.NOT_FOUND;
+		String title = "Recurso nao encontrado";
 		String detail = String.format("O recurso '%s' nao foi encontrado", ex.getRequestURL());
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Recurso nao encontrado")
+				.title(title)
 				.detail(detail)
 				.build();
 
@@ -164,12 +169,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	private ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
+		String title = "Caminho invalido";
 		String detail = String.format("O parametro de URL '%s' recebeu o valor invalido '%s'", 
 				ex.getName(), ex.getValue());
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Caminho invalido")
+				.title(title)
 				.detail(detail)
 				.build();
 
@@ -185,12 +191,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			MissingServletRequestParameterException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
+		String title = "Caminho invalido";
 		String detail = String.format("O parametro de URL '%s' nao foi fornecido", 
 				ex.getParameterName());
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Caminho invalido")
+				.title(title)
 				.detail(detail)
 				.build();
 
@@ -248,6 +255,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.collect(Collectors.joining("."));
 
 		String detail = String.format("A propriedade '%s' nao foi reconhecida", path);
+
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
 				.title(title)
@@ -334,6 +342,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
+		String title = "Operacao nao permitida";
+		String detail = String.format("Falha na validacao de um ou mais argumentos");
+
 		List<ExceptionMessage.Object> objects = bindingResult.getAllErrors().stream()
 				.map(objectError -> {
 					String message = messageSource.getMessage(objectError, LocaleContextHolder.getLocale());
@@ -350,10 +361,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				})
 				.collect(Collectors.toList());
 
-		String detail = String.format("Falha na validacao de um ou mais argumentos");
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Operacao nao permitida")
+				.title(title)
 				.detail(detail)
 				.objects(objects)
 				.build();
@@ -374,11 +384,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			WebRequest request) {
 
 		HttpStatus status = HttpStatus.BAD_REQUEST;	
+		String title = "Erro de validacao";
+		String detail = ex.getMessage();
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Erro de validacao")
-				.detail(ex.getMessage())
+				.title(title)
+				.detail(detail)
 				.build();
 
 		if (ex instanceof ConstraintViolationException) {
@@ -409,11 +421,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 						.build())
 				.collect(Collectors.toList());
 
+		String title = "Operacao nao autorizada";
 		String detail = String.format("Falha na validacao de um ou mais argumentos");
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Operacao nao autorizada")
+				.title(title)
 				.detail(detail)
 				.objects(objects)
 				.build();
@@ -434,13 +447,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;		
 
+		String title = "Erro inesperado";
 		String detail = "Ocorreu um erro interno inesperado no sistema. "
 				+ "Tente novamente. Caso o problema persista, entre em contato "
 				+ "com o administrador do sistema";
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
-				.title("Erro inesperado")
+				.title(title)
 				.detail(detail)
 				.build();
 
