@@ -24,8 +24,8 @@ JpaSpecificationExecutor<Restaurante>{
 	List<Restaurante> comNomeSemelhante(String nome);
 
 	// Resolvendo o problema do N + 1
-//		@Query("from Restaurante r join r.cozinha left join fetch r.formasPagamento")
-//		List<Restaurante> findAll();
+	//		@Query("from Restaurante r join r.cozinha left join fetch r.formasPagamento")
+	//		List<Restaurante> findAll();
 
 	// Movida para RestauranteCustomRepository
 	//	List<Restaurante> buscaCustomizadaPorNomeEFrete(String nome, BigDecimal taxaFreteInicial, 

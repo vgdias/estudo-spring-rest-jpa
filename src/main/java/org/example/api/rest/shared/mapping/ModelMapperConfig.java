@@ -23,27 +23,27 @@ public class ModelMapperConfig {
 	}
 
 	private void enderecoToEnderecoOutputDtoMappings(ModelMapper mapper) {
-		TypeMap<Endereco, EnderecoOutputDto> enderecoToEnderecoOutputDtpTypeMap = 
+		TypeMap<Endereco, EnderecoOutputDto> typeMap = 
 				mapper.createTypeMap(Endereco.class, EnderecoOutputDto.class);
 
-		enderecoToEnderecoOutputDtpTypeMap.<String>addMapping(
+		typeMap.<String>addMapping(
 				endereco -> endereco.getCidade().getEstado().getNome(), 
 				(enderecoOutputDto, value) -> enderecoOutputDto.setEstado(value));
 
-		enderecoToEnderecoOutputDtpTypeMap.<String>addMapping(
+		typeMap.<String>addMapping(
 				endereco -> endereco.getCidade().getNome(), 
 				(enderecoOutputDto, value) -> enderecoOutputDto.setCidade(value));
 	}
 
 	private void cidadeToCidadeOutputDtoMappings(ModelMapper mapper) {
-		TypeMap<Cidade, CidadeOutputDto> cidadeToCidadeOutputDtpTypeMap = 
+		TypeMap<Cidade, CidadeOutputDto> typeMap = 
 				mapper.createTypeMap(Cidade.class, CidadeOutputDto.class);
 
-		cidadeToCidadeOutputDtpTypeMap.<String>addMapping(
+		typeMap.<String>addMapping(
 				cidade -> cidade.getNome(), 
 				(cidadeOutputDto, value) -> cidadeOutputDto.setCidade(value));
 
-		cidadeToCidadeOutputDtpTypeMap.<String>addMapping(
+		typeMap.<String>addMapping(
 				cidade -> cidade.getEstado().getNome(), 
 				(cidadeOutputDto, value) -> cidadeOutputDto.setEstado(value));		
 	}

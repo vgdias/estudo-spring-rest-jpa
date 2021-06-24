@@ -62,10 +62,9 @@ public class RestauranteController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public RestauranteOutputDto adicionar(@Valid @RequestBody RestauranteInputDto restauranteNovo) {
-		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(
-				GenericMapper.map(restauranteNovo, Restaurante.class));
-
+	public RestauranteOutputDto adicionar(@Valid @RequestBody RestauranteInputDto restauranteNovoDto) {
+		Restaurante restauranteNovo = GenericMapper.map(restauranteNovoDto, Restaurante.class);
+		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(restauranteNovo);
 		return GenericMapper.map(restauranteAdicionado, RestauranteOutputDto.class);
 	}
 
@@ -89,19 +88,19 @@ public class RestauranteController {
 
 	@PatchMapping("/{id}/alterar-nome-e-frete")
 	public RestauranteOutputDto alterarNomeEFrete(@PathVariable("id") @Positive Long restauranteAtualId, 
-			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovo) {
+			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovoDto) {
 
-		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(
-				GenericMapper.map(nomeEFreteRestauranteNovo, Restaurante.class), 	restauranteAtualId);
+		Restaurante nomeEFreteRestauranteNovo = GenericMapper.map(nomeEFreteRestauranteNovoDto, Restaurante.class);
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(nomeEFreteRestauranteNovo, restauranteAtualId);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 
 	@PatchMapping("/{id}/alterar-endereco")
 	public RestauranteOutputDto alterarEnderecoDeRestaurante(@PathVariable("id") @Positive Long restauranteAtualId, 
-			@Valid @RequestBody EnderecoInputDto enderecoInputDto) {
+			@Valid @RequestBody EnderecoInputDto enderecoNovoDto) {
 
-		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarEnderecoDeRestaurante(
-				GenericMapper.map(enderecoInputDto, Endereco.class), 	restauranteAtualId);
+		Endereco enderecoNovo = GenericMapper.map(enderecoNovoDto, Endereco.class);
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarEnderecoDeRestaurante(enderecoNovo, restauranteAtualId);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 
@@ -124,7 +123,9 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam Map<String, String> allRequestParams) throws MissingServletRequestParameterException {
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam Map<String, String> allRequestParams) 
+			throws MissingServletRequestParameterException {
+		
 		validateParams(allRequestParams); 
 		List<Restaurante> restaurantes = cadastroRestauranteService
 				.restauranteComFreteGratisComNomeSemelhante(allRequestParams.get("nome"));
