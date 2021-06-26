@@ -2,13 +2,11 @@ package org.example.api.rest.api.controller;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -134,24 +132,30 @@ public class RestauranteController {
 
 	@GetMapping("/por-intervalo-de-taxa-frete")
 	public List<RestauranteOutputDto> porIntervaloDeTaxaFrete(@RequestParam @PositiveOrZero BigDecimal taxaInicial,
-			@RequestParam @PositiveOrZero BigDecimal taxaFinal) {
+			@RequestParam @PositiveOrZero BigDecimal taxaFinal, HttpServletRequest request) {
+
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("taxaInicial", "taxaFinal")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.restaurantePorIntervaloDeTaxaFrete(taxaInicial, taxaFinal);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class); 
 	}
 
 	@GetMapping("/quantos-por-cozinhaId")
-	public int quantosPorCozinhaId(@RequestParam @Positive Long cozinhaId) {
+	public int quantosPorCozinhaId(@RequestParam @Positive Long cozinhaId, HttpServletRequest request) {
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("cozinhaId")); 
 		return cadastroRestauranteService.quantosRestaurantesPorCozinhaId(cozinhaId);
 	}
 
 	@GetMapping("/quantos-por-cozinhaNome")
-	public int quantosPorCozinhaNome(@RequestParam @NotBlank String cozinhaNome) {
+	public int quantosPorCozinhaNome(@RequestParam @NotBlank String cozinhaNome, HttpServletRequest request) {
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("cozinhaNome")); 
 		return cadastroRestauranteService.quantosRestaurantesPorCozinhaNome(cozinhaNome);
 	}
 
 	@GetMapping("/com-nome-semelhante-e-cozinhaId")
 	public List<RestauranteOutputDto> comNomeSemelhanteECozinhaId(@RequestParam @NotBlank String nome, 
-			@RequestParam @Positive Long cozinhaId) {
+			@RequestParam @Positive Long cozinhaId, HttpServletRequest request) {
+
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome", "cozinhaId")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.
 				restauranteComNomeSemelhanteECozinhaId(nome, cozinhaId);
 
@@ -159,7 +163,8 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/com-nome-semelhante")
-	public List<RestauranteOutputDto> comNomeSemelhante(@RequestParam @NotBlank String nome) {
+	public List<RestauranteOutputDto> comNomeSemelhante(@RequestParam @NotBlank String nome, HttpServletRequest request) {
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 
 		List<Restaurante> restaurantes =  cadastroRestauranteService.restauranteComNomeSemelhante(nome);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
@@ -167,32 +172,42 @@ public class RestauranteController {
 	@GetMapping("/busca-customizada-por-nome-e-frete")
 	public List<RestauranteOutputDto> buscaCustomizadaPorNomeEFrete(@RequestParam @NotBlank String nome, 
 			@RequestParam @PositiveOrZero BigDecimal taxaFreteInicial, 
-			@RequestParam("taxaFreteFinal") @PositiveOrZero  BigDecimal taxaFinal) {// renomeando parametro recebido
+			@RequestParam("taxaFreteFinal") @PositiveOrZero  BigDecimal taxaFinal, // renomeando parametro recebido 
+			HttpServletRequest request) {
 
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("taxaFreteInicial", "taxaFinal")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.buscaCustomizadaPorNomeEFrete(
 				nome, taxaFreteInicial, taxaFinal);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
 	@GetMapping("/busca-dinamica")
-	public List<RestauranteOutputDto> buscaDinamica(@RequestParam @NotBlank String nomeRestaurante, 
+	public List<RestauranteOutputDto> buscaDinamica(@RequestParam @NotBlank String nome, 
 			@RequestParam @PositiveOrZero BigDecimal taxaFreteInicial, 
 			@RequestParam @PositiveOrZero BigDecimal taxaFreteFinal, 
-			@RequestParam @NotBlank String nomeCozinha) {
+			@RequestParam @NotBlank String nomeCozinha, HttpServletRequest request) {
 
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList(
+				"nome", "taxaFreteInicial", "taxaFreteFinal", "nomeCozinha")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.buscaDinamica(
-				nomeRestaurante, taxaFreteInicial, taxaFreteFinal, nomeCozinha);
+				nome, taxaFreteInicial, taxaFreteFinal, nomeCozinha);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante-spec")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec(@RequestParam @NotBlank String nome) {
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec(@RequestParam @NotBlank String nome,
+			HttpServletRequest request) {
+
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.restaurantesComFreteGratisENomeSemelhanteSpec(nome);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante-spec2")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec2(@RequestParam @NotBlank String nome) {
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec2(@RequestParam @NotBlank String nome,
+			HttpServletRequest request) {
+
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.restaurantesComFreteGratisENomeSemelhanteSpec2(nome);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
