@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CadastroEstadoService {
 
-	private static final String MSG_ESTADO_EM_USO = "Estado de id %d em uso e nao pode ser removido";
-	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id %d nao encontrado";
+	private static final String MSG_ESTADO_EM_USO = "Estado de id [%d] em uso e nao pode ser removido";
+	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
 
 	@Autowired
 	private EstadoRepository estadoRepository;

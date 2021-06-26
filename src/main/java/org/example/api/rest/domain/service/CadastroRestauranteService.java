@@ -27,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CadastroRestauranteService {
 
-	private static final String MSG_RESTAURANTE_EM_USO = "Restaurante de id %d em uso e nao pode ser removido";
-	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id %d nao encontrada";
-	private static final String MSG_RESTAURANTE_NAO_ENCONTRADO = "Restaurante de id %d nao encontrado";
+	private static final String MSG_RESTAURANTE_EM_USO = "Restaurante de id [%d] em uso e nao pode ser removido";
+	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id [%d] nao encontrada";
+	private static final String MSG_RESTAURANTE_NAO_ENCONTRADO = "Restaurante de id [%d] nao encontrado";
 
 	@Autowired
 	private RestauranteRepository restauranteRepository;

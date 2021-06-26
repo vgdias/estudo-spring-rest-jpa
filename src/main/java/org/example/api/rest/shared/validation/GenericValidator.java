@@ -1,5 +1,6 @@
 package org.example.api.rest.shared.validation;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class GenericValidator {
 
 		deniedProperties.forEach(property -> {
 			if (properties.containsKey(property)) {
-				throw new ValidationException(String.format("A propriedade %s não pode ser alterada", property));
+				throw new ValidationException(String.format("A propriedade [%s] não pode ser alterada", property));
 			}
 		});
 	}
@@ -47,10 +48,21 @@ public class GenericValidator {
 	}
 
 	public static void validateParameters(Enumeration<String> parameters, List<String> validParameters) {
+		List<String> unrecognizedParamateres = new ArrayList<>();
 		while (parameters.hasMoreElements()) {
-			if ( ! validParameters.contains( parameters.nextElement())) {
-				throw new ValidationException("Um ou mais parâmetros não reconhecidos");
+			String parameter =  parameters.nextElement();
+			if ( ! validParameters.contains(parameter)) {
+				unrecognizedParamateres.add(parameter);
 			}
+		}
+		if ( ! unrecognizedParamateres.isEmpty()) {
+			String message;
+			if (unrecognizedParamateres.size() == 1) {
+				message = String.format("Parâmetro [%s] não reconhecido", unrecognizedParamateres.get(0)); 
+			} else {
+				message = String.format("Parâmetros não reconhecidos: %s", unrecognizedParamateres.toString());
+			}
+			throw new ValidationException(message);
 		}
 	}
 
