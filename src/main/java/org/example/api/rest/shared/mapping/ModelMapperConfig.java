@@ -2,8 +2,10 @@ package org.example.api.rest.shared.mapping;
 
 import org.example.api.rest.api.model.dto.cidade.CidadeOutputDto;
 import org.example.api.rest.api.model.dto.endereco.EnderecoOutputDto;
+import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
 import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Endereco;
+import org.example.api.rest.domain.model.Restaurante;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
 import org.springframework.context.annotation.Bean;
@@ -16,10 +18,24 @@ public class ModelMapperConfig {
 	public ModelMapper modelMapper() {
 		ModelMapper mapper = new ModelMapper();
 
-		enderecoToEnderecoOutputDtoMappings(mapper);
 		cidadeToCidadeOutputDtoMappings(mapper);
 
+		// RestauranteOutputDto possui EnderecoOutputDto.
+		// Por isso, o mapeamento de endereco deve ser declarado antes
+		// do mapeamento de restaurante
+		enderecoToEnderecoOutputDtoMappings(mapper);
+		restauranteToRestauranteOutputDtoMappings(mapper);
+
 		return mapper;
+	}
+
+	private void restauranteToRestauranteOutputDtoMappings(ModelMapper mapper) {
+		TypeMap<Restaurante, RestauranteOutputDto> typeMap = 
+				mapper.createTypeMap(Restaurante.class, RestauranteOutputDto.class);
+
+		typeMap.<String>addMapping(
+				restaurante -> restaurante.getCozinha().getNome(), 
+				(restauranteOutputDto, value) -> restauranteOutputDto.setCozinha(value));		
 	}
 
 	private void enderecoToEnderecoOutputDtoMappings(ModelMapper mapper) {

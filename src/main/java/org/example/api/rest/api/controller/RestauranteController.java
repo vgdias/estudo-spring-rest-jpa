@@ -2,7 +2,7 @@ package org.example.api.rest.api.controller;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Validated
 @RestController
@@ -77,10 +76,10 @@ public class RestauranteController {
 				"id", "cozinha", "endereco", "dataCadastro", 
 				"dataAtualizacao", "formasPagamento", "produtos");
 
-		GenericValidator.validate(propriedadesRestauranteNovo, propriedadesNaoPermitidas);
+		GenericValidator.validateProperties(propriedadesRestauranteNovo, propriedadesNaoPermitidas);
 		Restaurante restauranteAtual = cadastroRestauranteService.obterRestaurante(restauranteAtualId);
 		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
-		GenericValidator.validate(restauranteAtual, "restaurante", Groups.AlterarRestaurante.class);
+		GenericValidator.validateObject(restauranteAtual, "restaurante", Groups.AlterarRestaurante.class);
 
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterar(restauranteAtual);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
@@ -123,31 +122,14 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam Map<String, String> allRequestParams) 
-			throws MissingServletRequestParameterException {
-		
-		validateParams(allRequestParams); 
-		List<Restaurante> restaurantes = cadastroRestauranteService
-				.restauranteComFreteGratisComNomeSemelhante(allRequestParams.get("nome"));
-		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
-	}
-	private void validateParams(Map<String, String> allRequestParams) throws MissingServletRequestParameterException {
-		if (allRequestParams.isEmpty()) {
-			throw new ValidationException("Nenhum parâmetro fornecido");
-		}
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam @NotBlank String nome,
+			HttpServletRequest request) 
+					throws MissingServletRequestParameterException {
 
-		Iterator<Map.Entry<String, String>> iterator = 
-				allRequestParams.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<String, String> entry = iterator.next();
-			if (entry.getKey().equals("nome")) {
-				if (entry.getValue().trim().isEmpty()) {
-					throw new MethodArgumentTypeMismatchException("", getClass(), "nome", null, null);
-				}
-			} else {
-				throw new ValidationException("Um ou mais parâmetros não reconhecidos");
-			}
-		}
+		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 
+		List<Restaurante> restaurantes = cadastroRestauranteService
+				.restauranteComFreteGratisComNomeSemelhante(nome);
+		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
 	@GetMapping("/por-intervalo-de-taxa-frete")

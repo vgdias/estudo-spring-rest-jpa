@@ -1,5 +1,6 @@
 package org.example.api.rest.shared.validation;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -25,23 +26,32 @@ public class GenericValidator {
 		validator = smartValidator;
 	}
 
-	public static void validate(Map<String, Object> object, List<String> properties) {
-		if (object.isEmpty()) {
+	public static void validateProperties(Map<String, Object> properties, List<String> deniedProperties) {
+		if (properties.isEmpty()) {
 			throw new ValidationException("Nenhum argumento fornecido");
 		}
 
-		properties.forEach(property -> {
-			if (object.containsKey(property)) {
+		deniedProperties.forEach(property -> {
+			if (properties.containsKey(property)) {
 				throw new ValidationException(String.format("A propriedade %s não pode ser alterada", property));
 			}
 		});
 	}
 
-	public static <T> void validate(Object object, String objectName, T validationGroup) {
+	public static <T> void validateObject(Object object, String objectName, T validationGroup) {
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(object, objectName);
 		validator.validate(object, bindingResult, validationGroup);
 		if (bindingResult.hasErrors()) {
 			throw new ValidacaoException(bindingResult);
 		}
-	} 
+	}
+
+	public static void validateParameters(Enumeration<String> parameters, List<String> validParameters) {
+		while (parameters.hasMoreElements()) {
+			if ( ! validParameters.contains( parameters.nextElement())) {
+				throw new ValidationException("Um ou mais parâmetros não reconhecidos");
+			}
+		}
+	}
+
 }
