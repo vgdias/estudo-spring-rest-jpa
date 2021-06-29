@@ -2,6 +2,7 @@ package org.example.api.rest.domain.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
@@ -22,6 +23,7 @@ public class CadastroCidadeService {
 	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
 	private static final String MSG_CIDADE_EM_USO = "Cidade de id [%d] em uso";
 	private static final String MSG_CIDADE_NAO_ENCONTRADA = "Cidade de id [%d] nao encontrada";
+	private static final String MSG_CIDADE_ENCONTRADA_POR_NOME = "Cidade [%s] já existe";;
 
 	@Autowired
 	private CidadeRepository cidadeRepository;
@@ -39,6 +41,12 @@ public class CadastroCidadeService {
 
 	@Transactional
 	public Cidade adicionar(Cidade cidade) {
+		Optional<Cidade> cidadeAtual = cidadeRepository.findByNomeAndEstadoId(cidade.getNome(), cidade.getEstado().getId());
+		if (cidadeAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(MSG_CIDADE_ENCONTRADA_POR_NOME, cidade.getNome()));
+		}
+		
 		if (Objects.nonNull(cidade.getEstado().getId())) {
 			Estado estado = obterEstadoDeCidade(cidade.getEstado().getId());
 

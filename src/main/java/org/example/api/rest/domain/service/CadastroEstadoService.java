@@ -18,7 +18,7 @@ public class CadastroEstadoService {
 
 	private static final String MSG_ESTADO_EM_USO = "Estado de id [%d] em uso";
 	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
-	private static final String MSG_ESTADO_COM_NOME_EXISTENTE = "Estado [%s] já existe";
+	private static final String MSG_ESTADO_ENCONTRADO_POR_NOME = "Estado [%s] já existe";
 
 	@Autowired
 	private EstadoRepository estadoRepository;
@@ -36,7 +36,7 @@ public class CadastroEstadoService {
 		Optional<Estado> estadoAtual = estadoRepository.findByNome(estado.getNome());
 		if (estadoAtual.isPresent()) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_ESTADO_COM_NOME_EXISTENTE, estado.getNome()));
+					String.format(MSG_ESTADO_ENCONTRADO_POR_NOME, estado.getNome()));
 		}
 		return estadoRepository.save(estado);
 	}
