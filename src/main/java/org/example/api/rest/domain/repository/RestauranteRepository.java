@@ -2,6 +2,7 @@ package org.example.api.rest.domain.repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.example.api.rest.domain.model.Restaurante;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +23,8 @@ JpaSpecificationExecutor<Restaurante>{
 
 	@Query("from Restaurante where nome like %:nome%")
 	List<Restaurante> comNomeSemelhante(String nome);
+
+	Optional<Restaurante> findByNome(String nome);
 
 	// Resolvendo o problema do N + 1
 	//		@Query("from Restaurante r join r.cozinha left join fetch r.formasPagamento")

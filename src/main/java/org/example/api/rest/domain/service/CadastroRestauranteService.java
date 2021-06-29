@@ -6,6 +6,7 @@ import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpe
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
@@ -30,6 +31,7 @@ public class CadastroRestauranteService {
 	private static final String MSG_RESTAURANTE_EM_USO = "Restaurante de id [%d] em uso";
 	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id [%d] nao encontrada";
 	private static final String MSG_RESTAURANTE_NAO_ENCONTRADO = "Restaurante de id [%d] nao encontrado";
+	private static final String MSG_RESTAURANTE_ENCONTRADO_POR_NOME = "Restaurante [%s] já existe";
 
 	@Autowired
 	private RestauranteRepository restauranteRepository;
@@ -63,6 +65,12 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public Restaurante adicionar(Restaurante restaurante) {
+		Optional<Restaurante> restauranteAtual = restauranteRepository.findByNome(restaurante.getNome());
+		if (restauranteAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(MSG_RESTAURANTE_ENCONTRADO_POR_NOME, restaurante.getNome()));
+		}
+		
 		Long cozinhaId = restaurante.getCozinha().getId();
 		if (Objects.nonNull(cozinhaId)) {
 			Cozinha cozinha = cozinhaService.obterCozinha(cozinhaId);
