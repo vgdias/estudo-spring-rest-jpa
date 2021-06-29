@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.validation.constraints.Positive;
+
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.model.Endereco;
+import org.example.api.rest.domain.model.FormaPagamento;
 import org.example.api.rest.domain.model.Restaurante;
 import org.example.api.rest.domain.repository.RestauranteRepository;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComFreteGratisSpec;
@@ -32,6 +35,8 @@ public class CadastroRestauranteService {
 	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id [%d] nao encontrada";
 	private static final String MSG_RESTAURANTE_NAO_ENCONTRADO = "Restaurante de id [%d] nao encontrado";
 	private static final String MSG_RESTAURANTE_ENCONTRADO_POR_NOME = "Restaurante [%s] já existe";
+	private static final String MSG_FORMA_PAGAMENTO_DE_RESTAURANTE_NAO_ENCONTRADA = 
+			"Forma de pagamento de id [%d] nao encontrada";
 
 	@Autowired
 	private RestauranteRepository restauranteRepository;
@@ -42,6 +47,8 @@ public class CadastroRestauranteService {
 	@Autowired
 	private CadastroCidadeService cidadeService;
 
+	@Autowired
+	private CadastroFormaPagamentoService formaPagamentoService;
 
 	@Transactional
 	public void ativar(Long restauranteId) {
@@ -70,7 +77,7 @@ public class CadastroRestauranteService {
 			throw new RecursoEmUsoException(
 					String.format(MSG_RESTAURANTE_ENCONTRADO_POR_NOME, restaurante.getNome()));
 		}
-		
+
 		Long cozinhaId = restaurante.getCozinha().getId();
 		if (Objects.nonNull(cozinhaId)) {
 			Cozinha cozinha = cozinhaService.obterCozinha(cozinhaId);
@@ -182,6 +189,7 @@ public class CadastroRestauranteService {
 		return restauranteRepository.findAll(comFreteGratis().and(comNomeSemelhante(nome)));
 	}
 
+	@Transactional
 	public Restaurante alterarEnderecoDeRestaurante(Endereco enderecoNovo, Long restauranteAtualId) {
 		Restaurante restauranteAtual = obterRestaurante(restauranteAtualId);
 		if (Objects.nonNull(enderecoNovo.getCidade().getId())) {
@@ -196,9 +204,21 @@ public class CadastroRestauranteService {
 		}
 	}
 
+	@Transactional
+	public void excluirFormaPagamento(@Positive Long restauranteId, @Positive Long formaPagamentoId) {
+		Restaurante restaurante = obterRestaurante(restauranteId);
+		FormaPagamento formaPagamento = formaPagamentoService.obtemFormaPagamento(formaPagamentoId);
+
+		if (! restaurante.excluirFormaPagamento(formaPagamento)) {
+			throw new RecursoNaoEncontradoException(
+					String.format(MSG_FORMA_PAGAMENTO_DE_RESTAURANTE_NAO_ENCONTRADA, formaPagamentoId));
+		}
+	}
+
 	private Restaurante obterRestaurante(Long id) {
 		return restauranteRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));
 	}
+
 }

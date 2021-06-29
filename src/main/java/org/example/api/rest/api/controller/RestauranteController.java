@@ -71,6 +71,14 @@ public class RestauranteController {
 		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(restauranteNovo);
 		return GenericMapper.map(restauranteAdicionado, RestauranteOutputDto.class);
 	}
+	
+	@DeleteMapping("/{restauranteId}/formas-pagamento/{formaPagamentoId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void excluirFormaPagamentoRestaurante(@PathVariable @Positive Long restauranteId, 
+			@PathVariable @Positive Long formaPagamentoId) {
+		
+		cadastroRestauranteService.excluirFormaPagamento(restauranteId, formaPagamentoId);
+	}
 
 	@PatchMapping("/{id}")
 	public RestauranteOutputDto alterar(@PathVariable("id") @Positive Long restauranteAtualId,

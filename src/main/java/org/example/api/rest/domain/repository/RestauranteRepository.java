@@ -27,13 +27,9 @@ JpaSpecificationExecutor<Restaurante>{
 	Optional<Restaurante> findByNome(String nome);
 
 	// Resolvendo o problema do N + 1
-			@Query("from Restaurante r left join r.cozinha left join r.endereco.cidade c left join c.estado")
-			List<Restaurante> findAll();
-			
-			@Query("from Restaurante r left join r.cozinha left join r.endereco.cidade c left join c.estado where r.id = ?1")
-			Optional<Restaurante> findById(Long id);
+	@Query("from Restaurante r left join r.cozinha left join r.endereco.cidade c left join c.estado")
+	List<Restaurante> findAll();
 
-	// Movida para RestauranteCustomRepository
-	//	List<Restaurante> buscaCustomizadaPorNomeEFrete(String nome, BigDecimal taxaFreteInicial, 
-	//			BigDecimal taxaFreteFinal);
+	@Query("from Restaurante r left join r.cozinha left join r.endereco.cidade c left join c.estado where r.id = ?1")
+	Optional<Restaurante> findById(Long id);
 }
