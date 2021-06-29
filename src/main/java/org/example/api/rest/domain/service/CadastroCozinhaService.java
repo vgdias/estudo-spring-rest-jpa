@@ -1,6 +1,7 @@
 package org.example.api.rest.domain.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
@@ -18,6 +19,7 @@ public class CadastroCozinhaService {
 	private static final String MSG_COZINHA_EM_USO = "Cozinha de id [%d] em uso";
 	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id [%d] nao encontrada";
 	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome [%s] nao encontrada";
+	private static final String MSG_COZINHA_ENCONTRADA_POR_NOME = "Cozinha [%s] já existe";
 
 	@Autowired
 	private CozinhaRepository cozinhaRepository;
@@ -32,6 +34,11 @@ public class CadastroCozinhaService {
 
 	@Transactional
 	public Cozinha adicionar(Cozinha cozinha) {
+		Optional<Cozinha> cozinhaAtual = cozinhaRepository.findByNome(cozinha.getNome());
+		if (cozinhaAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(MSG_COZINHA_ENCONTRADA_POR_NOME, cozinha.getNome()));
+		}
 		return cozinhaRepository.save(cozinha);
 	}
 
