@@ -1,6 +1,7 @@
 package org.example.api.rest.domain.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
@@ -15,8 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CadastroEstadoService {
 
-	private static final String MSG_ESTADO_EM_USO = "Estado de id [%d] em uso e nao pode ser removido";
+	private static final String MSG_ESTADO_EM_USO = "Estado de id [%d] em uso";
 	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
+	private static final String MSG_ESTADO_COM_NOME_EXISTENTE = "Estado [%s] já existe";
 
 	@Autowired
 	private EstadoRepository estadoRepository;
@@ -31,6 +33,11 @@ public class CadastroEstadoService {
 
 	@Transactional
 	public Estado adicionar(Estado estado) {
+		Optional<Estado> estadoAtual = estadoRepository.findByNome(estado.getNome());
+		if (estadoAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(MSG_ESTADO_COM_NOME_EXISTENTE, estado.getNome()));
+		}
 		return estadoRepository.save(estado);
 	}
 

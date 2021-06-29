@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CadastroCidadeService {
 
 	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
-	private static final String MSG_CIDADE_EM_USO = "Cidade de id [%d] em uso e nao pode ser removida";
+	private static final String MSG_CIDADE_EM_USO = "Cidade de id [%d] em uso";
 	private static final String MSG_CIDADE_NAO_ENCONTRADA = "Cidade de id [%d] nao encontrada";
 
 	@Autowired

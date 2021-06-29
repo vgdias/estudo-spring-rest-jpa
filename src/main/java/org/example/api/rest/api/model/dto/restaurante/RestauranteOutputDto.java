@@ -1,9 +1,7 @@
 package org.example.api.rest.api.model.dto.restaurante;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
-import org.example.api.rest.api.model.dto.cozinha.CozinhaOutputDto;
 import org.example.api.rest.api.model.dto.endereco.EnderecoOutputDto;
 
 import lombok.Getter;

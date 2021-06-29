@@ -18,7 +18,7 @@ public class CadastroFormaPagamentoService {
 	private static final String MSG_FORMA_PAGAMENTO_NAO_ENCONTRADA = 
 			"Forma de pagamento de id [%d] nao encontrada";
 	private static final String MSG_FORMA_PAGAMENTO_EM_USO = 
-			"Forma de pagamento de id [%d] em uso e nao pode ser removida";
+			"Forma de pagamento de id [%d] em uso";
 
 	@Autowired
 	private FormaPagamentoRepository formaPagamentoRepository;
