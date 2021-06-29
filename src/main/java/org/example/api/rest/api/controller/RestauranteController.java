@@ -12,6 +12,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.example.api.rest.api.model.dto.endereco.EnderecoInputDto;
+import org.example.api.rest.api.model.dto.formapagamento.FormaPagamentoOutputDto;
 import org.example.api.rest.api.model.dto.restaurante.NomeEFreteRestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
@@ -51,6 +52,12 @@ public class RestauranteController {
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
+	@GetMapping("/{id}/formas-pagamento")
+	public List<FormaPagamentoOutputDto> listarFormasPagamentoRestaurante(@PathVariable("id") @Positive Long restauranteId) {
+		Restaurante restaurante = cadastroRestauranteService.buscar(restauranteId);
+		return GenericMapper.collectionMap(restaurante.getFormasPagamento(), FormaPagamentoOutputDto.class);
+	}
+
 	@GetMapping("/{id}")
 	public RestauranteOutputDto buscar(@PathVariable("id") @Positive Long restauranteId) {
 		Restaurante restaurante = cadastroRestauranteService.buscar(restauranteId);
@@ -75,7 +82,7 @@ public class RestauranteController {
 				"dataAtualizacao", "formasPagamento", "produtos");
 
 		GenericValidator.validateProperties(propriedadesRestauranteNovo, propriedadesNaoPermitidas);
-		Restaurante restauranteAtual = cadastroRestauranteService.obterRestaurante(restauranteAtualId);
+		Restaurante restauranteAtual = cadastroRestauranteService.buscar(restauranteAtualId);
 		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
 		GenericValidator.validateObject(restauranteAtual, "restaurante", Groups.AlterarRestaurante.class);
 

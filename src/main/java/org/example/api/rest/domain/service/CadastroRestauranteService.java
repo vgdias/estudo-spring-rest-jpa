@@ -182,12 +182,6 @@ public class CadastroRestauranteService {
 		return restauranteRepository.findAll(comFreteGratis().and(comNomeSemelhante(nome)));
 	}
 
-	public Restaurante obterRestaurante(Long id) {
-		return restauranteRepository.findById(id)
-				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));
-	}
-
 	public Restaurante alterarEnderecoDeRestaurante(Endereco enderecoNovo, Long restauranteAtualId) {
 		Restaurante restauranteAtual = obterRestaurante(restauranteAtualId);
 		if (Objects.nonNull(enderecoNovo.getCidade().getId())) {
@@ -200,5 +194,11 @@ public class CadastroRestauranteService {
 					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, 
 							enderecoNovo.getCidade().getId()));
 		}
+	}
+
+	private Restaurante obterRestaurante(Long id) {
+		return restauranteRepository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
+						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));
 	}
 }

@@ -61,8 +61,6 @@ public class Restaurante {
 	@JoinColumn(name = "cozinha_id", nullable = false)
 	private Cozinha cozinha;
 
-	private Boolean ativo = Boolean.TRUE;
-
 	@Valid
 	@NotNull(groups = {Default.class, AlterarRestaurante.class})
 	@Embedded
@@ -84,6 +82,8 @@ public class Restaurante {
 
 	@OneToMany(mappedBy = "restaurante")
 	private List<Produto> produtos = new ArrayList<>();
+
+	private Boolean ativo = Boolean.TRUE;
 
 	public void ativar() {
 		setAtivo(true);
