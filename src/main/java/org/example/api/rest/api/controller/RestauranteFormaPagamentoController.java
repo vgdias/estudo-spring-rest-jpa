@@ -43,7 +43,7 @@ public class RestauranteFormaPagamentoController {
 
 	@PutMapping("/{formaPagamentoId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void incluirFormaPagamentoRestaurante(@PathVariable @Positive Long restauranteId, 
+	public void incluirFormaPagamentoRestaurante(@PathVariable("id") @Positive Long restauranteId, 
 			@PathVariable @Positive Long formaPagamentoId) {
 
 		cadastroRestauranteService.incluirFormaPagamento(restauranteId, formaPagamentoId);
