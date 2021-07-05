@@ -1,6 +1,7 @@
 package org.example.api.rest.shared.mapping;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class GenericMapper {
 	 * @param classeDestino Classe de destino
 	 * @return Lista de objetos do tipo T com as propriedades dos objetos de {@code listaObjetoOrigem}
 	 */
-	public static <T> List<T> collectionMap(List<?> listaObjetoOrigem, Class<T> classeDestino) {
+	public static <T> List<T> collectionMap(Collection<?> listaObjetoOrigem, Class<T> classeDestino) {
 		return listaObjetoOrigem.stream()
 				.map(objetoOrigem -> GenericMapper.map(objetoOrigem, classeDestino))
 				.collect(Collectors.toList());

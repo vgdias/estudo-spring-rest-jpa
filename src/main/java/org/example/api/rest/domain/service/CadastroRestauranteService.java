@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
@@ -37,6 +38,8 @@ public class CadastroRestauranteService {
 	private static final String MSG_RESTAURANTE_ENCONTRADO_POR_NOME = "Restaurante [%s] já existe";
 	private static final String MSG_FORMA_PAGAMENTO_DE_RESTAURANTE_NAO_ENCONTRADA = 
 			"Forma de pagamento de id [%d] nao encontrada";
+	private static final String MSG_FORMA_PAGAMENTO_DE_RESTAURANTE_ENCONTRADO = 
+			"Restaurante já possui forma de pagamento de id [%d]";
 
 	@Autowired
 	private RestauranteRepository restauranteRepository;
@@ -212,6 +215,17 @@ public class CadastroRestauranteService {
 		if (! restaurante.excluirFormaPagamento(formaPagamento)) {
 			throw new RecursoNaoEncontradoException(
 					String.format(MSG_FORMA_PAGAMENTO_DE_RESTAURANTE_NAO_ENCONTRADA, formaPagamentoId));
+		}
+	}
+	
+	@Transactional
+	public void incluirFormaPagamento(@Positive Long restauranteId, @Positive Long formaPagamentoId) {
+		Restaurante restaurante = obterRestaurante(restauranteId);
+		FormaPagamento formaPagamento = formaPagamentoService.obtemFormaPagamento(formaPagamentoId);
+
+		if (! restaurante.incluirFormaPagamento(formaPagamento)) {
+			throw new ValidationException(
+					String.format(MSG_FORMA_PAGAMENTO_DE_RESTAURANTE_ENCONTRADO, formaPagamentoId));
 		}
 	}
 
