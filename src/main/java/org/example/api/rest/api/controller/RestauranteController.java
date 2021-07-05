@@ -123,7 +123,7 @@ public class RestauranteController {
 	}
 	
 	@PutMapping("/{restauranteId}/formas-pagamento/{formaPagamentoId}")
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void incluirFormaPagamentoRestaurante(@PathVariable @Positive Long restauranteId, 
 			@PathVariable @Positive Long formaPagamentoId) {
 		
