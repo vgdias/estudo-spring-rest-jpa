@@ -7,4 +7,5 @@ public interface Groups {
 	public interface AlterarEstado {}
 	public interface AlterarFormaPagamento{}
 	public interface AlterarEndereco{}
+	public interface AlterarProduto{}
 }

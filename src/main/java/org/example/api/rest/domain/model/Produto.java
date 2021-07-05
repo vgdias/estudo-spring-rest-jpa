@@ -15,6 +15,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import javax.validation.groups.Default;
+
+import org.example.api.rest.shared.validation.Groups.AlterarProduto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,34 +28,33 @@ import lombok.EqualsAndHashCode;
 @Table(name="produto")
 public class Produto {
 
-	@NotNull
-	@Positive
+	@NotNull(groups = AlterarProduto.class)
+	@Positive(groups = AlterarProduto.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank
+	@NotBlank(groups = {Default.class, AlterarProduto.class})
 	@Column(nullable = false)
 	private String nome;
-	
-	@NotBlank
+
+	@NotBlank(groups = {Default.class, AlterarProduto.class})
 	@Column(nullable = false)
 	private String descricao;
-	
-	@NotBlank
+
+	@NotBlank(groups = {Default.class, AlterarProduto.class})
 	@PositiveOrZero
 	@Column(nullable = false)
 	private BigDecimal preco;
-	
-	@NotNull
+
+	@NotNull(groups = {Default.class, AlterarProduto.class})
 	@Column(nullable = false)
 	private Boolean ativo;
 
 	@Valid
-	@NotNull
 	@ManyToOne
-	@JoinColumn(nullable = false)
+	@JoinColumn(name = "restauranteId")
 	private Restaurante restaurante;
 
 }
