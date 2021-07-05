@@ -12,7 +12,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.example.api.rest.api.model.dto.endereco.EnderecoInputDto;
-import org.example.api.rest.api.model.dto.formapagamento.FormaPagamentoOutputDto;
 import org.example.api.rest.api.model.dto.restaurante.NomeEFreteRestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
@@ -50,12 +49,6 @@ public class RestauranteController {
 	public List<RestauranteOutputDto> listar() {
 		List<Restaurante> restaurantes = cadastroRestauranteService.listar();
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
-	}
-
-	@GetMapping("/{id}/formas-pagamento")
-	public List<FormaPagamentoOutputDto> listarFormasPagamentoRestaurante(@PathVariable("id") @Positive Long restauranteId) {
-		Restaurante restaurante = cadastroRestauranteService.buscar(restauranteId);
-		return GenericMapper.collectionMap(restaurante.getFormasPagamento(), FormaPagamentoOutputDto.class);
 	}
 
 	@GetMapping("/{id}")
@@ -112,22 +105,6 @@ public class RestauranteController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void remover(@PathVariable("id") @Positive Long restauranteId) {
 		cadastroRestauranteService.remover(restauranteId);
-	}
-	
-	@DeleteMapping("/{restauranteId}/formas-pagamento/{formaPagamentoId}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void excluirFormaPagamentoRestaurante(@PathVariable @Positive Long restauranteId, 
-			@PathVariable @Positive Long formaPagamentoId) {
-		
-		cadastroRestauranteService.excluirFormaPagamento(restauranteId, formaPagamentoId);
-	}
-	
-	@PutMapping("/{restauranteId}/formas-pagamento/{formaPagamentoId}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void incluirFormaPagamentoRestaurante(@PathVariable @Positive Long restauranteId, 
-			@PathVariable @Positive Long formaPagamentoId) {
-		
-		cadastroRestauranteService.incluirFormaPagamento(restauranteId, formaPagamentoId);
 	}
 	
 	@PutMapping("/{id}/ativo")

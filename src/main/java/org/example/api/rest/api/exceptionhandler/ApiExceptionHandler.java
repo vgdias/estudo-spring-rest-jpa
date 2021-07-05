@@ -23,6 +23,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -108,6 +109,19 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
 				status, request);
+	}
+
+	@Override
+	protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+
+		// 		Erro interno a ser registrado em log
+		//		String title = "Caminho invalido";
+		//		String detail = String.format("O parametro de URL '%s' nao foi definido como PathVariable", 
+		//				ex.getVariableName());
+		//		System.out.println(title + "\n" + detail);
+
+		return handleUncaught(ex, request);
 	}
 
 	/**
