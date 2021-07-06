@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
@@ -23,7 +25,11 @@ public class CadastroCidadeService {
 	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
 	private static final String MSG_CIDADE_EM_USO = "Cidade de id [%d] em uso";
 	private static final String MSG_CIDADE_NAO_ENCONTRADA = "Cidade de id [%d] nao encontrada";
-	private static final String MSG_CIDADE_ENCONTRADA_POR_NOME = "Cidade [%s] já existe";;
+	private static final String MSG_CIDADE_ENCONTRADA_POR_NOME = "Cidade [%s] já existe";
+	private static final String MSG_ESTADO_POR_ID_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
+
+	@Autowired
+	private EntityManager entityManager;
 
 	@Autowired
 	private CidadeRepository cidadeRepository;
@@ -36,20 +42,16 @@ public class CadastroCidadeService {
 	}
 
 	public Cidade buscar(Long cidadeId) {
-		return obterCidade(cidadeId);
+		return obterCidadePorId(cidadeId);
 	} 
 
 	@Transactional
 	public Cidade adicionar(Cidade cidade) {
-		Optional<Cidade> cidadeAtual = cidadeRepository.findByNomeAndEstadoId(cidade.getNome(), cidade.getEstado().getId());
-		if (cidadeAtual.isPresent()) {
-			throw new RecursoEmUsoException(
-					String.format(MSG_CIDADE_ENCONTRADA_POR_NOME, cidade.getNome()));
-		}
-		
-		if (Objects.nonNull(cidade.getEstado().getId())) {
-			Estado estado = obterEstadoDeCidade(cidade.getEstado().getId());
+		verificarSeCidadeEstadoExistePorCidadeNomeEstadoId(cidade);
 
+		Long estadoId = cidade.getEstado().getId();
+		if (Objects.nonNull(estadoId)) {
+			Estado estado = obterEstadoDeCidadePorId(estadoId);
 			cidade.setEstado(estado);
 			return cidadeRepository.save(cidade);
 
@@ -62,19 +64,28 @@ public class CadastroCidadeService {
 
 	@Transactional
 	public Cidade alterar(Cidade cidadeNova) {
-		Long estadoAtualId = cidadeNova.getEstado().getId();
-		Estado estadoAtual = obterEstadoDeCidade(estadoAtualId);
+		entityManager.detach(cidadeNova);
+		verificarSeCidadeEstadoExistePorCidadeNomeEstadoId(cidadeNova);
 
-		cidadeNova.setEstado(estadoAtual);
-		return cidadeRepository.save(cidadeNova);
+		Long estadoAtualId = cidadeNova.getEstado().getId();
+		if (Objects.nonNull(estadoAtualId)) {
+			Estado estadoAtual = obterEstadoDeCidadePorId(estadoAtualId);
+			cidadeNova.setEstado(estadoAtual);
+			return cidadeRepository.save(cidadeNova);
+
+		} else {
+			throw new DependenciaNaoEncontradaException(
+					String.format(MSG_ESTADO_POR_ID_NAO_ENCONTRADO, 
+							cidadeNova.getEstado().getId()));
+		}
 	}
 
-		@Transactional
+	@Transactional
 	public void remover(Long cidadeId) {
 		try {
 			cidadeRepository.deleteById(cidadeId);
 			cidadeRepository.flush();
-			
+
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
 					String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId));
@@ -84,15 +95,23 @@ public class CadastroCidadeService {
 		}
 	}
 
-	public Cidade obterCidade(Long id) {
+	public Cidade obterCidadePorId(Long id) {
 		return cidadeRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_CIDADE_NAO_ENCONTRADA, id)));
 	}
 
-	public Estado obterEstadoDeCidade(Long id) {
+	private Estado obterEstadoDeCidadePorId(Long id) {
 		return estadoRepository.findById(id)
 				.orElseThrow(() -> new DependenciaNaoEncontradaException(
 						String.format(MSG_ESTADO_NAO_ENCONTRADO, id)));
+	}
+
+	private void verificarSeCidadeEstadoExistePorCidadeNomeEstadoId(Cidade cidade) {
+		Optional<Cidade> cidadeAtual = cidadeRepository.findByNomeAndEstadoId(cidade.getNome(), cidade.getEstado().getId());
+		if (cidadeAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(MSG_CIDADE_ENCONTRADA_POR_NOME, cidade.getNome()));
+		}
 	}
 }

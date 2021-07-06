@@ -83,12 +83,11 @@ public class CadastroRestauranteService {
 		Long cozinhaId = restaurante.getCozinha().getId();
 		if (Objects.nonNull(cozinhaId)) {
 			Cozinha cozinha = cozinhaService.obterCozinha(cozinhaId);
-
 			restaurante.setCozinha(cozinha);
 
 			Long cidadeId = restaurante.getEndereco().getCidade().getId();
 			if (Objects.nonNull(cidadeId)) {
-				Cidade cidade  = cidadeService.obterCidade(cidadeId); 
+				Cidade cidade  = cidadeService.obterCidadePorId(cidadeId); 
 				restaurante.getEndereco().setCidade(cidade);
 			}
 			return restauranteRepository.save(restaurante);
@@ -105,9 +104,9 @@ public class CadastroRestauranteService {
 		entityManager.detach(restauranteNovo);
 		verificarSeRestauranteNomeExiste(restauranteNovo.getNome());
 
-		if (Objects.nonNull(restauranteNovo.getCozinha().getId())) {
-			Cozinha cozinhaAtual = cozinhaService.obterCozinha(restauranteNovo.getCozinha().getId());
-
+		Long cozinhaId = restauranteNovo.getCozinha().getId();
+		if (Objects.nonNull(cozinhaId)) {
+			Cozinha cozinhaAtual = cozinhaService.obterCozinha(cozinhaId);
 			restauranteNovo.setCozinha(cozinhaAtual);
 			return restauranteRepository.save(restauranteNovo);
 
@@ -199,7 +198,7 @@ public class CadastroRestauranteService {
 	public Restaurante alterarEnderecoDeRestaurante(Endereco enderecoNovo, Long restauranteAtualId) {
 		Restaurante restauranteAtual = obterRestaurantePorId(restauranteAtualId);
 		if (Objects.nonNull(enderecoNovo.getCidade().getId())) {
-			Cidade cidadeAtual = cidadeService.obterCidade(enderecoNovo.getCidade().getId());
+			Cidade cidadeAtual = cidadeService.obterCidadePorId(enderecoNovo.getCidade().getId());
 			enderecoNovo.setCidade(cidadeAtual);
 			restauranteAtual.setEndereco(enderecoNovo);
 			return restauranteRepository.save(restauranteAtual);
