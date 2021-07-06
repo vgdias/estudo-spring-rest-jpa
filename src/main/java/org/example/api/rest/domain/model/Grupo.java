@@ -15,6 +15,9 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.groups.Default;
+
+import org.example.api.rest.shared.validation.Groups.AlterarGrupo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,20 +28,20 @@ import lombok.EqualsAndHashCode;
 @Table(name="grupo")
 public class Grupo {
 
-	@NotNull
-	@Positive
+	@NotNull(groups = AlterarGrupo.class)
+	@Positive(groups = AlterarGrupo.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	@NotBlank
+
+	@NotBlank(groups = {Default.class, AlterarGrupo.class})
 	@Column(nullable = false)
 	private String nome;
-	
+
 	@ManyToMany
 	@JoinTable(name = "grupo_permissao", joinColumns = @JoinColumn(name = "grupo_id"),
-			inverseJoinColumns = @JoinColumn(name = "permissao_id"))
+	inverseJoinColumns = @JoinColumn(name = "permissao_id"))
 	private List<Permissao> permissoes = new ArrayList<>();
-	
+
 }

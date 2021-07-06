@@ -72,7 +72,7 @@ public class RestauranteController {
 
 		List<String> propriedadesNaoPermitidas = Arrays.asList(
 				"id", "cozinha", "endereco", "dataCadastro", 
-				"dataAtualizacao", "formasPagamento", "produtos");
+				"dataAtualizacao", "formasPagamento", "produtos", "ativo");
 
 		GenericValidator.validateProperties(propriedadesRestauranteNovo, propriedadesNaoPermitidas);
 		Restaurante restauranteAtual = cadastroRestauranteService.buscar(restauranteAtualId);
@@ -124,7 +124,7 @@ public class RestauranteController {
 			HttpServletRequest request) 
 					throws MissingServletRequestParameterException {
 
-		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("nome")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService
 				.restauranteComFreteGratisComNomeSemelhante(nome);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);

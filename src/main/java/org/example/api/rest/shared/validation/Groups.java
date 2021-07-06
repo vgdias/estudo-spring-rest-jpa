@@ -8,4 +8,5 @@ public interface Groups {
 	public interface AlterarFormaPagamento{}
 	public interface AlterarEndereco{}
 	public interface AlterarProduto{}
+	public interface AlterarGrupo{}
 }
