@@ -47,21 +47,7 @@ public class CadastroGrupoService {
 		return grupoRepository.save(grupo);
 	}
 
-	private Grupo obterGrupoPorId(Long id) {
-		return grupoRepository.findById(id)
-				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_GRUPO_NAO_ENCONTRADO, id)));
-	}
-
-	private void verificarSeGrupoExiste(String nome) {
-		grupoRepository.findByNome(nome)
-		.ifPresent((grupoEncontrado) -> { 
-			throw new RecursoEmUsoException(
-					String.format(MSG_GRUPO_ENCONTRADO_POR_NOME, grupoEncontrado.getNome())
-					);
-		});
-	}
-
+	@Transactional
 	public void remover(Long grupoId) {
 		try {
 			grupoRepository.deleteById(grupoId);
@@ -72,5 +58,20 @@ public class CadastroGrupoService {
 					String.format(MSG_GRUPO_NAO_ENCONTRADO, grupoId));
 		}
 	}
+	
+	private void verificarSeGrupoExiste(String nome) {
+		grupoRepository.findByNome(nome)
+		.ifPresent((grupoEncontrado) -> { 
+			throw new RecursoEmUsoException(
+					String.format(MSG_GRUPO_ENCONTRADO_POR_NOME, grupoEncontrado.getNome())
+					);
+		});
+	}
 
+	private Grupo obterGrupoPorId(Long id) {
+		return grupoRepository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException(
+						String.format(MSG_GRUPO_NAO_ENCONTRADO, id)));
+	}
+	
 }

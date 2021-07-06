@@ -6,8 +6,8 @@ import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpe
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
+import javax.persistence.EntityManager;
 import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 
@@ -42,6 +42,9 @@ public class CadastroRestauranteService {
 			"Restaurante já possui forma de pagamento de id [%d]";
 
 	@Autowired
+	private EntityManager entityManager;
+
+	@Autowired
 	private RestauranteRepository restauranteRepository;
 
 	@Autowired
@@ -55,13 +58,13 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public void ativar(Long restauranteId) {
-		Restaurante restauranteAtual = obterRestaurante(restauranteId);
+		Restaurante restauranteAtual = obterRestaurantePorId(restauranteId);
 		restauranteAtual.ativar();
 	}
 
 	@Transactional
 	public void inativar(Long restauranteId) {
-		Restaurante restauranteAtual = obterRestaurante(restauranteId);
+		Restaurante restauranteAtual = obterRestaurantePorId(restauranteId);
 		restauranteAtual.desativar();
 	}
 
@@ -70,16 +73,12 @@ public class CadastroRestauranteService {
 	}
 
 	public Restaurante buscar(Long restauranteId) {
-		return obterRestaurante(restauranteId);
+		return obterRestaurantePorId(restauranteId);
 	}
 
 	@Transactional
 	public Restaurante adicionar(Restaurante restaurante) {
-		Optional<Restaurante> restauranteAtual = restauranteRepository.findByNome(restaurante.getNome());
-		if (restauranteAtual.isPresent()) {
-			throw new RecursoEmUsoException(
-					String.format(MSG_RESTAURANTE_ENCONTRADO_POR_NOME, restaurante.getNome()));
-		}
+		verificarSeRestauranteNomeExiste(restaurante.getNome());
 
 		Long cozinhaId = restaurante.getCozinha().getId();
 		if (Objects.nonNull(cozinhaId)) {
@@ -103,6 +102,9 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public Restaurante alterar(Restaurante restauranteNovo) {
+		entityManager.detach(restauranteNovo);
+		verificarSeRestauranteNomeExiste(restauranteNovo.getNome());
+
 		if (Objects.nonNull(restauranteNovo.getCozinha().getId())) {
 			Cozinha cozinhaAtual = cozinhaService.obterCozinha(restauranteNovo.getCozinha().getId());
 
@@ -118,8 +120,9 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public Restaurante alterarNomeEFrete(Restaurante nomeEFreteRestauranteNovo, Long restauranteAtualId) {
+		Restaurante restauranteAtual = obterRestaurantePorId(restauranteAtualId);
+		verificarSeRestauranteNomeExiste(nomeEFreteRestauranteNovo.getNome());
 
-		Restaurante restauranteAtual = obterRestaurante(restauranteAtualId);
 		restauranteAtual.setNome(nomeEFreteRestauranteNovo.getNome());
 		restauranteAtual.setTaxaFrete(nomeEFreteRestauranteNovo.getTaxaFrete());
 		return restauranteRepository.save(restauranteAtual);
@@ -194,7 +197,7 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public Restaurante alterarEnderecoDeRestaurante(Endereco enderecoNovo, Long restauranteAtualId) {
-		Restaurante restauranteAtual = obterRestaurante(restauranteAtualId);
+		Restaurante restauranteAtual = obterRestaurantePorId(restauranteAtualId);
 		if (Objects.nonNull(enderecoNovo.getCidade().getId())) {
 			Cidade cidadeAtual = cidadeService.obterCidade(enderecoNovo.getCidade().getId());
 			enderecoNovo.setCidade(cidadeAtual);
@@ -209,7 +212,7 @@ public class CadastroRestauranteService {
 
 	@Transactional
 	public void excluirFormaPagamento(@Positive Long restauranteId, @Positive Long formaPagamentoId) {
-		Restaurante restaurante = obterRestaurante(restauranteId);
+		Restaurante restaurante = obterRestaurantePorId(restauranteId);
 		FormaPagamento formaPagamento = formaPagamentoService.obtemFormaPagamento(formaPagamentoId);
 
 		if (! restaurante.excluirFormaPagamento(formaPagamento)) {
@@ -217,10 +220,10 @@ public class CadastroRestauranteService {
 					String.format(MSG_FORMA_PAGAMENTO_DE_RESTAURANTE_NAO_ENCONTRADA, formaPagamentoId));
 		}
 	}
-	
+
 	@Transactional
 	public void incluirFormaPagamento(@Positive Long restauranteId, @Positive Long formaPagamentoId) {
-		Restaurante restaurante = obterRestaurante(restauranteId);
+		Restaurante restaurante = obterRestaurantePorId(restauranteId);
 		FormaPagamento formaPagamento = formaPagamentoService.obtemFormaPagamento(formaPagamentoId);
 
 		if (! restaurante.incluirFormaPagamento(formaPagamento)) {
@@ -229,7 +232,16 @@ public class CadastroRestauranteService {
 		}
 	}
 
-	private Restaurante obterRestaurante(Long id) {
+	private void verificarSeRestauranteNomeExiste(String nome) {
+		restauranteRepository.findByNome(nome)
+		.ifPresent((restauranteEncontrado) -> { 
+			throw new RecursoEmUsoException(
+					String.format(MSG_RESTAURANTE_ENCONTRADO_POR_NOME, restauranteEncontrado.getNome())
+					);
+		});
+	}
+
+	private Restaurante obterRestaurantePorId(Long id) {
 		return restauranteRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));

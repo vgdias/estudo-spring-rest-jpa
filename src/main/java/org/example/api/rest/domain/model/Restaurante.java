@@ -39,8 +39,8 @@ import lombok.EqualsAndHashCode;
 @Table(name="restaurante")
 public class Restaurante {
 
-	@NotNull(groups = AlterarRestaurante.class)
-	@Positive(groups = AlterarRestaurante.class)
+	@NotNull(groups = {AlterarRestaurante.class})
+	@Positive(groups = {AlterarRestaurante.class})
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
