@@ -37,20 +37,27 @@ public class CidadeController {
 	private CadastroCidadeService cadastroCidadeService;
 
 	@GetMapping()
-	public List<CidadeOutputDto> listar() {
+	public List<CidadeOutputDto> listar(HttpServletRequest request) {
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList());
 		List<Cidade> cidades = cadastroCidadeService.listar();
 		return GenericMapper.collectionMap(cidades, CidadeOutputDto.class);
 	}
 
 	@GetMapping("/{id}")
-	public CidadeOutputDto buscar(@PathVariable("id") @Positive Long cidadeId) {
+	public CidadeOutputDto buscar(@PathVariable("id") @Positive Long cidadeId,
+			HttpServletRequest request) {
+		
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id")); 
 		Cidade cidade = cadastroCidadeService.buscar(cidadeId);
 		return GenericMapper.map(cidade, CidadeOutputDto.class);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public CidadeOutputDto adicionar(@Valid @RequestBody CidadeInputDto cidadeNovaDto) {
+	public CidadeOutputDto adicionar(@Valid @RequestBody CidadeInputDto cidadeNovaDto,
+			HttpServletRequest request) {
+		
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList());
 		Cidade cidadeNova = GenericMapper.map(cidadeNovaDto, Cidade.class);
 		Cidade cidadeAdicionada = cadastroCidadeService.adicionar(cidadeNova);
 		return GenericMapper.map(cidadeAdicionada, CidadeOutputDto.class);
@@ -61,6 +68,7 @@ public class CidadeController {
 			@RequestBody Map<String, Object> propriedadesCidadeNova, 
 			HttpServletRequest request) {
 
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		List<String> propriedadesNaoPermitidas = Arrays.asList("id");
 		GenericValidator.validateProperties(propriedadesCidadeNova, propriedadesNaoPermitidas);
 
@@ -74,7 +82,8 @@ public class CidadeController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") Long cidadeId) {
+	public void remover(@PathVariable("id") Long cidadeId, HttpServletRequest request) {
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroCidadeService.remover(cidadeId);
 	}
 }
