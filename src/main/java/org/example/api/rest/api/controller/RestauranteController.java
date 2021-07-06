@@ -46,20 +46,27 @@ public class RestauranteController {
 	private CadastroRestauranteService cadastroRestauranteService;
 
 	@GetMapping
-	public List<RestauranteOutputDto> listar() {
+	public List<RestauranteOutputDto> listar(HttpServletRequest request) {
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList());
 		List<Restaurante> restaurantes = cadastroRestauranteService.listar();
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
 	@GetMapping("/{id}")
-	public RestauranteOutputDto buscar(@PathVariable("id") @Positive Long restauranteId) {
+	public RestauranteOutputDto buscar(@PathVariable("id") @Positive Long restauranteId,
+			HttpServletRequest request) {
+		
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id")); 
 		Restaurante restaurante = cadastroRestauranteService.buscar(restauranteId);
 		return GenericMapper.map(restaurante, RestauranteOutputDto.class);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public RestauranteOutputDto adicionar(@Valid @RequestBody RestauranteInputDto restauranteNovoDto) {
+	public RestauranteOutputDto adicionar(@Valid @RequestBody RestauranteInputDto restauranteNovoDto,
+			HttpServletRequest request) {
+		
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList()); 
 		Restaurante restauranteNovo = GenericMapper.map(restauranteNovoDto, Restaurante.class);
 		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(restauranteNovo);
 		return GenericMapper.map(restauranteAdicionado, RestauranteOutputDto.class);
@@ -70,6 +77,8 @@ public class RestauranteController {
 			@RequestBody Map<String, Object> propriedadesRestauranteNovo, 
 			HttpServletRequest request) {
 
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
+		
 		List<String> propriedadesNaoPermitidas = Arrays.asList(
 				"id", "cozinha", "endereco", "dataCadastro", 
 				"dataAtualizacao", "formasPagamento", "produtos", "ativo");
@@ -85,8 +94,10 @@ public class RestauranteController {
 
 	@PatchMapping("/{id}/alterar-nome-e-frete")
 	public RestauranteOutputDto alterarNomeEFrete(@PathVariable("id") @Positive Long restauranteAtualId, 
-			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovoDto) {
+			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovoDto,
+			HttpServletRequest request) {
 
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		Restaurante nomeEFreteRestauranteNovo = GenericMapper.map(nomeEFreteRestauranteNovoDto, Restaurante.class);
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(nomeEFreteRestauranteNovo, restauranteAtualId);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
@@ -94,8 +105,9 @@ public class RestauranteController {
 
 	@PatchMapping("/{id}/alterar-endereco")
 	public RestauranteOutputDto alterarEnderecoDeRestaurante(@PathVariable("id") @Positive Long restauranteAtualId, 
-			@Valid @RequestBody EnderecoInputDto enderecoNovoDto) {
+			@Valid @RequestBody EnderecoInputDto enderecoNovoDto, HttpServletRequest request) {
 
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		Endereco enderecoNovo = GenericMapper.map(enderecoNovoDto, Endereco.class);
 		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarEnderecoDeRestaurante(enderecoNovo, restauranteAtualId);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
@@ -103,19 +115,22 @@ public class RestauranteController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive Long restauranteId) {
+	public void remover(@PathVariable("id") @Positive Long restauranteId, HttpServletRequest request) {
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroRestauranteService.remover(restauranteId);
 	}
-	
+
 	@PutMapping("/{id}/ativo")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void ativar(@PathVariable("id") Long restauranteId) {
+	public void ativar(@PathVariable("id") Long restauranteId, HttpServletRequest request) {
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroRestauranteService.ativar(restauranteId);
 	}
 
 	@DeleteMapping("/{id}/ativo")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void inativar(@PathVariable("id") Long restauranteId) {
+	public void inativar(@PathVariable("id") Long restauranteId, HttpServletRequest request) {
+		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroRestauranteService.inativar(restauranteId);
 	}
 
