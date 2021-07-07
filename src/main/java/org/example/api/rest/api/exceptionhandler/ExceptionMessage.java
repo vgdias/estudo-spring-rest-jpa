@@ -16,11 +16,11 @@ public class ExceptionMessage {
 	private Integer status;
 	private String title;
 	private String detail;
-	private List<Object> errors;
+	private List<Error> errors;
 
 	@Getter
 	@Builder
-	public static class Object {
+	public static class Error {
 		private String source;
 		private String rule;
 	}

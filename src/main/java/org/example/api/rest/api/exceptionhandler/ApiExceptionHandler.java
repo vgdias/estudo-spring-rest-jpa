@@ -153,12 +153,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		String detail = String.format("Requisição com URL contendo tipo de argumento invalido", 
 				ex.getName(), ex.getValue());
 
-		ExceptionMessage.Object error = ExceptionMessage.Object.builder()
+		ExceptionMessage.Error error = ExceptionMessage.Error.builder()
 				.source(String.format("%s = %s" , ex.getName(), ex.getValue()))
 				.rule(String.format("%s deve ser do tipo %s", ex.getName(), ex.getRequiredType().getSimpleName()))
 				.build();
 
-		List<ExceptionMessage.Object> errors = Arrays.asList(error);
+		List<ExceptionMessage.Error> errors = Arrays.asList(error);
 
 		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
 				.status(status.value())
@@ -355,7 +355,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		String title = "Operacao nao permitida";
 		String detail = String.format("Falha na validacao de um ou mais argumentos");
 
-		List<ExceptionMessage.Object> objects = bindingResult.getAllErrors().stream()
+		List<ExceptionMessage.Error> objects = bindingResult.getAllErrors().stream()
 				.map(objectError -> {
 					String message = messageSource.getMessage(objectError, LocaleContextHolder.getLocale());
 					String name = objectError.getObjectName();
@@ -364,7 +364,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 						name = ((FieldError) objectError).getField();
 					}
 
-					return ExceptionMessage.Object.builder()
+					return ExceptionMessage.Error.builder()
 							.source(name)
 							.rule(message)
 							.build();
@@ -424,14 +424,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	private ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, HttpStatus status,
 			WebRequest request) {
 
-		List<ExceptionMessage.Object> objects = ex.getConstraintViolations().stream()
+		List<ExceptionMessage.Error> objects = ex.getConstraintViolations().stream()
 				.map(constraintViolation -> {
 					String invalidValue = constraintViolation.getInvalidValue().toString();
 					String argument = null;
 					for (Node node : constraintViolation.getPropertyPath()) {
 						argument = node.getName();
 					} 
-					return ExceptionMessage.Object.builder()
+					return ExceptionMessage.Error.builder()
 							.source(String.format("%s = %s" , argument, invalidValue))
 							.rule(constraintViolation.getMessage().toString())
 							.build();
