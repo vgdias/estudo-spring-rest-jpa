@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IdEstadoInputDto {
-	@Positive
-	@NotNull
+	@Positive(message = "{positive}")
+	@NotNull(message = "{notNull}")
 	private Long id;
 }

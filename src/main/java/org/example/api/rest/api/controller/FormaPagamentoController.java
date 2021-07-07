@@ -48,14 +48,18 @@ public class FormaPagamentoController {
 	}
 
 	@GetMapping("/{id}")
-	public FormaPagamentoOutputDto buscar(@PathVariable("id") @Positive Long formaPagamentoId) {
+	public FormaPagamentoOutputDto buscar(
+			@PathVariable("id") @Positive(message = "{positive}") Long formaPagamentoId) {
+		
 		FormaPagamento formaPagamento = cadastroFormaPagamentoService.buscar(formaPagamentoId);
 		return GenericMapper.map(formaPagamento, FormaPagamentoOutputDto.class);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public FormaPagamentoOutputDto adicionar(@Valid @RequestBody FormaPagamentoInputDto formaPagamentoNova) {
+	public FormaPagamentoOutputDto adicionar(
+			@Valid @RequestBody FormaPagamentoInputDto formaPagamentoNova) {
+		
 		FormaPagamento formaPagamentoAdicionada = cadastroFormaPagamentoService.adicionar(
 				GenericMapper.map(formaPagamentoNova, FormaPagamento.class));
 
@@ -63,7 +67,8 @@ public class FormaPagamentoController {
 	}
 
 	@PutMapping("/{id}")
-	public FormaPagamentoOutputDto alterar(@PathVariable("id") @Positive Long formaPagamentoAtualId, 
+	public FormaPagamentoOutputDto alterar(
+			@PathVariable("id") @Positive(message = "{positive}") Long formaPagamentoAtualId, 
 			@RequestBody Map<String, Object> propriedadesFormaPagamentoNova, 
 			HttpServletRequest request) {
 
@@ -93,7 +98,7 @@ public class FormaPagamentoController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive Long formaPagamentoId) {
+	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long formaPagamentoId) {
 		cadastroFormaPagamentoService.remover(formaPagamentoId);
 	}
 }

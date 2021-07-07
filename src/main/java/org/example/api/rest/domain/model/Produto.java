@@ -28,27 +28,27 @@ import lombok.EqualsAndHashCode;
 @Table(name="produto")
 public class Produto {
 
-	@NotNull(groups = AlterarProduto.class)
+	@NotNull(groups = AlterarProduto.class, message = "{notNull}")
 	@Positive(groups = AlterarProduto.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(groups = {Default.class, AlterarProduto.class})
+	@NotBlank(groups = {Default.class, AlterarProduto.class}, message = "{notBlank}")
 	@Column(nullable = false)
 	private String nome;
 
-	@NotBlank(groups = {Default.class, AlterarProduto.class})
+	@NotBlank(groups = {Default.class, AlterarProduto.class}, message = "{notBlank}")
 	@Column(nullable = false)
 	private String descricao;
 
-	@NotBlank(groups = {Default.class, AlterarProduto.class})
+	@NotBlank(groups = {Default.class, AlterarProduto.class}, message = "{notBlank}")
 	@PositiveOrZero
 	@Column(nullable = false)
 	private BigDecimal preco;
 
-	@NotNull(groups = {Default.class, AlterarProduto.class})
+	@NotNull(groups = {Default.class, AlterarProduto.class}, message = "{notNull}")
 	@Column(nullable = false)
 	private Boolean ativo;
 

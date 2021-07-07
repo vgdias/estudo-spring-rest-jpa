@@ -43,7 +43,7 @@ public class GrupoController {
 	}
 
 	@GetMapping("/{id}") 
-	public GrupoOutputDto buscar(@PathVariable("id") @Positive Long grupoId) {
+	public GrupoOutputDto buscar(@PathVariable("id") @Positive(message = "{positive}") Long grupoId) {
 		Grupo grupo = cadastroGrupoService.buscar(grupoId);
 		return GenericMapper.map(grupo, GrupoOutputDto.class);
 	}
@@ -57,7 +57,7 @@ public class GrupoController {
 	}
 
 	@PatchMapping("/{id}")
-	public GrupoOutputDto alterar(@PathVariable("id") @Positive Long grupoId,
+	public GrupoOutputDto alterar(@PathVariable("id") @Positive(message = "{positive}") Long grupoId,
 			@RequestBody Map<String, Object> propriedadesGrupoNovo,
 			HttpServletRequest request) {
 
@@ -74,7 +74,7 @@ public class GrupoController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive Long grupoId) {
+	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long grupoId) {
 		cadastroGrupoService.remover(grupoId);
 	}
 }

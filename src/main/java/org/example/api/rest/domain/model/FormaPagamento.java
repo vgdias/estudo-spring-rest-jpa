@@ -22,14 +22,14 @@ import lombok.EqualsAndHashCode;
 @Table(name="forma_pagamento")
 public class FormaPagamento {
 
-	@NotNull(groups = {AlterarFormaPagamento.class})
-	@Positive(groups = {AlterarFormaPagamento.class})
+	@NotNull(groups = {AlterarFormaPagamento.class}, message = "{notNull}")
+	@Positive(groups = {AlterarFormaPagamento.class}, message = "{positive}")
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(groups = {Default.class, AlterarFormaPagamento.class})
+	@NotBlank(groups = {Default.class, AlterarFormaPagamento.class}, message = "{notBlank}")
 	@Column(nullable = false)
 	private String descricao;
 

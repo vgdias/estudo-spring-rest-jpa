@@ -24,7 +24,6 @@ import org.example.api.rest.shared.validation.Groups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -53,9 +52,10 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/{id}")
-	public RestauranteOutputDto buscar(@PathVariable("id") @Positive Long restauranteId,
+	public RestauranteOutputDto buscar(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId,
 			HttpServletRequest request) {
-		
+
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id")); 
 		Restaurante restaurante = cadastroRestauranteService.buscar(restauranteId);
 		return GenericMapper.map(restaurante, RestauranteOutputDto.class);
@@ -63,9 +63,10 @@ public class RestauranteController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public RestauranteOutputDto adicionar(@Valid @RequestBody RestauranteInputDto restauranteNovoDto,
+	public RestauranteOutputDto adicionar(
+			@Valid @RequestBody RestauranteInputDto restauranteNovoDto,
 			HttpServletRequest request) {
-		
+
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList()); 
 		Restaurante restauranteNovo = GenericMapper.map(restauranteNovoDto, Restaurante.class);
 		Restaurante restauranteAdicionado = cadastroRestauranteService.adicionar(restauranteNovo);
@@ -73,18 +74,19 @@ public class RestauranteController {
 	}
 
 	@PatchMapping("/{id}")
-	public RestauranteOutputDto alterar(@PathVariable("id") @Positive Long restauranteAtualId,
+	public RestauranteOutputDto alterar(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
 			@RequestBody Map<String, Object> propriedadesRestauranteNovo, 
 			HttpServletRequest request) {
 
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
-		
+
 		List<String> propriedadesNaoPermitidas = Arrays.asList(
 				"id", "cozinha", "endereco", "dataCadastro", 
 				"dataAtualizacao", "formasPagamento", "produtos", "ativo");
 
 		GenericValidator.validateProperties(propriedadesRestauranteNovo, propriedadesNaoPermitidas);
-		Restaurante restauranteAtual = cadastroRestauranteService.buscar(restauranteAtualId);
+		Restaurante restauranteAtual = cadastroRestauranteService.buscar(restauranteId);
 		GenericMapper.map(propriedadesRestauranteNovo, restauranteAtual, Restaurante.class, request);
 		GenericValidator.validateObject(restauranteAtual, "restaurante", Groups.AlterarRestaurante.class);
 
@@ -93,18 +95,20 @@ public class RestauranteController {
 	}
 
 	@PatchMapping("/{id}/alterar-nome-e-frete")
-	public RestauranteOutputDto alterarNomeEFrete(@PathVariable("id") @Positive Long restauranteAtualId, 
+	public RestauranteOutputDto alterarNomeEFrete(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
 			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovoDto,
 			HttpServletRequest request) {
 
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		Restaurante nomeEFreteRestauranteNovo = GenericMapper.map(nomeEFreteRestauranteNovoDto, Restaurante.class);
-		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(nomeEFreteRestauranteNovo, restauranteAtualId);
+		Restaurante restauranteAtualizado = cadastroRestauranteService.alterarNomeEFrete(nomeEFreteRestauranteNovo, restauranteId);
 		return GenericMapper.map(restauranteAtualizado, RestauranteOutputDto.class);
 	}
 
 	@PatchMapping("/{id}/alterar-endereco")
-	public RestauranteOutputDto alterarEnderecoDeRestaurante(@PathVariable("id") @Positive Long restauranteAtualId, 
+	public RestauranteOutputDto alterarEnderecoDeRestaurante(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteAtualId, 
 			@Valid @RequestBody EnderecoInputDto enderecoNovoDto, HttpServletRequest request) {
 
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
@@ -115,29 +119,38 @@ public class RestauranteController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive Long restauranteId, HttpServletRequest request) {
+	public void remover(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
+			HttpServletRequest request) {
+
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroRestauranteService.remover(restauranteId);
 	}
 
 	@PutMapping("/{id}/ativo")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void ativar(@PathVariable("id") Long restauranteId, HttpServletRequest request) {
+	public void ativar(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
+			HttpServletRequest request) {
+
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroRestauranteService.ativar(restauranteId);
 	}
 
 	@DeleteMapping("/{id}/ativo")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void inativar(@PathVariable("id") Long restauranteId, HttpServletRequest request) {
+	public void inativar(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
+			HttpServletRequest request) {
+
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroRestauranteService.inativar(restauranteId);
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(@RequestParam @NotBlank String nome,
-			HttpServletRequest request) 
-					throws MissingServletRequestParameterException {
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhante(
+			@RequestParam @NotBlank(message = "{notBlank}") String nome,
+			HttpServletRequest request) {
 
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("nome")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService
@@ -146,8 +159,10 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/por-intervalo-de-taxa-frete")
-	public List<RestauranteOutputDto> porIntervaloDeTaxaFrete(@RequestParam @PositiveOrZero BigDecimal taxaInicial,
-			@RequestParam @PositiveOrZero BigDecimal taxaFinal, HttpServletRequest request) {
+	public List<RestauranteOutputDto> porIntervaloDeTaxaFrete(
+			@RequestParam @PositiveOrZero(message = "{positiveOrZero}") BigDecimal taxaInicial,
+			@RequestParam @PositiveOrZero(message = "{positiveOrZero}") BigDecimal taxaFinal, 
+			HttpServletRequest request) {
 
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("taxaInicial", "taxaFinal")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.restaurantePorIntervaloDeTaxaFrete(taxaInicial, taxaFinal);
@@ -155,20 +170,28 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/quantos-por-cozinhaId")
-	public int quantosPorCozinhaId(@RequestParam @Positive Long cozinhaId, HttpServletRequest request) {
+	public int quantosPorCozinhaId(
+			@RequestParam @Positive(message = "{positive}") Long cozinhaId, 
+			HttpServletRequest request) {
+
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("cozinhaId")); 
 		return cadastroRestauranteService.quantosRestaurantesPorCozinhaId(cozinhaId);
 	}
 
 	@GetMapping("/quantos-por-cozinhaNome")
-	public int quantosPorCozinhaNome(@RequestParam @NotBlank String cozinhaNome, HttpServletRequest request) {
+	public int quantosPorCozinhaNome(
+			@RequestParam @NotBlank(message = "{notBlank}") String cozinhaNome, 
+			HttpServletRequest request) {
+
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("cozinhaNome")); 
 		return cadastroRestauranteService.quantosRestaurantesPorCozinhaNome(cozinhaNome);
 	}
 
 	@GetMapping("/com-nome-semelhante-e-cozinhaId")
-	public List<RestauranteOutputDto> comNomeSemelhanteECozinhaId(@RequestParam @NotBlank String nome, 
-			@RequestParam @Positive Long cozinhaId, HttpServletRequest request) {
+	public List<RestauranteOutputDto> comNomeSemelhanteECozinhaId(
+			@RequestParam @NotBlank(message = "{notBlank}") String nome, 
+			@RequestParam @Positive(message = "{positive}") Long cozinhaId, 
+			HttpServletRequest request) {
 
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome", "cozinhaId")); 
 		List<Restaurante> restaurantes = cadastroRestauranteService.
@@ -178,16 +201,20 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/com-nome-semelhante")
-	public List<RestauranteOutputDto> comNomeSemelhante(@RequestParam @NotBlank String nome, HttpServletRequest request) {
+	public List<RestauranteOutputDto> comNomeSemelhante(
+			@RequestParam @NotBlank(message = "{notBlank}") String nome, 
+			HttpServletRequest request) {
+
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 
 		List<Restaurante> restaurantes =  cadastroRestauranteService.restauranteComNomeSemelhante(nome);
 		return GenericMapper.collectionMap(restaurantes, RestauranteOutputDto.class);
 	}
 
 	@GetMapping("/busca-customizada-por-nome-e-frete")
-	public List<RestauranteOutputDto> buscaCustomizadaPorNomeEFrete(@RequestParam @NotBlank String nome, 
-			@RequestParam @PositiveOrZero BigDecimal taxaFreteInicial, 
-			@RequestParam("taxaFreteFinal") @PositiveOrZero  BigDecimal taxaFinal, // renomeando parametro recebido 
+	public List<RestauranteOutputDto> buscaCustomizadaPorNomeEFrete(
+			@RequestParam @NotBlank(message = "{notBlank}") String nome, 
+			@RequestParam @PositiveOrZero(message = "{positiveOrZero}") BigDecimal taxaFreteInicial, 
+			@RequestParam("taxaFreteFinal") @PositiveOrZero(message = "{positiveOrZero}")  BigDecimal taxaFinal,
 			HttpServletRequest request) {
 
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("taxaFreteInicial", "taxaFinal")); 
@@ -197,10 +224,12 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/busca-dinamica")
-	public List<RestauranteOutputDto> buscaDinamica(@RequestParam @NotBlank String nome, 
-			@RequestParam @PositiveOrZero BigDecimal taxaFreteInicial, 
-			@RequestParam @PositiveOrZero BigDecimal taxaFreteFinal, 
-			@RequestParam @NotBlank String nomeCozinha, HttpServletRequest request) {
+	public List<RestauranteOutputDto> buscaDinamica(
+			@RequestParam @NotBlank(message = "{notBlank}") String nome, 
+			@RequestParam @PositiveOrZero(message = "{positiveOrZero}") BigDecimal taxaFreteInicial, 
+			@RequestParam @PositiveOrZero(message = "{positiveOrZero}") BigDecimal taxaFreteFinal, 
+			@RequestParam @NotBlank(message = "{notBlank}") String nomeCozinha, 
+			HttpServletRequest request) {
 
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList(
 				"nome", "taxaFreteInicial", "taxaFreteFinal", "nomeCozinha")); 
@@ -210,7 +239,8 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante-spec")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec(@RequestParam @NotBlank String nome,
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec(
+			@RequestParam @NotBlank(message = "{notBlank}") String nome,
 			HttpServletRequest request) {
 
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 
@@ -219,7 +249,8 @@ public class RestauranteController {
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante-spec2")
-	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec2(@RequestParam @NotBlank String nome,
+	public List<RestauranteOutputDto> comFreteGratisENomeSemelhanteSpec2(
+			@RequestParam @NotBlank(message = "{notBlank}") String nome,
 			HttpServletRequest request) {
 
 		GenericValidator.validateParameters( request.getParameterNames(), Arrays.asList("nome")); 

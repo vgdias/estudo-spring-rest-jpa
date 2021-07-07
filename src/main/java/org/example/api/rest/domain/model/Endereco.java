@@ -16,27 +16,27 @@ import lombok.Data;
 @Embeddable
 public class Endereco {
 
-	@NotBlank(groups = {AlterarEndereco.class})
+	@NotBlank(groups = {AlterarEndereco.class}, message = "{notBlank}")
 	@Column(name = "endereco_cep")
 	private String cep;
 
-	@NotBlank(groups = {AlterarEndereco.class})
+	@NotBlank(groups = {AlterarEndereco.class}, message = "{notBlank}")
 	@Column(name = "endereco_logradouro")
 	private String logradouro;
 
-	@NotBlank(groups = {AlterarEndereco.class})
+	@NotBlank(groups = {AlterarEndereco.class}, message = "{notBlank}")
 	@Column(name = "endereco_numero")
 	private String numero;
 
 	@Column(name = "endereco_complemento")
 	private String complemento;
 
-	@NotBlank(groups = {AlterarEndereco.class})
+	@NotBlank(groups = {AlterarEndereco.class}, message = "{notBlank}")
 	@Column(name = "endereco_bairro")
 	private String bairro;
 
 	@Valid
-	@NotNull(groups = {AlterarEndereco.class})
+	@NotNull(groups = {AlterarEndereco.class}, message = "{notNull}")
 	@ManyToOne
 	@JoinColumn(name = "endereco_cidade_id")
 	private Cidade cidade;

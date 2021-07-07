@@ -16,12 +16,12 @@ public class ExceptionMessage {
 	private Integer status;
 	private String title;
 	private String detail;
-	private List<Object> objects;
+	private List<Object> errors;
 
 	@Getter
 	@Builder
 	public static class Object {
-		private String name;
-		private String userMessage;
+		private String source;
+		private String rule;
 	}
 }

@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class GrupoInputDto {
 
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String nome;
 
 }

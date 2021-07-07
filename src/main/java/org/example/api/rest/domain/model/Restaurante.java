@@ -39,32 +39,32 @@ import lombok.EqualsAndHashCode;
 @Table(name="restaurante")
 public class Restaurante {
 
-	@NotNull(groups = {AlterarRestaurante.class})
-	@Positive(groups = {AlterarRestaurante.class})
+	@NotNull(groups = {AlterarRestaurante.class}, message = "{notNull}")
+	@Positive(groups = {AlterarRestaurante.class}, message = "{positive}")
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(groups = {Default.class, AlterarRestaurante.class})
+	@NotBlank(groups = {Default.class, AlterarRestaurante.class}, message = "{notBlank}")
 	@Column(nullable = false)
 	private String nome;
 
-	@NotNull(groups = {Default.class, AlterarRestaurante.class})
-	@PositiveOrZero(groups = {Default.class, AlterarRestaurante.class})
+	@NotNull(groups = {Default.class, AlterarRestaurante.class}, message = "{notNull}")
+	@PositiveOrZero(groups = {Default.class, AlterarRestaurante.class}, message = "{positiveOrZero}")
 	@Column(name = "taxa_frete", nullable = false)
 	private BigDecimal taxaFrete;
 
 	// https://stackoverflow.com/questions/24994440/no-serializer-found-for-class-org-hibernate-proxy-pojo-javassist-javassist
 	// @JsonIgnoreProperties("hibernateLazyInitializer")
 	@Valid
-	@NotNull(groups = {Default.class, AlterarRestaurante.class})
+	@NotNull(groups = {Default.class, AlterarRestaurante.class}, message = "{notNull}")
 	@ManyToOne
 	@JoinColumn(name = "cozinha_id", nullable = false)
 	private Cozinha cozinha;
 
 	@Valid
-	@NotNull(groups = {Default.class, AlterarRestaurante.class})
+	@NotNull(groups = {Default.class, AlterarRestaurante.class}, message = "{notNull}")
 	@Embedded
 	private Endereco endereco;
 

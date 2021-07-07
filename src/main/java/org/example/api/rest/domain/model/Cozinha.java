@@ -27,14 +27,14 @@ import lombok.EqualsAndHashCode;
 @Table(name="cozinha")
 public class Cozinha {
 
-	@NotNull(groups = {AlterarCozinha.class, AlterarRestaurante.class})
-	@Positive(groups = {AlterarCozinha.class, AlterarRestaurante.class})
+	@NotNull(groups = {AlterarCozinha.class, AlterarRestaurante.class}, message = "{notNull}")
+	@Positive(groups = {AlterarCozinha.class, AlterarRestaurante.class}, message = "{positive}")
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotBlank(groups = {Default.class, AlterarCozinha.class})
+	@NotBlank(groups = {Default.class, AlterarCozinha.class}, message = "{notBlank}")
 	@Column(nullable = false)
 	private String nome;
 	

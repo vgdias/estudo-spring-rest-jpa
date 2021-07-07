@@ -12,11 +12,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CidadeInputDto {
-	
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String nome;
 	
 	@Valid
-	@NotNull
+	@NotNull(message = "{notNull}")
 	private IdEstadoInputDto estado;
 }

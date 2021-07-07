@@ -44,7 +44,8 @@ public class CidadeController {
 	}
 
 	@GetMapping("/{id}")
-	public CidadeOutputDto buscar(@PathVariable("id") @Positive Long cidadeId,
+	public CidadeOutputDto buscar(
+			@PathVariable("id") @Positive(message = "{positive}") Long cidadeId,
 			HttpServletRequest request) {
 		
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id")); 
@@ -54,7 +55,8 @@ public class CidadeController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public CidadeOutputDto adicionar(@Valid @RequestBody CidadeInputDto cidadeNovaDto,
+	public CidadeOutputDto adicionar(
+			@Valid @RequestBody CidadeInputDto cidadeNovaDto,
 			HttpServletRequest request) {
 		
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList());
@@ -64,7 +66,8 @@ public class CidadeController {
 	}
 
 	@PatchMapping("/{id}")
-	public CidadeOutputDto alterar(@PathVariable("id") @Positive Long cidadeAtualId, 
+	public CidadeOutputDto alterar(
+			@PathVariable("id") @Positive (message = "{positive}") Long cidadeAtualId, 
 			@RequestBody Map<String, Object> propriedadesCidadeNova, 
 			HttpServletRequest request) {
 
@@ -82,7 +85,10 @@ public class CidadeController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") Long cidadeId, HttpServletRequest request) {
+	public void remover(
+			@PathVariable("id") @Positive(message = "{positive}") Long cidadeId, 
+			HttpServletRequest request) {
+		
 		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
 		cadastroCidadeService.remover(cidadeId);
 	}

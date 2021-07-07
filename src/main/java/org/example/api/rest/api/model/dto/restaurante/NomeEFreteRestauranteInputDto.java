@@ -13,10 +13,10 @@ import lombok.Setter;
 @Setter
 public class NomeEFreteRestauranteInputDto {
 
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String nome;
 	
-	@NotNull
-	@PositiveOrZero
+	@NotNull(message = "{notNull}")
+	@PositiveOrZero(message = "{positiveOrZero}")
 	private BigDecimal taxaFrete;
 }

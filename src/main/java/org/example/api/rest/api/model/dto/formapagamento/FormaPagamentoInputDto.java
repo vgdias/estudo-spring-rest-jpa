@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 public class FormaPagamentoInputDto {
 
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String descricao;
 }

@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IdCidadeInputDto {
-	@NotNull
+	@NotNull(message = "{notNull}")
 	private Long id;
 }

@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CozinhaInputDto {
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String nome;
 }

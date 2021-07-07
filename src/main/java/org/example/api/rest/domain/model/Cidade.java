@@ -25,19 +25,19 @@ import lombok.EqualsAndHashCode;
 @Table(name="cidade")
 public class Cidade {
 
-	@NotNull(groups = AlterarCidade.class)
-	@Positive(groups = AlterarCidade.class)
+	@NotNull(groups = AlterarCidade.class, message = "{notNull}")
+	@Positive(groups = AlterarCidade.class, message = "{positive}")
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotBlank(groups = {Default.class, AlterarCidade.class})
+	@NotBlank(groups = {Default.class, AlterarCidade.class}, message = "{notBlank}")
 	@Column(nullable = false)
 	private String nome;
 	
 	@Valid
-	@NotNull(groups = {Default.class, AlterarCidade.class})
+	@NotNull(groups = {Default.class, AlterarCidade.class}, message = "{notNull}")
 	@ManyToOne
 	@JoinColumn(nullable = false)
 	private Estado estado;

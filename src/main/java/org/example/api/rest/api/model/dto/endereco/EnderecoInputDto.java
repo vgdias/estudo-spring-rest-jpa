@@ -12,21 +12,21 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EnderecoInputDto {
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String cep;
 	
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String logradouro;
 	
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String numero;
 
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String bairro;
 
 	private String complemento;
 	
 	@Valid
-	@NotNull
+	@NotNull(message = "{notNull}")
 	private IdCidadeInputDto cidade;
 }

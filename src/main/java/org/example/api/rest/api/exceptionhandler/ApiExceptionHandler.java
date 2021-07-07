@@ -1,10 +1,12 @@
 package org.example.api.rest.api.exceptionhandler;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Path.Node;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -23,7 +25,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -112,22 +113,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Excecao lancada por erro interno de definicao de PathVariable
-	 */
-	@Override
-	protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers,
-			HttpStatus status, WebRequest request) {
-
-		// 		Erro interno a ser registrado em log
-		//		String title = "Caminho invalido";
-		//		String detail = String.format("O parametro de URL '%s' nao foi definido como PathVariable", 
-		//				ex.getVariableName());
-		//		System.out.println(title + "\n" + detail);
-
-		return handleUncaught(ex, request);
-	}
-
-	/**
 	 * Excecao lancada por requisicao a recurso invalido
 	 */
 	@Override
@@ -149,6 +134,40 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.build();
 
 		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
+	}
+
+	/**
+	 * Excecao lancada por requisicao com URL contendo tipo de argumento invalido
+	 * 
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param headers cabecalho Http a ser inserido na resposta
+	 * @param status estado Http a ser inserido na resposta
+	 * @param request requisicao Http
+	 * @return informacoes de resposta ao usuario
+	 */
+	private ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+		String title = "Requisição inválida";
+		String detail = String.format("Requisição com URL contendo tipo de argumento invalido", 
+				ex.getName(), ex.getValue());
+
+		ExceptionMessage.Object error = ExceptionMessage.Object.builder()
+				.source(String.format("%s = %s" , ex.getName(), ex.getValue()))
+				.rule(String.format("%s deve ser do tipo %s", ex.getName(), ex.getRequiredType().getSimpleName()))
+				.build();
+
+		List<ExceptionMessage.Object> errors = Arrays.asList(error);
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title(title)
+				.detail(detail)
+				.errors(errors)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
 				status, request);
 	}
 
@@ -175,32 +194,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * Excecao lancada por requisicao contendo tipo de parametro de URL invalido
-	 * 
-	 * @param ex tipo de excecao a ser tratada 
-	 * @param headers cabecalho Http a ser inserido na resposta
-	 * @param status estado Http a ser inserido na resposta
-	 * @param request requisicao Http
-	 * @return informacoes de resposta ao usuario
-	 */
-	private ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-
-		String title = "Caminho invalido";
-		String detail = String.format("O parametro de URL '%s' recebeu o valor invalido '%s'", 
-				ex.getName(), ex.getValue());
-
-		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
-				.status(status.value())
-				.title(title)
-				.detail(detail)
-				.build();
-
-		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
-				status, request);
-	}
-
-	/**
 	 * Excecao lancada por requisicao contendo parametro de URL nao fornecido
 	 */
 	@Override
@@ -208,7 +201,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			MissingServletRequestParameterException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-		String title = "Caminho invalido";
+		String title = "Requisição inválida";
 		String detail = String.format("O parametro de URL '%s' nao foi fornecido", 
 				ex.getParameterName());
 
@@ -372,8 +365,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 					}
 
 					return ExceptionMessage.Object.builder()
-							.name(name)
-							.userMessage(message)
+							.source(name)
+							.rule(message)
 							.build();
 				})
 				.collect(Collectors.toList());
@@ -382,7 +375,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.status(status.value())
 				.title(title)
 				.detail(detail)
-				.objects(objects)
+				.errors(objects)
 				.build();
 
 		return handleExceptionInternal(ex, exceptionMessage, headers, 
@@ -432,10 +425,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			WebRequest request) {
 
 		List<ExceptionMessage.Object> objects = ex.getConstraintViolations().stream()
-				.map(constraintViolation -> ExceptionMessage.Object.builder()
-						.name(constraintViolation.getPropertyPath().toString())
-						.userMessage(constraintViolation.getMessage().toString())
-						.build())
+				.map(constraintViolation -> {
+					String invalidValue = constraintViolation.getInvalidValue().toString();
+					String argument = null;
+					for (Node node : constraintViolation.getPropertyPath()) {
+						argument = node.getName();
+					} 
+					return ExceptionMessage.Object.builder()
+							.source(String.format("%s = %s" , argument, invalidValue))
+							.rule(constraintViolation.getMessage().toString())
+							.build();
+				})
 				.collect(Collectors.toList());
 
 		String title = "Operacao nao autorizada";
@@ -445,7 +445,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.status(status.value())
 				.title(title)
 				.detail(detail)
-				.objects(objects)
+				.errors(objects)
 				.build();
 
 		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 

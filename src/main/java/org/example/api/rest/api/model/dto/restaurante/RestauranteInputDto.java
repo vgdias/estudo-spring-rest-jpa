@@ -17,19 +17,19 @@ import lombok.Setter;
 @Setter
 public class RestauranteInputDto {
 
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	private String nome;
 
-	@NotNull
-	@PositiveOrZero
+	@NotNull(message = "{notNull}")
+	@PositiveOrZero(message = "{positiveOrZero}")
 	private BigDecimal taxaFrete;
 
 	@Valid
-	@NotNull
+	@NotNull(message = "{notNull}")
 	private IdCozinhaInputDto cozinha;
 
 	@Valid
-	@NotNull
+	@NotNull(message = "{notNull}")
 	private EnderecoInputDto endereco;
 
 }

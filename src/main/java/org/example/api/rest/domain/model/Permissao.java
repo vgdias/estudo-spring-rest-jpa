@@ -19,18 +19,18 @@ import lombok.EqualsAndHashCode;
 @Table(name="permissao")
 public class Permissao {
 
-	@NotNull
+	@NotNull(message = "{notNull}")
 	@Positive
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	@Column(nullable = false)
 	private String nome;
 	
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	@Column(nullable = false)
 	private String descricao;
 	

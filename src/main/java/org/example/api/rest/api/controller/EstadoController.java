@@ -48,7 +48,7 @@ public class EstadoController {
 	}
 
 	@GetMapping("/{id}")
-	public EstadoOutputDto buscar(@PathVariable("id") @Positive Long estadoId) {
+	public EstadoOutputDto buscar(@PathVariable("id") @Positive(message = "{positive}") Long estadoId) {
 		Estado estadoAtual = cadastroEstadoService.buscar(estadoId);
 		return GenericMapper.map(estadoAtual, EstadoOutputDto.class);
 	}
@@ -61,7 +61,8 @@ public class EstadoController {
 	}
 
 	@PutMapping("/{id}")
-	public EstadoOutputDto alterar(@PathVariable("id") @Positive Long estadoAtualId, 
+	public EstadoOutputDto alterar(
+			@PathVariable("id") @Positive(message = "{positive}") Long estadoAtualId, 
 			@RequestBody Map<String, Object> propriedadesEstadoNovo, HttpServletRequest request) {
 
 		this.validate(propriedadesEstadoNovo);
@@ -90,7 +91,7 @@ public class EstadoController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive Long estadoId) {
+	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long estadoId) {
 		cadastroEstadoService.remover(estadoId);
 	}
 }

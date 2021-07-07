@@ -28,23 +28,27 @@ public class RestauranteFormaPagamentoController {
 	private CadastroRestauranteService cadastroRestauranteService;
 
 	@GetMapping
-	public List<FormaPagamentoOutputDto> listarRestauranteFormasPagamento(@PathVariable("id") @Positive Long restauranteId) {
+	public List<FormaPagamentoOutputDto> listarRestauranteFormasPagamento(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId) {
+		
 		Restaurante restaurante = cadastroRestauranteService.buscar(restauranteId);
 		return GenericMapper.collectionMap(restaurante.getFormasPagamento(), FormaPagamentoOutputDto.class);
 	}
 
 	@DeleteMapping("/{formaPagamentoId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void excluirFormaPagamentoRestaurante(@PathVariable("id") @Positive Long restauranteId, 
-			@PathVariable("formaPagamentoId") @Positive Long formaPagamentoId) {
+	public void excluirFormaPagamentoRestaurante(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
+			@PathVariable("formaPagamentoId") @Positive(message = "{positive}") Long formaPagamentoId) {
 
 		cadastroRestauranteService.excluirFormaPagamento(restauranteId, formaPagamentoId);
 	}
 
 	@PutMapping("/{formaPagamentoId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void incluirFormaPagamentoRestaurante(@PathVariable("id") @Positive Long restauranteId, 
-			@PathVariable @Positive Long formaPagamentoId) {
+	public void incluirFormaPagamentoRestaurante(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
+			@PathVariable @Positive(message = "{positive}") Long formaPagamentoId) {
 
 		cadastroRestauranteService.incluirFormaPagamento(restauranteId, formaPagamentoId);
 	}

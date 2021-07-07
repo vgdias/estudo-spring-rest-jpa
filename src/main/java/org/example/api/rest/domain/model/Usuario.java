@@ -29,22 +29,22 @@ import lombok.EqualsAndHashCode;
 @Table(name="usuario")
 public class Usuario {
 
-	@NotNull
-	@Positive
+	@NotNull(message = "{notNull}")
+	@Positive(message = "{positive}")
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	@Column(nullable = false)
 	private String nome;
 
-	@Email
+	@Email(message = "{email}")
 	@Column(nullable = false)
 	private String email;
 
-	@NotBlank
+	@NotBlank(message = "{notBlank}")
 	@Column(nullable = false)
 	private String senha;
 

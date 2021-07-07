@@ -50,7 +50,9 @@ public class CozinhaController {
 	}
 
 	@GetMapping("/{id}")
-	public CozinhaOutputDto buscar(@PathVariable("id") @Positive Long cozinhaId) {
+	public CozinhaOutputDto buscar(
+			@PathVariable("id") @Positive(message = "{positive}") Long cozinhaId) {
+			
 		Cozinha cozinha = cadastroCozinhaService.buscar(cozinhaId);
 		return GenericMapper.map(cozinha, CozinhaOutputDto.class);
 	}
@@ -65,7 +67,8 @@ public class CozinhaController {
 	}
 
 	@PutMapping("/{id}")
-	public CozinhaOutputDto alterar(@PathVariable("id") @Positive Long cozinhaAtualId, 
+	public CozinhaOutputDto alterar(
+			@PathVariable("id") @Positive(message = "{positive}") Long cozinhaAtualId, 
 			@RequestBody Map<String, Object> propriedadesCozinhaNova, 
 			HttpServletRequest request) {
 
@@ -95,18 +98,18 @@ public class CozinhaController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive Long cozinhaId) {
+	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long cozinhaId) {
 		cadastroCozinhaService.remover(cozinhaId);
 	}
 
 	@GetMapping("/por-nome")
-	public CozinhaOutputDto porNome(@RequestParam @NotBlank String nome) {
+	public CozinhaOutputDto porNome(@RequestParam @NotBlank(message = "{notBlank}") String nome) {
 		Cozinha cozinha = cadastroCozinhaService.porNome(nome);
 		return GenericMapper.map(cozinha, CozinhaOutputDto.class);
 	}
 
 	@GetMapping("/com-nome-semelhante")
-	public List<CozinhaOutputDto> comNomeSemelhante(@NotBlank String nome) {
+	public List<CozinhaOutputDto> comNomeSemelhante(@NotBlank(message = "{notBlank}") String nome) {
 		return GenericMapper.collectionMap(cadastroCozinhaService.comNomeSemelhante(nome), CozinhaOutputDto.class);
 	}
 }
