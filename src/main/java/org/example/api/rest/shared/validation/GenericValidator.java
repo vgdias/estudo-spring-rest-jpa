@@ -47,7 +47,7 @@ public class GenericValidator {
 		}
 	}
 
-	public static void validateParameters(Enumeration<String> parameters, List<String> validParameters) {
+	public static void validateRequestParams(Enumeration<String> parameters, List<String> validParameters) {
 		List<String> unrecognizedParamateres = new ArrayList<>();
 		while (parameters.hasMoreElements()) {
 			String parameter =  parameters.nextElement();

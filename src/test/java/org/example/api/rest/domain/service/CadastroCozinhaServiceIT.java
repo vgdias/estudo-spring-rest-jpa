@@ -41,16 +41,16 @@ public class CadastroCozinhaServiceIT {
 	private DatabaseCleaner databaseCleaner;
 
 	@Autowired
-	private CadastroCozinhaService cadastroCozinhaService;
+	private CozinhaService cadastroCozinhaService;
 
 	@Autowired
-	private CadastroRestauranteService cadastroRestauranteService;
+	private RestauranteService cadastroRestauranteService;
 
 	@Autowired
-	private CadastroEstadoService cadastroEstadoService;
+	private EstadoService cadastroEstadoService;
 
 	@Autowired
-	private CadastroCidadeService cadastroCidadeService;
+	private CidadeService cadastroCidadeService;
 
 	@BeforeEach
 	public void setup() {
@@ -106,7 +106,7 @@ public class CadastroCozinhaServiceIT {
 	public void deveFalhar_quandoBuscarPorIdDeCozinhaInexistente() {
 		Assertions.assertThrows(
 				RecursoNaoEncontradoException.class , 
-				() -> cadastroCozinhaService.obterCozinha(
+				() -> cadastroCozinhaService.buscarCozinhaPorId(
 						ID_COZINHA_INEXISTENTE));
 	}
 

@@ -1,5 +1,9 @@
 package org.example.api.rest.domain.service;
 
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.ESTADO_POR_ID_EM_USO;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.ESTADO_POR_ID_NAO_ENCONTRADO;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.ESTADO_POR_NOME_ENCONTRADO;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -14,11 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CadastroEstadoService {
-
-	private static final String MSG_ESTADO_EM_USO = "Estado de id [%d] em uso";
-	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
-	private static final String MSG_ESTADO_ENCONTRADO_POR_NOME = "Estado [%s] já existe";
+public class EstadoService {
 
 	@Autowired
 	private EstadoRepository estadoRepository;
@@ -27,7 +27,7 @@ public class CadastroEstadoService {
 		return estadoRepository.findAll();
 	}
 
-	public Estado buscar(Long estadoId) {
+	public Estado buscarPorId(Long estadoId) {
 		return obterEstado(estadoId);
 	}
 
@@ -36,7 +36,9 @@ public class CadastroEstadoService {
 		Optional<Estado> estadoAtual = estadoRepository.findByNome(estado.getNome());
 		if (estadoAtual.isPresent()) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_ESTADO_ENCONTRADO_POR_NOME, estado.getNome()));
+					String.format(
+							ESTADO_POR_NOME_ENCONTRADO.toString(), 
+							estado.getNome()));
 		}
 		return estadoRepository.save(estado);
 	}
@@ -46,7 +48,7 @@ public class CadastroEstadoService {
 		return estadoRepository.save(estadoNovo);
 	}
 
-		@Transactional
+	@Transactional
 	public void remover(Long estadoId) {
 		try {
 			estadoRepository.deleteById(estadoId);
@@ -54,16 +56,22 @@ public class CadastroEstadoService {
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
-					String.format(MSG_ESTADO_NAO_ENCONTRADO, estadoId));
+					String.format(
+							ESTADO_POR_ID_NAO_ENCONTRADO.toString(), 
+							estadoId));
 		} catch (DataIntegrityViolationException e) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_ESTADO_EM_USO, estadoId));
+					String.format(
+							ESTADO_POR_ID_EM_USO.toString(), 
+							estadoId));
 		}
 	}
 
 	public Estado obterEstado(Long id) {
 		return estadoRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_ESTADO_NAO_ENCONTRADO, id)));
+						String.format(
+								ESTADO_POR_ID_NAO_ENCONTRADO.toString(), 
+								id)));
 	}
 }

@@ -1,24 +1,22 @@
 package org.example.api.rest.api.controller;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.validation.constraints.Positive;
 
 import org.example.api.rest.api.model.dto.estado.EstadoInputDto;
 import org.example.api.rest.api.model.dto.estado.EstadoOutputDto;
-import org.example.api.rest.domain.exception.ValidacaoException;
 import org.example.api.rest.domain.model.Estado;
-import org.example.api.rest.domain.service.CadastroEstadoService;
+import org.example.api.rest.domain.service.EstadoService;
 import org.example.api.rest.shared.mapping.GenericMapper;
+import org.example.api.rest.shared.validation.GenericValidator;
 import org.example.api.rest.shared.validation.Groups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,27 +34,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class EstadoController {
 
 	@Autowired
-	private CadastroEstadoService cadastroEstadoService;
+	private EstadoService estadoService;
 
-	@Autowired
-	private SmartValidator validator;
-	
 	@GetMapping
-	public List<EstadoOutputDto> listar() {
-		List<Estado> estados = cadastroEstadoService.listar();
+	public List<EstadoOutputDto> listar(HttpServletRequest request) {
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		List<Estado> estados = estadoService.listar();
 		return GenericMapper.collectionMap(estados, EstadoOutputDto.class);
 	}
 
 	@GetMapping("/{id}")
-	public EstadoOutputDto buscar(@PathVariable("id") @Positive(message = "{positive}") Long estadoId) {
-		Estado estadoAtual = cadastroEstadoService.buscar(estadoId);
+	public EstadoOutputDto buscarPorId(@PathVariable("id") @Positive(message = "{positive}") Long estadoId,
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		Estado estadoAtual = estadoService.buscarPorId(estadoId);
 		return GenericMapper.map(estadoAtual, EstadoOutputDto.class);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public EstadoOutputDto adicionar(@Valid @RequestBody EstadoInputDto estadoNovo) {
-		Estado estadoAdicionado = cadastroEstadoService.adicionar(GenericMapper.map(estadoNovo, Estado.class));
+	public EstadoOutputDto adicionar(@Valid @RequestBody EstadoInputDto estadoNovoDto,
+			HttpServletRequest request) {
+
+		Estado estadoNovo = GenericMapper.map(estadoNovoDto, Estado.class);
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList()); 
+		Estado estadoAdicionado = estadoService.adicionar(estadoNovo);
 		return GenericMapper.map(estadoAdicionado, EstadoOutputDto.class);
 	}
 
@@ -65,33 +68,24 @@ public class EstadoController {
 			@PathVariable("id") @Positive(message = "{positive}") Long estadoAtualId, 
 			@RequestBody Map<String, Object> propriedadesEstadoNovo, HttpServletRequest request) {
 
-		this.validate(propriedadesEstadoNovo);
-		Estado estadoAtual = cadastroEstadoService.obterEstado(estadoAtualId);
-		GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class, request);
-		this.validate(estadoAtual, "estado");
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		List<String> propriedadesNaoPermitidas = Arrays.asList("id");
+		GenericValidator.validateProperties(propriedadesEstadoNovo, propriedadesNaoPermitidas);
 
-		Estado estadoAtualizado = cadastroEstadoService.alterar(estadoAtual);
+		Estado estadoAtual = estadoService.obterEstado(estadoAtualId);
+		GenericMapper.map(propriedadesEstadoNovo, estadoAtual, Estado.class, request);
+		GenericValidator.validateObject(estadoAtual, "estado", Groups.AlterarEstado.class);
+
+		Estado estadoAtualizado = estadoService.alterar(estadoAtual);
 		return GenericMapper.map(estadoAtualizado, EstadoOutputDto.class);
 	}
-	private void validate(Map<String, Object> propriedadesEstadoNovo) {
-		if (propriedadesEstadoNovo.isEmpty()) {
-			throw new ValidationException("Nenhum argumento fornecido");
-		}
-		if (propriedadesEstadoNovo.containsKey("id")) {
-			throw new ValidationException("A propriedade 'id' nao pode ser alterada");
-		}
-	}
-	private void validate(Object object, String objectName) {
-		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(object, objectName);
-		validator.validate(object, bindingResult, Groups.AlterarEstado.class);
-		if (bindingResult.hasErrors()) {
-			throw new ValidacaoException(bindingResult);
-		}
-	} 
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long estadoId) {
-		cadastroEstadoService.remover(estadoId);
+	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long estadoId,
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		estadoService.remover(estadoId);
 	}
 }

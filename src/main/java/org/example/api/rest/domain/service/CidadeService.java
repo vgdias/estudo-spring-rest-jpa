@@ -1,5 +1,10 @@
 package org.example.api.rest.domain.service;
 
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.CIDADE_POR_ID_EM_USO;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.CIDADE_POR_ID_NAO_ENCONTRADA;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.CIDADE_POR_NOME_ENCONTRADA;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.ESTADO_POR_ID_NAO_ENCONTRADO;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,13 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CadastroCidadeService {
-
-	private static final String MSG_ESTADO_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
-	private static final String MSG_CIDADE_EM_USO = "Cidade de id [%d] em uso";
-	private static final String MSG_CIDADE_NAO_ENCONTRADA = "Cidade de id [%d] nao encontrada";
-	private static final String MSG_CIDADE_ENCONTRADA_POR_NOME = "Cidade [%s] já existe";
-	private static final String MSG_ESTADO_POR_ID_NAO_ENCONTRADO = "Estado de id [%d] nao encontrado";
+public class CidadeService {
 
 	@Autowired
 	private EntityManager entityManager;
@@ -41,8 +40,8 @@ public class CadastroCidadeService {
 		return cidadeRepository.findAll();
 	}
 
-	public Cidade buscar(Long cidadeId) {
-		return obterCidadePorId(cidadeId);
+	public Cidade buscarPorId(Long cidadeId) {
+		return buscarCidadePorId(cidadeId);
 	} 
 
 	@Transactional
@@ -57,7 +56,8 @@ public class CadastroCidadeService {
 
 		} else {
 			throw new DependenciaNaoEncontradaException(
-					String.format(MSG_ESTADO_NAO_ENCONTRADO, 
+					String.format(
+							ESTADO_POR_ID_NAO_ENCONTRADO.toString(), 
 							cidade.getEstado().getId()));
 		}
 	}
@@ -75,7 +75,8 @@ public class CadastroCidadeService {
 
 		} else {
 			throw new DependenciaNaoEncontradaException(
-					String.format(MSG_ESTADO_POR_ID_NAO_ENCONTRADO, 
+					String.format(
+							ESTADO_POR_ID_NAO_ENCONTRADO.toString(), 
 							cidadeNova.getEstado().getId()));
 		}
 	}
@@ -88,30 +89,40 @@ public class CadastroCidadeService {
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
-					String.format(MSG_CIDADE_NAO_ENCONTRADA, cidadeId));
+					String.format(
+							CIDADE_POR_ID_NAO_ENCONTRADA.toString(), 
+							cidadeId));
 		} catch (DataIntegrityViolationException e) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_CIDADE_EM_USO, cidadeId));
+					String.format(
+							CIDADE_POR_ID_EM_USO.toString(), 
+							cidadeId));
 		}
 	}
 
-	public Cidade obterCidadePorId(Long id) {
+	public Cidade buscarCidadePorId(Long id) {
 		return cidadeRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_CIDADE_NAO_ENCONTRADA, id)));
+						String.format(
+								CIDADE_POR_ID_NAO_ENCONTRADA.toString(), 
+								id)));
 	}
 
 	private Estado obterEstadoDeCidadePorId(Long id) {
 		return estadoRepository.findById(id)
 				.orElseThrow(() -> new DependenciaNaoEncontradaException(
-						String.format(MSG_ESTADO_NAO_ENCONTRADO, id)));
+						String.format(
+								ESTADO_POR_ID_NAO_ENCONTRADO.toString(), 
+								id)));
 	}
 
 	private void verificarSeCidadeEstadoExistePorCidadeNomeEstadoId(Cidade cidade) {
 		Optional<Cidade> cidadeAtual = cidadeRepository.findByNomeAndEstadoId(cidade.getNome(), cidade.getEstado().getId());
 		if (cidadeAtual.isPresent()) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_CIDADE_ENCONTRADA_POR_NOME, cidade.getNome()));
+					String.format(
+							CIDADE_POR_NOME_ENCONTRADA.toString(), 
+							cidade.getNome()));
 		}
 	}
 }

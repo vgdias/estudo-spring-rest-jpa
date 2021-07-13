@@ -1,5 +1,11 @@
 package org.example.api.rest.domain.service;
 
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.CIDADE_POR_ID_NAO_ENCONTRADA;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.COZINHA_POR_ID_EM_USO;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.COZINHA_POR_ID_NAO_ENCONTRADA;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.COZINHA_POR_NOME_ENCONTRADA;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.COZINHA_POR_NOME_NAO_ENCONTRADA;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -14,12 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CadastroCozinhaService {
-
-	private static final String MSG_COZINHA_EM_USO = "Cozinha de id [%d] em uso";
-	private static final String MSG_COZINHA_POR_ID_NAO_ENCONTRADA = "Cozinha de id [%d] nao encontrada";
-	private static final String MSG_COZINHA_POR_NOME_NAO_ENCONTRADA = "Cozinha de nome [%s] nao encontrada";
-	private static final String MSG_COZINHA_ENCONTRADA_POR_NOME = "Cozinha [%s] já existe";
+public class CozinhaService {
 
 	@Autowired
 	private CozinhaRepository cozinhaRepository;
@@ -28,8 +29,8 @@ public class CadastroCozinhaService {
 		return cozinhaRepository.findAll();
 	}
 
-	public Cozinha buscar(Long cozinhaId) {
-		return obterCozinha(cozinhaId);
+	public Cozinha buscarPorId(Long cozinhaId) {
+		return buscarCozinhaPorId(cozinhaId);
 	}
 
 	@Transactional
@@ -37,7 +38,9 @@ public class CadastroCozinhaService {
 		Optional<Cozinha> cozinhaAtual = cozinhaRepository.findByNome(cozinha.getNome());
 		if (cozinhaAtual.isPresent()) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_COZINHA_ENCONTRADA_POR_NOME, cozinha.getNome()));
+					String.format(
+							COZINHA_POR_NOME_ENCONTRADA.toString(), 
+							cozinha.getNome()));
 		}
 		return cozinhaRepository.save(cozinha);
 	}
@@ -55,17 +58,23 @@ public class CadastroCozinhaService {
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
-					String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, cozinhaId));
+					String.format(
+							CIDADE_POR_ID_NAO_ENCONTRADA.toString(), 
+							cozinhaId));
 		} catch (DataIntegrityViolationException e) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_COZINHA_EM_USO, cozinhaId));
+					String.format(
+							COZINHA_POR_ID_EM_USO.toString(), 
+							cozinhaId));
 		}
 	}
 
 	public Cozinha porNome(String nome) {
 		return cozinhaRepository.findByNome(nome)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_COZINHA_POR_NOME_NAO_ENCONTRADA, nome)));
+						String.format(
+								COZINHA_POR_NOME_NAO_ENCONTRADA.toString(), 
+								nome)));
 	}
 
 	public List<Cozinha> comNomeSemelhante(String nome) {
@@ -76,10 +85,12 @@ public class CadastroCozinhaService {
 		return cozinhaRepository.count();
 	}
 
-	public Cozinha obterCozinha(Long id) {
+	public Cozinha buscarCozinhaPorId(Long id) {
 		return cozinhaRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_COZINHA_POR_ID_NAO_ENCONTRADA, id)));
+						String.format(
+								COZINHA_POR_ID_NAO_ENCONTRADA.toString(), 
+								id)));
 	}
 
 }

@@ -35,4 +35,7 @@ JpaSpecificationExecutor<Restaurante>{
 	// Resolvendo o problema do N + 1
 	@Query("from Restaurante r left join r.cozinha left join r.endereco.cidade c left join c.estado where r.id = ?1")
 	Optional<Restaurante> findById(Long id);
+	
+	Boolean existsByProdutosNome(String nome);
+
 }

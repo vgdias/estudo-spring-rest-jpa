@@ -1,5 +1,8 @@
 package org.example.api.rest.domain.service;
 
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.FORMA_PAGAMENTO_POR_ID_EM_USO;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.FORMA_PAGAMENTO_POR_ID_NAO_ENCONTRADA;
+
 import java.util.List;
 
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
@@ -13,12 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CadastroFormaPagamentoService {
-
-	private static final String MSG_FORMA_PAGAMENTO_NAO_ENCONTRADA = 
-			"Forma de pagamento de id [%d] nao encontrada";
-	private static final String MSG_FORMA_PAGAMENTO_EM_USO = 
-			"Forma de pagamento de id [%d] em uso";
+public class FormaPagamentoService {
 
 	@Autowired
 	private FormaPagamentoRepository formaPagamentoRepository;
@@ -27,8 +25,8 @@ public class CadastroFormaPagamentoService {
 		return formaPagamentoRepository.findAll();
 	}
 
-	public FormaPagamento buscar(Long formaPagamentoId) {
-		return obtemFormaPagamento(formaPagamentoId);
+	public FormaPagamento buscarPorId(Long formaPagamentoId) {
+		return buscarFormaPagamentoPorId(formaPagamentoId);
 	} 
 
 	@Transactional
@@ -49,16 +47,22 @@ public class CadastroFormaPagamentoService {
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
-					String.format(MSG_FORMA_PAGAMENTO_NAO_ENCONTRADA, formaPagamentoId));
+					String.format(
+							FORMA_PAGAMENTO_POR_ID_NAO_ENCONTRADA.toString(), 
+							formaPagamentoId));
 		} catch (DataIntegrityViolationException e) {
 			throw new RecursoEmUsoException(
-					String.format(MSG_FORMA_PAGAMENTO_EM_USO, formaPagamentoId));
+					String.format(
+							FORMA_PAGAMENTO_POR_ID_EM_USO.toString(), 
+							formaPagamentoId));
 		}
 	}
 
-	public FormaPagamento obtemFormaPagamento(Long id) {
+	public FormaPagamento buscarFormaPagamentoPorId(Long id) {
 		return formaPagamentoRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_FORMA_PAGAMENTO_NAO_ENCONTRADA, id)));
+						String.format(
+								FORMA_PAGAMENTO_POR_ID_NAO_ENCONTRADA.toString(), 
+								id)));
 	}
 }

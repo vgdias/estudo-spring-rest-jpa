@@ -1,5 +1,8 @@
 package org.example.api.rest.domain.service;
 
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.GRUPO_ENCONTRADO_POR_NOME;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.GRUPO_POR_ID_NAO_ENCONTRADO;
+
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -15,10 +18,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CadastroGrupoService {
-
-	private static final String MSG_GRUPO_NAO_ENCONTRADO = "Grupo de id [%d] nao encontrado";
-	private static final String MSG_GRUPO_ENCONTRADO_POR_NOME = "Grupo [%s] já existe";
+public class GrupoService {
 
 	@Autowired
 	private EntityManager entityManager;
@@ -30,7 +30,7 @@ public class CadastroGrupoService {
 		return grupoRepository.findAll();
 	}
 
-	public Grupo buscar(@Positive Long grupoId) {
+	public Grupo buscarPorId(@Positive Long grupoId) {
 		return obterGrupoPorId(grupoId);
 	}
 
@@ -55,15 +55,19 @@ public class CadastroGrupoService {
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new RecursoNaoEncontradoException(
-					String.format(MSG_GRUPO_NAO_ENCONTRADO, grupoId));
+					String.format(
+							GRUPO_POR_ID_NAO_ENCONTRADO.toString(), 
+							grupoId));
 		}
 	}
-	
+
 	private void verificarSeGrupoExiste(String nome) {
 		grupoRepository.findByNome(nome)
 		.ifPresent((grupoEncontrado) -> { 
 			throw new RecursoEmUsoException(
-					String.format(MSG_GRUPO_ENCONTRADO_POR_NOME, grupoEncontrado.getNome())
+					String.format(
+							GRUPO_ENCONTRADO_POR_NOME.toString(), 
+							grupoEncontrado.getNome())
 					);
 		});
 	}
@@ -71,7 +75,9 @@ public class CadastroGrupoService {
 	private Grupo obterGrupoPorId(Long id) {
 		return grupoRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(MSG_GRUPO_NAO_ENCONTRADO, id)));
+						String.format(
+								GRUPO_POR_ID_NAO_ENCONTRADO.toString(), 
+								id)));
 	}
-	
+
 }

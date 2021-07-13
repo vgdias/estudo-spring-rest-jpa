@@ -1,25 +1,23 @@
 package org.example.api.rest.api.controller;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 
 import org.example.api.rest.api.model.dto.cozinha.CozinhaInputDto;
 import org.example.api.rest.api.model.dto.cozinha.CozinhaOutputDto;
-import org.example.api.rest.domain.exception.ValidacaoException;
 import org.example.api.rest.domain.model.Cozinha;
-import org.example.api.rest.domain.service.CadastroCozinhaService;
+import org.example.api.rest.domain.service.CozinhaService;
 import org.example.api.rest.shared.mapping.GenericMapper;
+import org.example.api.rest.shared.validation.GenericValidator;
 import org.example.api.rest.shared.validation.Groups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.SmartValidator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,31 +36,33 @@ import org.springframework.web.bind.annotation.RestController;
 public class CozinhaController {
 
 	@Autowired
-	private CadastroCozinhaService cadastroCozinhaService;
-
-	@Autowired
-	private SmartValidator validator;
+	private CozinhaService cozinhaService;
 
 	@GetMapping()
-	public List<CozinhaOutputDto> listar() {
-		List<Cozinha> cozinhas = cadastroCozinhaService.listar();
+	public List<CozinhaOutputDto> listar(HttpServletRequest request) {
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		List<Cozinha> cozinhas = cozinhaService.listar();
 		return GenericMapper.collectionMap(cozinhas, CozinhaOutputDto.class);
 	}
 
 	@GetMapping("/{id}")
-	public CozinhaOutputDto buscar(
-			@PathVariable("id") @Positive(message = "{positive}") Long cozinhaId) {
-			
-		Cozinha cozinha = cadastroCozinhaService.buscar(cozinhaId);
+	public CozinhaOutputDto buscarPorId(
+			@PathVariable("id") @Positive(message = "{positive}") Long cozinhaId,
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList()); 
+		Cozinha cozinha = cozinhaService.buscarPorId(cozinhaId);
 		return GenericMapper.map(cozinha, CozinhaOutputDto.class);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public CozinhaOutputDto adicionar(@Valid @RequestBody CozinhaInputDto cozinhaNova) {
-		Cozinha cozinhaAdicionada = cadastroCozinhaService.adicionar(
-				GenericMapper.map(cozinhaNova, Cozinha.class));
+	public CozinhaOutputDto adicionar(@Valid @RequestBody CozinhaInputDto cozinhaNovaDto,
+			HttpServletRequest request) {
 
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList()); 
+		Cozinha cozinhaNova = GenericMapper.map(cozinhaNovaDto, Cozinha.class);
+		Cozinha cozinhaAdicionada = cozinhaService.adicionar(cozinhaNova);
 		return GenericMapper.map(cozinhaAdicionada, CozinhaOutputDto.class);
 	}
 
@@ -72,44 +72,35 @@ public class CozinhaController {
 			@RequestBody Map<String, Object> propriedadesCozinhaNova, 
 			HttpServletRequest request) {
 
-		this.validate(propriedadesCozinhaNova);
-		Cozinha cozinhaAtual = cadastroCozinhaService.obterCozinha(cozinhaAtualId);
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		List<String> propriedadesNaoPermitidas = Arrays.asList("id", "restaurantes");
+		GenericValidator.validateProperties(propriedadesCozinhaNova, propriedadesNaoPermitidas);
+
+		Cozinha cozinhaAtual = cozinhaService.buscarCozinhaPorId(cozinhaAtualId);
 		GenericMapper.map(propriedadesCozinhaNova, cozinhaAtual, Cozinha.class, request);
-		validate(cozinhaAtual, "cozinha");
-	
-		Cozinha cozinhaAtualizada = cadastroCozinhaService.alterar(cozinhaAtual);
+		GenericValidator.validateObject(cozinhaAtual, "cozinha", Groups.AlterarCozinha.class);
+
+		Cozinha cozinhaAtualizada = cozinhaService.alterar(cozinhaAtual);
 		return GenericMapper.map(cozinhaAtualizada, CozinhaOutputDto.class);
-	}
-	private void validate(Map<String, Object> propriedadesCozinhaNova) {
-		if (propriedadesCozinhaNova.isEmpty()) {
-			throw new ValidationException("Nenhum argumento fornecido");
-		}
-		if (propriedadesCozinhaNova.containsKey("id")) {
-			throw new ValidationException("A propriedade 'id' nao pode ser alterada");
-		}
-	}
-	private void validate(Cozinha cozinhaAtual, String objectName) {
-		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(cozinhaAtual, objectName);
-		validator.validate(cozinhaAtual, bindingResult, Groups.AlterarCozinha.class);
-		if (bindingResult.hasErrors()) {
-			throw new ValidacaoException(bindingResult);
-		}
 	}
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long cozinhaId) {
-		cadastroCozinhaService.remover(cozinhaId);
+	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long cozinhaId,
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		cozinhaService.remover(cozinhaId);
 	}
 
 	@GetMapping("/por-nome")
 	public CozinhaOutputDto porNome(@RequestParam @NotBlank(message = "{notBlank}") String nome) {
-		Cozinha cozinha = cadastroCozinhaService.porNome(nome);
+		Cozinha cozinha = cozinhaService.porNome(nome);
 		return GenericMapper.map(cozinha, CozinhaOutputDto.class);
 	}
 
 	@GetMapping("/com-nome-semelhante")
 	public List<CozinhaOutputDto> comNomeSemelhante(@NotBlank(message = "{notBlank}") String nome) {
-		return GenericMapper.collectionMap(cadastroCozinhaService.comNomeSemelhante(nome), CozinhaOutputDto.class);
+		return GenericMapper.collectionMap(cozinhaService.comNomeSemelhante(nome), CozinhaOutputDto.class);
 	}
 }

@@ -24,10 +24,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -216,6 +218,27 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
+	 * Excecao lancada por requisicao com metodo Http nao suportado
+	 */
+	@Override
+	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+		String title = "Requisição inválida";
+		String detail = String.format("Método [%s] não suportado pelo endpoint [%s]", 
+				ex.getMethod(), ((ServletWebRequest)request).getRequest().getRequestURI().toString());
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title(title)
+				.detail(detail)
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, headers, 
+				status, request);
+	}
+
+	/**
 	 * Excecao lancada por sintaxe invalida no corpo da requisicao
 	 */
 	@Override
@@ -315,7 +338,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return informacoes de resposta ao usuario
 	 */
 	@ExceptionHandler({ ValidacaoException.class })
-	public ResponseEntity<Object> handleValidacaoException(ValidacaoException ex, WebRequest request) {
+	public ResponseEntity<Object> handleValidacao(ValidacaoException ex, WebRequest request) {
 		return handleValidationInternal(ex, ex.getBindingResult(), new HttpHeaders(), 
 				HttpStatus.BAD_REQUEST, request);
 	}   
@@ -355,13 +378,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		String title = "Operacao nao permitida";
 		String detail = String.format("Falha na validacao de um ou mais argumentos");
 
-		List<ExceptionMessage.Error> objects = bindingResult.getAllErrors().stream()
-				.map(objectError -> {
-					String message = messageSource.getMessage(objectError, LocaleContextHolder.getLocale());
-					String name = objectError.getObjectName();
+		List<ExceptionMessage.Error> errors = bindingResult.getAllErrors().stream()
+				.map(error -> {
+					String message = messageSource.getMessage(error, LocaleContextHolder.getLocale());
+					String name = error.getObjectName();
 
-					if (objectError instanceof FieldError) {
-						name = ((FieldError) objectError).getField();
+					if (error instanceof FieldError) {
+						name = ((FieldError) error).getField();
 					}
 
 					return ExceptionMessage.Error.builder()
@@ -375,7 +398,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.status(status.value())
 				.title(title)
 				.detail(detail)
-				.errors(objects)
+				.errors(errors)
 				.build();
 
 		return handleExceptionInternal(ex, exceptionMessage, headers, 
@@ -424,7 +447,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	private ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex, HttpStatus status,
 			WebRequest request) {
 
-		List<ExceptionMessage.Error> objects = ex.getConstraintViolations().stream()
+		List<ExceptionMessage.Error> errors = ex.getConstraintViolations().stream()
 				.map(constraintViolation -> {
 					String invalidValue = constraintViolation.getInvalidValue().toString();
 					String argument = null;
@@ -445,7 +468,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				.status(status.value())
 				.title(title)
 				.detail(detail)
-				.errors(objects)
+				.errors(errors)
 				.build();
 
 		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 

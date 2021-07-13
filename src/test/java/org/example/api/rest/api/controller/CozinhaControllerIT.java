@@ -13,10 +13,10 @@ import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.model.Endereco;
 import org.example.api.rest.domain.model.Estado;
 import org.example.api.rest.domain.model.Restaurante;
-import org.example.api.rest.domain.service.CadastroCidadeService;
-import org.example.api.rest.domain.service.CadastroCozinhaService;
-import org.example.api.rest.domain.service.CadastroEstadoService;
-import org.example.api.rest.domain.service.CadastroRestauranteService;
+import org.example.api.rest.domain.service.CidadeService;
+import org.example.api.rest.domain.service.CozinhaService;
+import org.example.api.rest.domain.service.EstadoService;
+import org.example.api.rest.domain.service.RestauranteService;
 import org.example.api.rest.util.DatabaseCleaner;
 import org.example.api.rest.util.ResourceUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,16 +59,16 @@ public class CozinhaControllerIT {
 	private DatabaseCleaner databaseCleaner;
 
 	@Autowired
-	private CadastroCozinhaService cadastroCozinhaService;
+	private CozinhaService cadastroCozinhaService;
 
 	@Autowired
-	private CadastroRestauranteService cadastroRestauranteService;
+	private RestauranteService cadastroRestauranteService;
 
 	@Autowired
-	private CadastroEstadoService cadastroEstadoService;
+	private EstadoService cadastroEstadoService;
 
 	@Autowired
-	private CadastroCidadeService cadastroCidadeService;
+	private CidadeService cadastroCidadeService;
 
 	@BeforeEach
 	public void setup() {

@@ -11,7 +11,7 @@ import javax.validation.constraints.Positive;
 import org.example.api.rest.api.model.dto.grupo.GrupoInputDto;
 import org.example.api.rest.api.model.dto.grupo.GrupoOutputDto;
 import org.example.api.rest.domain.model.Grupo;
-import org.example.api.rest.domain.service.CadastroGrupoService;
+import org.example.api.rest.domain.service.GrupoService;
 import org.example.api.rest.shared.mapping.GenericMapper;
 import org.example.api.rest.shared.validation.GenericValidator;
 import org.example.api.rest.shared.validation.Groups;
@@ -34,25 +34,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class GrupoController {
 
 	@Autowired
-	private CadastroGrupoService cadastroGrupoService;
+	private GrupoService grupoService;
 
 	@GetMapping
-	public List<GrupoOutputDto> listar() {
-		List<Grupo> grupos = cadastroGrupoService.listar();
+	public List<GrupoOutputDto> listar(HttpServletRequest request) {
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		List<Grupo> grupos = grupoService.listar();
 		return GenericMapper.collectionMap(grupos, GrupoOutputDto.class);
 	}
 
 	@GetMapping("/{id}") 
-	public GrupoOutputDto buscar(@PathVariable("id") @Positive(message = "{positive}") Long grupoId) {
-		Grupo grupo = cadastroGrupoService.buscar(grupoId);
+	public GrupoOutputDto buscarPorId(@PathVariable("id") @Positive(message = "{positive}") Long grupoId,
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		Grupo grupo = grupoService.buscarPorId(grupoId);
 		return GenericMapper.map(grupo, GrupoOutputDto.class);
 	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public GrupoOutputDto adicionar( @Valid @RequestBody GrupoInputDto grupoInputDto) {
+	public GrupoOutputDto adicionar( @Valid @RequestBody GrupoInputDto grupoInputDto,
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
 		Grupo grupoNovo = GenericMapper.map(grupoInputDto, Grupo.class);
-		Grupo grupoAdicionado = cadastroGrupoService.adicionar(grupoNovo);
+		Grupo grupoAdicionado = grupoService.adicionar(grupoNovo);
 		return GenericMapper.map(grupoAdicionado, GrupoOutputDto.class);
 	}
 
@@ -61,20 +68,24 @@ public class GrupoController {
 			@RequestBody Map<String, Object> propriedadesGrupoNovo,
 			HttpServletRequest request) {
 
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
 		List<String> propriedadesNaoPermitidas = Arrays.asList("id", "permissoes");
 		GenericValidator.validateProperties(propriedadesGrupoNovo, propriedadesNaoPermitidas);
 
-		Grupo grupoAtual = cadastroGrupoService.buscar(grupoId);
+		Grupo grupoAtual = grupoService.buscarPorId(grupoId);
 		GenericMapper.map(propriedadesGrupoNovo, grupoAtual, Grupo.class, request);
 		GenericValidator.validateObject(grupoAtual, "grupo", Groups.AlterarGrupo.class);
 
-		Grupo grupoAtualizado = cadastroGrupoService.alterar(grupoAtual);
+		Grupo grupoAtualizado = grupoService.alterar(grupoAtual);
 		return GenericMapper.map(grupoAtualizado, GrupoOutputDto.class);
 	}
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long grupoId) {
-		cadastroGrupoService.remover(grupoId);
+	public void remover(@PathVariable("id") @Positive(message = "{positive}") Long grupoId,
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		grupoService.remover(grupoId);
 	}
 }

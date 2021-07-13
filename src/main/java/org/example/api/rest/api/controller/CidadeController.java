@@ -11,7 +11,7 @@ import javax.validation.constraints.Positive;
 import org.example.api.rest.api.model.dto.cidade.CidadeInputDto;
 import org.example.api.rest.api.model.dto.cidade.CidadeOutputDto;
 import org.example.api.rest.domain.model.Cidade;
-import org.example.api.rest.domain.service.CadastroCidadeService;
+import org.example.api.rest.domain.service.CidadeService;
 import org.example.api.rest.shared.mapping.GenericMapper;
 import org.example.api.rest.shared.validation.GenericValidator;
 import org.example.api.rest.shared.validation.Groups;
@@ -34,22 +34,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class CidadeController {
 
 	@Autowired
-	private CadastroCidadeService cadastroCidadeService;
+	private CidadeService cidadecService;
 
 	@GetMapping()
 	public List<CidadeOutputDto> listar(HttpServletRequest request) {
-		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList());
-		List<Cidade> cidades = cadastroCidadeService.listar();
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		List<Cidade> cidades = cidadecService.listar();
 		return GenericMapper.collectionMap(cidades, CidadeOutputDto.class);
 	}
 
 	@GetMapping("/{id}")
-	public CidadeOutputDto buscar(
+	public CidadeOutputDto buscarPorId(
 			@PathVariable("id") @Positive(message = "{positive}") Long cidadeId,
 			HttpServletRequest request) {
 		
-		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id")); 
-		Cidade cidade = cadastroCidadeService.buscar(cidadeId);
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList("id")); 
+		Cidade cidade = cidadecService.buscarPorId(cidadeId);
 		return GenericMapper.map(cidade, CidadeOutputDto.class);
 	}
 
@@ -59,9 +59,9 @@ public class CidadeController {
 			@Valid @RequestBody CidadeInputDto cidadeNovaDto,
 			HttpServletRequest request) {
 		
-		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList());
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
 		Cidade cidadeNova = GenericMapper.map(cidadeNovaDto, Cidade.class);
-		Cidade cidadeAdicionada = cadastroCidadeService.adicionar(cidadeNova);
+		Cidade cidadeAdicionada = cidadecService.adicionar(cidadeNova);
 		return GenericMapper.map(cidadeAdicionada, CidadeOutputDto.class);
 	}
 
@@ -71,15 +71,15 @@ public class CidadeController {
 			@RequestBody Map<String, Object> propriedadesCidadeNova, 
 			HttpServletRequest request) {
 
-		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList("id"));
 		List<String> propriedadesNaoPermitidas = Arrays.asList("id");
 		GenericValidator.validateProperties(propriedadesCidadeNova, propriedadesNaoPermitidas);
 
-		Cidade cidadeAtual = cadastroCidadeService.obterCidadePorId(cidadeAtualId);
+		Cidade cidadeAtual = cidadecService.buscarCidadePorId(cidadeAtualId);
 		GenericMapper.map(propriedadesCidadeNova, cidadeAtual, Cidade.class, request);
 		GenericValidator.validateObject(cidadeAtual, "cidade", Groups.AlterarCidade.class);
 
-		Cidade cidadeAtualizado = cadastroCidadeService.alterar(cidadeAtual);
+		Cidade cidadeAtualizado = cidadecService.alterar(cidadeAtual);
 		return GenericMapper.map(cidadeAtualizado, CidadeOutputDto.class);
 	}
 
@@ -89,7 +89,7 @@ public class CidadeController {
 			@PathVariable("id") @Positive(message = "{positive}") Long cidadeId, 
 			HttpServletRequest request) {
 		
-		GenericValidator.validateParameters(request.getParameterNames(), Arrays.asList("id"));
-		cadastroCidadeService.remover(cidadeId);
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList("id"));
+		cidadecService.remover(cidadeId);
 	}
 }

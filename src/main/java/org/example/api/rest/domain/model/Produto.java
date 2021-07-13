@@ -43,18 +43,16 @@ public class Produto {
 	@Column(nullable = false)
 	private String descricao;
 
-	@NotBlank(groups = {Default.class, AlterarProduto.class}, message = "{notBlank}")
+	@NotNull(groups = {Default.class, AlterarProduto.class}, message = "{notBlank}")
 	@PositiveOrZero
 	@Column(nullable = false)
 	private BigDecimal preco;
 
-	@NotNull(groups = {Default.class, AlterarProduto.class}, message = "{notNull}")
-	@Column(nullable = false)
-	private Boolean ativo;
+	private Boolean ativo = Boolean.TRUE;
 
+	@NotNull
 	@Valid
 	@ManyToOne
-	@JoinColumn(name = "restauranteId")
+	@JoinColumn(nullable = false)
 	private Restaurante restaurante;
-
 }
