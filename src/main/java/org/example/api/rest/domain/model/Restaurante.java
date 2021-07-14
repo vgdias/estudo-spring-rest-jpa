@@ -84,6 +84,7 @@ public class Restaurante {
 	private Set<Produto> produtos = new HashSet<>();
 
 	private Boolean ativo = Boolean.TRUE;
+	private Boolean aberto = Boolean.TRUE;
 
 	public void ativar() {
 		setAtivo(true);
