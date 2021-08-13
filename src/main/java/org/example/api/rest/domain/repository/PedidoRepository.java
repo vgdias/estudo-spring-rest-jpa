@@ -1,0 +1,17 @@
+package org.example.api.rest.domain.repository;
+
+import java.util.List;
+
+import org.example.api.rest.domain.model.Pedido;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+
+public interface PedidoRepository extends 
+JpaRepository<Pedido, Long>,
+JpaSpecificationExecutor<Pedido> {
+
+	@Query("from Pedido p join fetch p.cliente join fetch p.restaurante r join fetch r.cozinha")
+	List<Pedido> findAll();
+
+}

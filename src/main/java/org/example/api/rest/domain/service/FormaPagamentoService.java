@@ -2,8 +2,10 @@ package org.example.api.rest.domain.service;
 
 import static org.example.api.rest.api.exceptionhandler.ErrorMessage.FORMA_PAGAMENTO_POR_ID_EM_USO;
 import static org.example.api.rest.api.exceptionhandler.ErrorMessage.FORMA_PAGAMENTO_POR_ID_NAO_ENCONTRADA;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.FORMA_PAGAMENTO_POR_NOME_ENCONTRADA;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
@@ -31,11 +33,13 @@ public class FormaPagamentoService {
 
 	@Transactional
 	public FormaPagamento adicionar(FormaPagamento formaPagamento) {
+		verificarSeFormaPagamentoExistePorDescricao(formaPagamento);
 		return formaPagamentoRepository.save(formaPagamento);
 	}
 
 	@Transactional
 	public FormaPagamento alterar(FormaPagamento formaPagamentoNova) {
+		verificarSeFormaPagamentoExistePorDescricao(formaPagamentoNova);
 		return formaPagamentoRepository.save(formaPagamentoNova);
 	}
 
@@ -64,5 +68,15 @@ public class FormaPagamentoService {
 						String.format(
 								FORMA_PAGAMENTO_POR_ID_NAO_ENCONTRADA.toString(), 
 								id)));
+	}
+
+	private void verificarSeFormaPagamentoExistePorDescricao(FormaPagamento formaPagamento) {
+		Optional<FormaPagamento> formaPagamentoAtual = formaPagamentoRepository.findByDescricao(formaPagamento.getDescricao());
+		if (formaPagamentoAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(
+							FORMA_PAGAMENTO_POR_NOME_ENCONTRADA.toString(), 
+							formaPagamento.getDescricao()));
+		}
 	}
 }

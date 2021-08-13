@@ -11,7 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NomeEFreteRestauranteInputDto {
+public class NomeFreteRestauranteInputDto {
 
 	@NotBlank(message = "{notBlank}")
 	private String nome;

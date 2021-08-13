@@ -2,23 +2,17 @@ package org.example.api.rest.domain.service;
 
 import static org.example.api.rest.api.exceptionhandler.ErrorMessage.CIDADE_POR_ID_NAO_ENCONTRADA;
 import static org.example.api.rest.api.exceptionhandler.ErrorMessage.COZINHA_POR_ID_NAO_ENCONTRADA;
-import static org.example.api.rest.api.exceptionhandler.ErrorMessage.RESTAURANTE_FORMA_PAGAMENTO_POR_ID_ENCONTRADA;
-import static org.example.api.rest.api.exceptionhandler.ErrorMessage.RESTAURANTE_FORMA_PAGAMENTO_POR_ID_NAO_ENCONTRADA;
-import static org.example.api.rest.api.exceptionhandler.ErrorMessage.PRODUTO_POR_NOME_ENCONTRADO;
-import static org.example.api.rest.api.exceptionhandler.ErrorMessage.PRODUTO_POR_ID_NAO_ENCONTRADO;
 import static org.example.api.rest.api.exceptionhandler.ErrorMessage.RESTAURANTE_POR_ID_EM_USO;
-import static org.example.api.rest.api.exceptionhandler.ErrorMessage.RESTAURANTE_POR_NOME_ENCONTRADO;
 import static org.example.api.rest.api.exceptionhandler.ErrorMessage.RESTAURANTE_POR_ID_NAO_ENCONTRADO;
+import static org.example.api.rest.api.exceptionhandler.ErrorMessage.RESTAURANTE_POR_NOME_ENCONTRADO;
 import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpecs.comFreteGratis;
 import static org.example.api.rest.infrastructure.repository.spec.RestauranteSpecs.comNomeSemelhante;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
-import javax.validation.ValidationException;
 
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
@@ -26,10 +20,8 @@ import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Cozinha;
 import org.example.api.rest.domain.model.Endereco;
-import org.example.api.rest.domain.model.FormaPagamento;
-import org.example.api.rest.domain.model.Produto;
 import org.example.api.rest.domain.model.Restaurante;
-import org.example.api.rest.domain.repository.ProdutoRepository;
+import org.example.api.rest.domain.model.Usuario;
 import org.example.api.rest.domain.repository.RestauranteRepository;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComFreteGratisSpec;
 import org.example.api.rest.infrastructure.repository.spec.RestauranteComNomeSemelhanteSpec;
@@ -62,7 +54,7 @@ public class RestauranteService {
 	private RestauranteRepository restauranteRepository;
 
 	@Autowired
-	private ProdutoRepository produtoRepository;
+	private UsuarioService usuarioService;
 
 	@Transactional
 	public void ativar(Long restauranteId) {
@@ -74,6 +66,35 @@ public class RestauranteService {
 	public void inativar(Long restauranteId) {
 		Restaurante restauranteAtual = buscarRestaurantePorId(restauranteId);
 		restauranteAtual.desativar();
+	}
+
+	@Transactional
+	public void abrir(Long restauranteId) {
+		Restaurante restauranteAtual = buscarRestaurantePorId(restauranteId);
+		restauranteAtual.abrir();
+	}
+
+	@Transactional
+	public void fechar(Long restauranteId) {
+		Restaurante restauranteAtual = buscarRestaurantePorId(restauranteId);
+		restauranteAtual.fechar();
+	}     
+
+
+	@Transactional
+	public void removerResponsavel(Long restauranteId, Long usuarioId) {
+		Restaurante restaurante = buscarRestaurantePorId(restauranteId);
+		Usuario usuario = usuarioService.buscarUsuarioPorId(usuarioId);
+
+		restaurante.removerResponsavel(usuario);
+	}
+
+	@Transactional
+	public void adicionarResponsavel(Long restauranteId, Long usuarioId) {
+		Restaurante restaurante = buscarRestaurantePorId(restauranteId);
+		Usuario usuario = usuarioService.buscarUsuarioPorId(usuarioId);
+
+		restaurante.adicionarResponsavel(usuario);
 	}
 
 	public List<Restaurante> listar() {
@@ -223,61 +244,12 @@ public class RestauranteService {
 		}
 	}
 
-	@Transactional
-	public void excluirRestauranteFormaPagamento(Long restauranteId, Long formaPagamentoId) {
-		Restaurante restaurante = buscarRestaurantePorId(restauranteId);
-		FormaPagamento formaPagamento = formaPagamentoService.buscarFormaPagamentoPorId(formaPagamentoId);
-
-		if (! restaurante.excluirFormaPagamento(formaPagamento)) {
-			throw new RecursoNaoEncontradoException(
-					String.format(
-							RESTAURANTE_FORMA_PAGAMENTO_POR_ID_NAO_ENCONTRADA.toString(), 
-							formaPagamentoId));
-		}
-	}
-
-	@Transactional
-	public void incluirRestauranteFormaPagamento(Long restauranteId, Long formaPagamentoId) {
-		Restaurante restaurante = buscarRestaurantePorId(restauranteId);
-		FormaPagamento formaPagamento = formaPagamentoService.buscarFormaPagamentoPorId(formaPagamentoId);
-
-		if (! restaurante.incluirFormaPagamento(formaPagamento)) {
-			throw new ValidationException(
-					String.format(
-							RESTAURANTE_FORMA_PAGAMENTO_POR_ID_ENCONTRADA.toString(), 
-							formaPagamentoId));
-		}
-	}
-
-	public Set<Produto> listarRestauranteProdutos(Restaurante restaurante) {
-		return produtoRepository.findByRestaurante(restaurante);
-	}
-
-	public Produto buscarRestauranteProdutoPorId(Long restauranteId, Long produtoId) {
-		return produtoRepository.obterProdutoDeRestaurante(restauranteId, produtoId)
+	public Restaurante buscarRestaurantePorId(Long id) {
+		return restauranteRepository.findById(id)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(
-								PRODUTO_POR_ID_NAO_ENCONTRADO.toString(), 
-								produtoId)));
-	}
-
-	@Transactional
-	public Produto adicionarRestauranteProduto(Long restauranteId, Produto produto) {
-		Restaurante restaurante = buscarRestaurantePorId(restauranteId);
-		if (verificarSeRestauranteProdutoNomeExiste(produto.getNome())) {
-			throw new RecursoEmUsoException(
-					String.format(
-							PRODUTO_POR_NOME_ENCONTRADO.toString(), 
-							produto.getNome())
-					);
-		}
-
-		produto.setRestaurante(restaurante);
-		return produtoService.adicionar(produto);
-	}
-
-	private Boolean verificarSeRestauranteProdutoNomeExiste(String nome) {
-		return restauranteRepository.existsByProdutosNome(nome);
+								RESTAURANTE_POR_ID_NAO_ENCONTRADO.toString(), 
+								id)));
 	}
 
 	private void verificarSeRestauranteNomeExiste(String nome) {
@@ -290,13 +262,4 @@ public class RestauranteService {
 					);
 		});
 	}
-
-	public Restaurante buscarRestaurantePorId(Long id) {
-		return restauranteRepository.findById(id)
-				.orElseThrow(() -> new RecursoNaoEncontradoException(
-						String.format(
-								RESTAURANTE_POR_ID_NAO_ENCONTRADO.toString(), 
-								id)));
-	}
-
 }

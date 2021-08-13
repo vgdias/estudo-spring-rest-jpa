@@ -12,7 +12,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 import org.example.api.rest.api.model.dto.endereco.EnderecoInputDto;
-import org.example.api.rest.api.model.dto.restaurante.NomeEFreteRestauranteInputDto;
+import org.example.api.rest.api.model.dto.restaurante.NomeFreteRestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
 import org.example.api.rest.domain.model.Endereco;
@@ -96,7 +96,7 @@ public class RestauranteController {
 	@PatchMapping("/{id}/alterar-nome-e-frete")
 	public RestauranteOutputDto alterarNomeEFrete(
 			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
-			@Valid @RequestBody NomeEFreteRestauranteInputDto nomeEFreteRestauranteNovoDto,
+			@Valid @RequestBody NomeFreteRestauranteInputDto nomeEFreteRestauranteNovoDto,
 			HttpServletRequest request) {
 
 		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
@@ -145,6 +145,26 @@ public class RestauranteController {
 
 		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
 		restauranteService.inativar(restauranteId);
+	}
+
+	@PutMapping("/{id}/abertura")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void abrir(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		restauranteService.abrir(restauranteId);
+	}
+
+	@PutMapping("/{id}/fechamento")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void fechar(
+			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
+			HttpServletRequest request) {
+
+		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
+		restauranteService.fechar(restauranteId);
 	}
 
 	@GetMapping("/com-frete-gratis-e-nome-semelhante")

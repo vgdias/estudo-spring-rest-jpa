@@ -1,4 +1,4 @@
-package org.example.api.rest.api.model.dto.restaurante;
+package org.example.api.rest.api.model.dto.usuario;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class IdRestauranteInputDto {
+public class IdUsuarioInputDto {
 	@Positive(message = "{positive}")
 	@NotNull(message = "{notNull}")
 	private Long id;

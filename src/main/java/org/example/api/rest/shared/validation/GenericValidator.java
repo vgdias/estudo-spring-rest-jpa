@@ -65,5 +65,4 @@ public class GenericValidator {
 			throw new ValidationException(message);
 		}
 	}
-
 }

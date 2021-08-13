@@ -33,18 +33,13 @@ public class EstadoService {
 
 	@Transactional
 	public Estado adicionar(Estado estado) {
-		Optional<Estado> estadoAtual = estadoRepository.findByNome(estado.getNome());
-		if (estadoAtual.isPresent()) {
-			throw new RecursoEmUsoException(
-					String.format(
-							ESTADO_POR_NOME_ENCONTRADO.toString(), 
-							estado.getNome()));
-		}
+		verificarSeEstadoExistePorNome(estado);
 		return estadoRepository.save(estado);
 	}
 
 	@Transactional
 	public Estado alterar(Estado estadoNovo) {
+		verificarSeEstadoExistePorNome(estadoNovo);
 		return estadoRepository.save(estadoNovo);
 	}
 
@@ -73,5 +68,15 @@ public class EstadoService {
 						String.format(
 								ESTADO_POR_ID_NAO_ENCONTRADO.toString(), 
 								id)));
+	}
+
+	private void verificarSeEstadoExistePorNome(Estado estado) {
+		Optional<Estado> estadoAtual = estadoRepository.findByNome(estado.getNome());
+		if (estadoAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(
+							ESTADO_POR_NOME_ENCONTRADO.toString(), 
+							estado.getNome()));
+		}
 	}
 }

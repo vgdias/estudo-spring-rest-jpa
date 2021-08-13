@@ -14,16 +14,17 @@ public class ProdutoService {
 	@Autowired
 	private ProdutoRepository produtoRepository;
 
-	public Produto obterProdutoPorId(Long produtoId) {
+
+	public Produto adicionar(Produto produto) {
+		return produtoRepository.save(produto);
+	}
+
+	public Produto buscarProdutoPorId(Long produtoId) {
 		return produtoRepository.findById(produtoId)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(
 								PRODUTO_POR_ID_NAO_ENCONTRADO.toString(), 
 								produtoId)));
-	}
-
-	public Produto adicionar(Produto produto) {
-		return produtoRepository.save(produto);
 	}
 
 }

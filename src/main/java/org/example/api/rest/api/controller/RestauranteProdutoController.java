@@ -12,6 +12,7 @@ import org.example.api.rest.api.model.dto.produto.ProdutoInputDto;
 import org.example.api.rest.api.model.dto.produto.ProdutoOutputDto;
 import org.example.api.rest.domain.model.Produto;
 import org.example.api.rest.domain.model.Restaurante;
+import org.example.api.rest.domain.service.RestauranteProdutoService;
 import org.example.api.rest.domain.service.RestauranteService;
 import org.example.api.rest.shared.mapping.GenericMapper;
 import org.example.api.rest.shared.validation.GenericValidator;
@@ -34,6 +35,9 @@ public class RestauranteProdutoController {
 	@Autowired
 	private RestauranteService restauranteService;
 
+	@Autowired
+	private RestauranteProdutoService restauranteProdutoService;
+
 	@GetMapping
 	public List<ProdutoOutputDto> listarRestauranteProdutos(
 			@PathVariable @Positive(message = "{positive}") Long restauranteId,
@@ -41,7 +45,7 @@ public class RestauranteProdutoController {
 
 		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
 		Restaurante restaurante = restauranteService.buscarPorId(restauranteId);
-		Set<Produto> produtos = restauranteService.listarRestauranteProdutos(restaurante);
+		Set<Produto> produtos = restauranteProdutoService.listarRestauranteProdutos(restaurante);
 		return GenericMapper.collectionMap(produtos, ProdutoOutputDto.class);
 	}
 
@@ -52,7 +56,7 @@ public class RestauranteProdutoController {
 			HttpServletRequest request) {
 
 		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
-		Produto produto = restauranteService.buscarRestauranteProdutoPorId(restauranteId, produtoId);
+		Produto produto = restauranteProdutoService.buscarRestauranteProdutoPorId(restauranteId, produtoId);
 		return GenericMapper.map(produto, ProdutoOutputDto.class);
 	}
 
@@ -65,7 +69,7 @@ public class RestauranteProdutoController {
 
 		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
 		Produto produtoNovo = GenericMapper.map(produtoNovoDto, Produto.class);
-		Produto produtoInserido = restauranteService.adicionarRestauranteProduto(restauranteId, produtoNovo);
+		Produto produtoInserido = restauranteProdutoService.adicionarRestauranteProduto(restauranteId, produtoNovo);
 		return GenericMapper.map(produtoInserido, ProdutoOutputDto.class);
 	}
 }

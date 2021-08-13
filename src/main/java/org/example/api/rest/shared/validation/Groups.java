@@ -9,4 +9,5 @@ public interface Groups {
 	public interface AlterarEndereco{}
 	public interface AlterarProduto{}
 	public interface AlterarGrupo{}
+	public interface AlterarPermissao{}
 }

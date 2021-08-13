@@ -6,9 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 
-import org.example.api.rest.api.model.dto.formapagamento.FormaPagamentoOutputDto;
+import org.example.api.rest.api.model.dto.usuario.UsuarioOutputDto;
 import org.example.api.rest.domain.model.Restaurante;
-import org.example.api.rest.domain.service.RestauranteFormaPagamentoService;
 import org.example.api.rest.domain.service.RestauranteService;
 import org.example.api.rest.shared.mapping.GenericMapper;
 import org.example.api.rest.shared.validation.GenericValidator;
@@ -25,45 +24,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
-@RequestMapping("/restaurantes/{id}/formas-pagamento")
-public class RestauranteFormaPagamentoController {
+@RequestMapping("/restaurantes/{id}/usuarios")
+public class RestauranteUsuarioResponsavelController {
 
-	@Autowired
-	private RestauranteFormaPagamentoService restauranteFormaPagamentoService;
-	
 	@Autowired
 	RestauranteService restauranteService;
 
 	@GetMapping
-	public List<FormaPagamentoOutputDto> listar(
+	public List<UsuarioOutputDto> listar(
 			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId,
 			HttpServletRequest request) {
 
 		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
 		Restaurante restaurante = restauranteService.buscarPorId(restauranteId);
-		return GenericMapper.collectionMap(restaurante.getFormasPagamento(), FormaPagamentoOutputDto.class);
+		return GenericMapper.collectionMap(restaurante.getResponsaveis(), UsuarioOutputDto.class);
 	}
 
-	@DeleteMapping("/{formaPagamentoId}")
+	@PutMapping("/{usuarioId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void excluir(
-			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
-			@PathVariable("formaPagamentoId") @Positive(message = "{positive}") Long formaPagamentoId,
-			HttpServletRequest request) {
-
-		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
-		restauranteFormaPagamentoService.excluirRestauranteFormaPagamento(restauranteId, formaPagamentoId);
+	public void adicionar(@PathVariable("id") Long restauranteId, @PathVariable Long usuarioId) {
+		restauranteService.adicionarResponsavel(restauranteId, usuarioId);
 	}
 
-	@PutMapping("/{formaPagamentoId}")
+	@DeleteMapping("/{usuarioId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void incluir(
-			@PathVariable("id") @Positive(message = "{positive}") Long restauranteId, 
-			@PathVariable @Positive(message = "{positive}") Long formaPagamentoId,
-			HttpServletRequest request) {
-
-		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList());
-		restauranteFormaPagamentoService.incluirRestauranteFormaPagamento(restauranteId, formaPagamentoId);
+	public void remover(@PathVariable("id") Long restauranteId, @PathVariable Long usuarioId) {
+		restauranteService.removerResponsavel(restauranteId, usuarioId);
 	}
-
 }

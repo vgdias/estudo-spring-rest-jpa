@@ -2,9 +2,11 @@ package org.example.api.rest.shared.mapping;
 
 import org.example.api.rest.api.model.dto.cidade.CidadeOutputDto;
 import org.example.api.rest.api.model.dto.endereco.EnderecoOutputDto;
+import org.example.api.rest.api.model.dto.itempedido.ItemPedidoInputDto;
 import org.example.api.rest.api.model.dto.restaurante.RestauranteOutputDto;
 import org.example.api.rest.domain.model.Cidade;
 import org.example.api.rest.domain.model.Endereco;
+import org.example.api.rest.domain.model.ItemPedido;
 import org.example.api.rest.domain.model.Restaurante;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
@@ -19,6 +21,7 @@ public class ModelMapperConfig {
 		ModelMapper mapper = new ModelMapper();
 
 		cidadeToCidadeOutputDtoMappings(mapper);
+		itemPedidoInputDtoToItemPedidoMappings(mapper);
 
 		// RestauranteOutputDto possui EnderecoOutputDto.
 		// Por isso, o mapeamento de endereco deve ser declarado antes
@@ -27,6 +30,11 @@ public class ModelMapperConfig {
 		restauranteToRestauranteOutputDtoMappings(mapper);
 
 		return mapper;
+	}
+
+	private void itemPedidoInputDtoToItemPedidoMappings(ModelMapper mapper) {
+		mapper.createTypeMap(ItemPedidoInputDto.class, ItemPedido.class)
+		.addMappings(map -> map.skip(ItemPedido::setId));
 	}
 
 	private void restauranteToRestauranteOutputDtoMappings(ModelMapper mapper) {

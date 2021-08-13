@@ -11,6 +11,7 @@ import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.example.api.rest.domain.exception.DependenciaNaoEncontradaException;
+import org.example.api.rest.domain.exception.NegocioException;
 import org.example.api.rest.domain.exception.RecursoEmUsoException;
 import org.example.api.rest.domain.exception.RecursoNaoEncontradoException;
 import org.example.api.rest.domain.exception.ValidacaoException;
@@ -43,6 +44,29 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@Autowired
 	private MessageSource messageSource;
+
+	/**
+	 * Excecao lancada por violação de regra de negócio 
+	 * 
+	 * @param ex tipo de excecao a ser tratada 
+	 * @param request requisicao Htttp
+	 * @return informacoes de resposta ao usuario
+	 */
+	@ExceptionHandler(NegocioException.class)
+	public ResponseEntity<Object> handleNegocio(NegocioException ex,
+			WebRequest request) {
+
+		HttpStatus status = HttpStatus.NOT_FOUND;
+
+		ExceptionMessage exceptionMessage = ExceptionMessage.builder()
+				.status(status.value())
+				.title("Violação de regra de negócio")
+				.detail(ex.getMessage())
+				.build();
+
+		return handleExceptionInternal(ex, exceptionMessage, new HttpHeaders(), 
+				status, request);
+	}
 
 	/**
 	 * Excecao lancada por recurso nao encontrado 

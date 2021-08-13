@@ -35,13 +35,7 @@ public class CozinhaService {
 
 	@Transactional
 	public Cozinha adicionar(Cozinha cozinha) {
-		Optional<Cozinha> cozinhaAtual = cozinhaRepository.findByNome(cozinha.getNome());
-		if (cozinhaAtual.isPresent()) {
-			throw new RecursoEmUsoException(
-					String.format(
-							COZINHA_POR_NOME_ENCONTRADA.toString(), 
-							cozinha.getNome()));
-		}
+		verificarSeCozinhaExistePorNome(cozinha);
 		return cozinhaRepository.save(cozinha);
 	}
 
@@ -93,4 +87,13 @@ public class CozinhaService {
 								id)));
 	}
 
+	private void verificarSeCozinhaExistePorNome(Cozinha cozinha) {
+		Optional<Cozinha> cozinhaAtual = cozinhaRepository.findByNome(cozinha.getNome());
+		if (cozinhaAtual.isPresent()) {
+			throw new RecursoEmUsoException(
+					String.format(
+							COZINHA_POR_NOME_ENCONTRADA.toString(), 
+							cozinha.getNome()));
+		}
+	}
 }
