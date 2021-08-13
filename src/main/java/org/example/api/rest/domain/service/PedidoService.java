@@ -82,11 +82,11 @@ public class PedidoService {
 		});
 	}
 
-	public Pedido buscarPedidoPorId(Long id) {
-		return pedidoRepository.findById(id)
+	public Pedido buscarPedidoPorId(String codigo) {
+		return pedidoRepository.findByCodigo(codigo)
 				.orElseThrow(() -> new RecursoNaoEncontradoException(
 						String.format(
 								PEDIDO_POR_ID_NAO_ENCONTRADO.toString(), 
-								id)));
+								codigo)));
 	}
 }

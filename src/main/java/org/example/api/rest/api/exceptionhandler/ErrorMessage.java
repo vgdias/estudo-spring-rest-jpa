@@ -39,7 +39,7 @@ public enum ErrorMessage {
 
 	PRODUTO_POR_ID_NAO_ENCONTRADO("Produto de id [%d] não encontrado"),
 
-	PEDIDO_POR_ID_NAO_ENCONTRADO("Pedido de id [%d] não encontrado") 
+	PEDIDO_POR_ID_NAO_ENCONTRADO("Pedido de id [%s] não encontrado") 
 	;
 
 	private final String text;

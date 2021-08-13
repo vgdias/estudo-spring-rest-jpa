@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.NotBlank;
 
 import org.example.api.rest.api.model.dto.pedido.PedidoInputDto;
 import org.example.api.rest.api.model.dto.pedido.PedidoOutputDto;
@@ -61,11 +61,11 @@ public class PedidoController {
 
 	@GetMapping("/{id}")
 	public PedidoOutputDto buscarPorId(
-			@PathVariable("id") @Positive(message = "{positive}") Long pedidoId,
+			@PathVariable("id") @NotBlank(message = "{notBlank}") String codigo,
 			HttpServletRequest request) {
 
 		GenericValidator.validateRequestParams(request.getParameterNames(), Arrays.asList()); 
-		Pedido pedido = pedidoService.buscarPedidoPorId(pedidoId);
+		Pedido pedido = pedidoService.buscarPedidoPorId(codigo);
 		return GenericMapper.map(pedido, PedidoOutputDto.class);
 	}
 }
